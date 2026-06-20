@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>NexGame — Release Tracker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1a0033">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NexGame">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -16,13 +24,29 @@
     display: block;
   }
 
+  :root {
+    /* default theme (Nebula); overridden when another theme is picked */
+    --bg-gradient: linear-gradient(135deg, #1a0033 0%, #3a0ca3 40%, #7209b7 70%, #f72585 100%);
+    --blob1: rgba(114, 9, 183, 0.55);
+    --blob2: rgba(247, 37, 133, 0.45);
+    --accent: linear-gradient(135deg, #ffd6f4, #ff8fd6);
+    --accent-2: #ff8fd6;
+    --accent-soft: #ffd6f4;
+    --on-accent: #2a0845;
+    --modal-bg: rgba(40, 8, 70, 0.92);
+    --results-bg: rgba(45, 10, 78, 0.98);
+    --scrim-a: rgba(15, 2, 30, 0.55);
+    --scrim-b: rgba(15, 2, 30, 0.80);
+  }
+
   body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
     color: #f3f6ff;
-    background: linear-gradient(135deg, #1a0033 0%, #3a0ca3 40%, #7209b7 70%, #f72585 100%);
+    background: var(--bg-gradient);
     background-attachment: fixed;
     overflow-x: hidden;
+    transition: background 0.5s ease;
   }
 
   body::before, body::after {
@@ -35,12 +59,12 @@
   }
   body::before {
     width: 340px; height: 340px;
-    background: rgba(114, 9, 183, 0.55);
+    background: var(--blob1);
     top: -90px; left: -70px;
   }
   body::after {
     width: 380px; height: 380px;
-    background: rgba(247, 37, 133, 0.45);
+    background: var(--blob2);
     bottom: -120px; right: -90px;
   }
 
@@ -66,7 +90,7 @@
     border-radius: 14px;
     background: rgba(255,255,255,0.14);
     border: 1px solid rgba(255,255,255,0.25);
-    color: #ffd6f4;
+    color: var(--accent-soft);
   }
   header.top h1 {
     font-size: 1.5rem;
@@ -90,7 +114,7 @@
   }
   .icon-btn svg, .group-toggle svg { width: 18px; height: 18px; }
   .icon-btn:hover, .group-toggle:hover { color: #fff; }
-  .group-toggle.active { color: #2a0845; background: linear-gradient(135deg, #ffd6f4, #ff8fd6); border-color: transparent; }
+  .group-toggle.active { color: var(--on-accent); background: var(--accent); border-color: transparent; }
 
   .settings-open { margin-left: auto; }
   .group-toggle { margin-left: 10px; }
@@ -115,7 +139,7 @@
   }
   .vt-btn svg { width: 18px; height: 18px; }
   .vt-btn:hover { color: #fff; }
-  .vt-btn.active { color: #2a0845; background: linear-gradient(135deg, #ffd6f4, #ff8fd6); }
+  .vt-btn.active { color: var(--on-accent); background: var(--accent); }
 
   .add-btn {
     margin-left: 10px;
@@ -128,12 +152,12 @@
     cursor: pointer;
     font-size: 0.92rem;
     font-weight: 600;
-    color: #2a0845;
-    background: linear-gradient(135deg, #ffd6f4, #ff8fd6);
-    box-shadow: 0 6px 18px rgba(247, 37, 133, 0.35);
+    color: var(--on-accent);
+    background: var(--accent);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
     transition: transform .15s, box-shadow .15s;
   }
-  .add-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(247, 37, 133, 0.45); }
+  .add-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42); }
   .add-btn svg { width: 18px; height: 18px; }
 
   .list { display: flex; flex-direction: column; gap: 16px; }
@@ -321,7 +345,7 @@
     max-width: 420px;
     border-radius: 20px;
     padding: 26px;
-    background: rgba(40, 8, 70, 0.92);
+    background: var(--modal-bg);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255,255,255,0.22);
     box-shadow: 0 20px 60px rgba(0,0,0,0.5);
@@ -338,6 +362,29 @@
     font-weight: 700;
   }
   .set-desc { font-size: 0.84rem; opacity: 0.7; margin-bottom: 12px; }
+
+  .theme-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+  .theme-swatch {
+    flex: 1;
+    min-width: 56px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .theme-swatch .sw-chip {
+    height: 44px;
+    border-radius: 11px;
+    border: 2px solid transparent;
+    transition: transform .12s, border-color .15s;
+  }
+  .theme-swatch:hover .sw-chip { transform: translateY(-2px); }
+  .theme-swatch.sel .sw-chip { border-color: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,0.35); }
+  .theme-swatch .sw-name {
+    display: block;
+    font-size: 0.68rem;
+    margin-top: 6px;
+    opacity: 0.8;
+  }
+  .theme-swatch.sel .sw-name { opacity: 1; font-weight: 600; }
   .set-row { display: flex; gap: 10px; }
   .set-row button { flex: 1; padding: 11px; border-radius: 11px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; transition: transform .15s; }
   .set-row button:hover { transform: translateY(-1px); }
@@ -358,11 +405,10 @@
   .cl-current {
     font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.5px;
     padding: 2px 8px; border-radius: 20px;
-    background: linear-gradient(135deg, #ffd6f4, #ff8fd6); color: #2a0845; font-weight: 700;
+    background: var(--accent); color: var(--on-accent); font-weight: 700;
   }
   .changelog ul { margin: 0; padding-left: 18px; }
   .changelog li { font-size: 0.84rem; opacity: 0.88; margin-bottom: 5px; line-height: 1.4; }
-  .set-version { text-align: center; font-size: 0.78rem; opacity: 0.55; margin-bottom: 16px; }
   .field { margin-bottom: 16px; position: relative; }
   .name-row { display: flex; gap: 8px; }
   .name-row input { flex: 1; }
@@ -372,7 +418,7 @@
     border-radius: 11px;
     border: 1px solid rgba(255,255,255,0.22);
     background: rgba(255,255,255,0.1);
-    color: #ffd6f4;
+    color: var(--accent-soft);
     cursor: pointer;
     display: grid; place-items: center;
     transition: background .15s, transform .15s;
@@ -390,7 +436,7 @@
     z-index: 5;
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(45, 10, 78, 0.98);
+    background: var(--results-bg);
     border: 1px solid rgba(255,255,255,0.22);
     box-shadow: 0 14px 40px rgba(0,0,0,0.5);
     max-height: 230px;
@@ -429,7 +475,7 @@
     outline: none;
     transition: border .15s, background .15s;
   }
-  .field input:focus { border-color: #ff8fd6; background: rgba(255,255,255,0.16); }
+  .field input:focus { border-color: var(--accent-2); background: rgba(255,255,255,0.16); }
   .field input::placeholder { color: rgba(255,255,255,0.45); }
   .field input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; }
 
@@ -481,7 +527,7 @@
     font-size: 0.85rem;
     outline: none;
   }
-  .img-row input[type=text]:focus { border-color: #ff8fd6; background: rgba(255,255,255,0.16); }
+  .img-row input[type=text]:focus { border-color: var(--accent-2); background: rgba(255,255,255,0.16); }
   .img-row input::placeholder { color: rgba(255,255,255,0.45); }
   .img-search-btn {
     flex-shrink: 0;
@@ -489,7 +535,7 @@
     border-radius: 10px;
     border: 1px solid rgba(255,255,255,0.22);
     background: rgba(255,255,255,0.1);
-    color: #ffd6f4;
+    color: var(--accent-soft);
     cursor: pointer;
     display: grid; place-items: center;
     transition: background .15s;
@@ -525,8 +571,8 @@
     border: 1px solid rgba(255,255,255,0.2) !important;
   }
   .btn-save {
-    color: #2a0845;
-    background: linear-gradient(135deg, #ffd6f4, #ff8fd6);
+    color: var(--on-accent);
+    background: var(--accent);
   }
   .btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
@@ -621,6 +667,11 @@
       <h3>Settings</h3>
 
       <div class="set-section">
+        <div class="set-label">Theme</div>
+        <div class="theme-grid" id="themeGrid"></div>
+      </div>
+
+      <div class="set-section">
         <div class="set-label">Backup &amp; restore</div>
         <p class="set-desc">Save all your tracked games to a file, or restore from one.</p>
         <div class="set-row">
@@ -635,7 +686,16 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.1.0 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.2.0 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Installable as an app on Android Chrome (Add to Home screen).</li>
+              <li>Works offline via a service worker.</li>
+              <li>Added app icons and a fullscreen standalone mode.</li>
+              <li>5 colour themes (Nebula, Ocean, Sunset, Forest, Midnight) that restyle the whole app.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.1.0</div>
             <ul>
               <li>Track games with a live days-until-release countdown.</li>
               <li>Online release-date lookup via Wikidata.</li>
@@ -650,7 +710,6 @@
         </div>
       </div>
 
-      <div class="set-version">NexGame · Alpha 0.1.0</div>
       <div class="modal-actions">
         <button class="btn-cancel" id="settingsClose">Close</button>
       </div>
@@ -733,7 +792,7 @@
   // background inline-style shared by both layouts
   function bgStyle(g) {
     if (g.image) {
-      return ` style="background-image: linear-gradient(rgba(15,2,30,0.55), rgba(15,2,30,0.78)), url('${esc(g.image)}'); background-size: cover; background-position: center;"`;
+      return ` style="background-image: linear-gradient(var(--scrim-a), var(--scrim-b)), url('${esc(g.image)}'); background-size: cover; background-position: center;"`;
     }
     if (g.color) {
       return ` style="background: linear-gradient(135deg, ${g.color}66, ${g.color}1f), rgba(255,255,255,0.10);"`;
@@ -1088,10 +1147,95 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.1.0';
+  const APP_VERSION = 'Alpha 0.2.0';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
+
+  // --- Theme: 5 colour styles ---
+  const THEMES = {
+    nebula: {
+      label: 'Nebula',
+      gradient: 'linear-gradient(135deg, #1a0033 0%, #3a0ca3 40%, #7209b7 70%, #f72585 100%)',
+      blob1: 'rgba(114, 9, 183, 0.55)', blob2: 'rgba(247, 37, 133, 0.45)', meta: '#1a0033',
+      accent: 'linear-gradient(135deg, #ffd6f4, #ff8fd6)', accent2: '#ff8fd6', accentSoft: '#ffd6f4',
+      onAccent: '#2a0845', modalBg: 'rgba(40, 8, 70, 0.92)', resultsBg: 'rgba(45, 10, 78, 0.98)',
+      scrimA: 'rgba(15, 2, 30, 0.55)', scrimB: 'rgba(15, 2, 30, 0.80)'
+    },
+    ocean: {
+      label: 'Ocean',
+      gradient: 'linear-gradient(135deg, #021024 0%, #052f5f 40%, #036280 70%, #14b8a6 100%)',
+      blob1: 'rgba(3, 98, 128, 0.55)', blob2: 'rgba(20, 184, 166, 0.45)', meta: '#021024',
+      accent: 'linear-gradient(135deg, #a5f3fc, #22d3ee)', accent2: '#22d3ee', accentSoft: '#a5f3fc',
+      onAccent: '#022a30', modalBg: 'rgba(5, 27, 48, 0.93)', resultsBg: 'rgba(7, 34, 58, 0.98)',
+      scrimA: 'rgba(2, 14, 26, 0.55)', scrimB: 'rgba(2, 14, 26, 0.80)'
+    },
+    sunset: {
+      label: 'Sunset',
+      gradient: 'linear-gradient(135deg, #2a0a18 0%, #7a1f3d 38%, #e85d04 75%, #ffba08 100%)',
+      blob1: 'rgba(232, 93, 4, 0.5)', blob2: 'rgba(255, 186, 8, 0.42)', meta: '#2a0a18',
+      accent: 'linear-gradient(135deg, #ffe0a3, #ff8e3c)', accent2: '#ff8e3c', accentSoft: '#ffe0a3',
+      onAccent: '#3a1405', modalBg: 'rgba(46, 16, 12, 0.93)', resultsBg: 'rgba(58, 22, 16, 0.98)',
+      scrimA: 'rgba(26, 8, 4, 0.55)', scrimB: 'rgba(26, 8, 4, 0.80)'
+    },
+    forest: {
+      label: 'Forest',
+      gradient: 'linear-gradient(135deg, #04140c 0%, #0b3d2e 42%, #1b7a4b 72%, #7bd389 100%)',
+      blob1: 'rgba(27, 122, 75, 0.55)', blob2: 'rgba(123, 211, 137, 0.4)', meta: '#04140c',
+      accent: 'linear-gradient(135deg, #bff7c8, #34d17a)', accent2: '#34d17a', accentSoft: '#bff7c8',
+      onAccent: '#04160d', modalBg: 'rgba(7, 30, 21, 0.93)', resultsBg: 'rgba(9, 38, 27, 0.98)',
+      scrimA: 'rgba(4, 18, 11, 0.55)', scrimB: 'rgba(4, 18, 11, 0.80)'
+    },
+    midnight: {
+      label: 'Midnight',
+      gradient: 'linear-gradient(135deg, #0a0a14 0%, #16213e 45%, #1f2a52 75%, #415a90 100%)',
+      blob1: 'rgba(31, 42, 82, 0.6)', blob2: 'rgba(65, 90, 144, 0.45)', meta: '#0a0a14',
+      accent: 'linear-gradient(135deg, #cdd8ff, #7d97e8)', accent2: '#7d97e8', accentSoft: '#cdd8ff',
+      onAccent: '#0a0f20', modalBg: 'rgba(15, 21, 42, 0.94)', resultsBg: 'rgba(21, 29, 56, 0.98)',
+      scrimA: 'rgba(8, 8, 18, 0.55)', scrimB: 'rgba(8, 8, 18, 0.80)'
+    }
+  };
+  const THEME_KEY = 'nexgame.theme';
+  let themeName = THEMES[localStorage.getItem(THEME_KEY)] ? localStorage.getItem(THEME_KEY) : 'nebula';
+  const themeGrid = document.getElementById('themeGrid');
+
+  function applyTheme(name) {
+    const t = THEMES[name] || THEMES.nebula;
+    const root = document.documentElement.style;
+    root.setProperty('--bg-gradient', t.gradient);
+    root.setProperty('--blob1', t.blob1);
+    root.setProperty('--blob2', t.blob2);
+    root.setProperty('--accent', t.accent);
+    root.setProperty('--accent-2', t.accent2);
+    root.setProperty('--accent-soft', t.accentSoft);
+    root.setProperty('--on-accent', t.onAccent);
+    root.setProperty('--modal-bg', t.modalBg);
+    root.setProperty('--results-bg', t.resultsBg);
+    root.setProperty('--scrim-a', t.scrimA);
+    root.setProperty('--scrim-b', t.scrimB);
+    const meta = document.querySelector('meta[name=theme-color]');
+    if (meta) meta.content = t.meta;
+  }
+
+  function buildThemes() {
+    themeGrid.innerHTML = Object.entries(THEMES).map(([k, t]) =>
+      `<div class="theme-swatch${k === themeName ? ' sel' : ''}" data-theme="${k}">
+         <div class="sw-chip" style="background:${t.gradient}"></div>
+         <span class="sw-name">${t.label}</span>
+       </div>`).join('');
+  }
+
+  themeGrid.addEventListener('click', e => {
+    const sw = e.target.closest('.theme-swatch');
+    if (!sw) return;
+    themeName = sw.dataset.theme;
+    localStorage.setItem(THEME_KEY, themeName);
+    applyTheme(themeName);
+    [...themeGrid.children].forEach(el => el.classList.toggle('sel', el.dataset.theme === themeName));
+  });
+
+  applyTheme(themeName);
+  buildThemes();
 
   function openSettings() {
     restoreNote.textContent = '';
@@ -1159,6 +1303,13 @@
 
   buildSwatches();
   render();
+
+  // register the service worker so the app is installable / works offline
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
 </script>
 </body>
 </html>
