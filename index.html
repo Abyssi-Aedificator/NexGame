@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexGame — Release Tracker</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: block;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    color: #f3f6ff;
+    background: linear-gradient(135deg, #1a0033 0%, #3a0ca3 40%, #7209b7 70%, #f72585 100%);
+    background-attachment: fixed;
+    overflow-x: hidden;
+  }
+
+  body::before, body::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(70px);
+    z-index: 0;
+    pointer-events: none;
+  }
+  body::before {
+    width: 340px; height: 340px;
+    background: rgba(114, 9, 183, 0.55);
+    top: -90px; left: -70px;
+  }
+  body::after {
+    width: 380px; height: 380px;
+    background: rgba(247, 37, 133, 0.45);
+    bottom: -120px; right: -90px;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+    transition: max-width .25s ease;
+  }
+  .wrap.wide { max-width: 1280px; }
+
+  header.top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  header.top .logo {
+    width: 46px; height: 46px;
+    display: grid; place-items: center;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #ffd6f4;
+  }
+  header.top h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  header.top p {
+    font-size: 0.82rem;
+    opacity: 0.75;
+  }
+
+  .icon-btn, .group-toggle {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    padding: 9px;
+    border-radius: 11px;
+    display: grid; place-items: center;
+    transition: color .15s, background .15s;
+  }
+  .icon-btn svg, .group-toggle svg { width: 18px; height: 18px; }
+  .icon-btn:hover, .group-toggle:hover { color: #fff; }
+  .group-toggle.active { color: #2a0845; background: linear-gradient(135deg, #ffd6f4, #ff8fd6); border-color: transparent; }
+
+  .settings-open { margin-left: auto; }
+  .group-toggle { margin-left: 10px; }
+
+  .view-toggle {
+    margin-left: 10px;
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 11px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+  .vt-btn {
+    background: none; border: none;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    padding: 7px;
+    border-radius: 8px;
+    display: grid; place-items: center;
+    transition: color .15s, background .15s;
+  }
+  .vt-btn svg { width: 18px; height: 18px; }
+  .vt-btn:hover { color: #fff; }
+  .vt-btn.active { color: #2a0845; background: linear-gradient(135deg, #ffd6f4, #ff8fd6); }
+
+  .add-btn {
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #2a0845;
+    background: linear-gradient(135deg, #ffd6f4, #ff8fd6);
+    box-shadow: 0 6px 18px rgba(247, 37, 133, 0.35);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .add-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(247, 37, 133, 0.45); }
+  .add-btn svg { width: 18px; height: 18px; }
+
+  .list { display: flex; flex-direction: column; gap: 16px; }
+
+  .month-sep {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 6px 2px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: rgba(255,255,255,0.85);
+  }
+  .month-sep::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(255,255,255,0.3), rgba(255,255,255,0));
+  }
+  .grid .month-sep { grid-column: 1 / -1; margin-top: 14px; }
+
+  /* ---- grid (cover-art) view ---- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+  .tile {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #2a1840;
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px 18px;
+    color: #fff;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .tile:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(0,0,0,0.45); }
+  .tile.released { opacity: 0.72; }
+  /* dark scrim so text stays readable over any cover */
+  .tile::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 35%, rgba(0,0,0,0.35) 65%, rgba(0,0,0,0.78) 100%);
+    z-index: 0;
+  }
+  .tile > * { position: relative; z-index: 1; }
+  .tile-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .tile-num {
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    z-index: 1;
+    font-size: 3.4rem;
+    font-weight: 800;
+    text-shadow: 0 2px 14px rgba(0,0,0,0.7);
+    pointer-events: none;
+  }
+  .tile-num.small { font-size: 1.5rem; }
+  .tile-sub {
+    align-self: center;
+    font-size: 0.78rem;
+    opacity: 0.92;
+    text-shadow: 0 1px 5px rgba(0,0,0,0.85);
+  }
+  .tile-actions {
+    position: absolute; top: 10px; right: 10px;
+    display: flex; gap: 2px;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .tile:hover .tile-actions { opacity: 1; }
+  .tile-actions button {
+    background: rgba(0,0,0,0.45); border: none;
+    color: #fff; cursor: pointer;
+    padding: 5px; border-radius: 7px;
+    display: grid; place-items: center;
+  }
+  .tile-actions button:hover { background: rgba(0,0,0,0.7); }
+  .tile-actions svg { width: 15px; height: 15px; }
+
+  .card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 22px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+    transition: transform .15s;
+  }
+  .card:hover { transform: translateY(-2px); }
+  .card.released { opacity: 0.72; }
+  .card.has-bg h2, .card.has-bg .meta, .card.has-bg .countdown {
+    text-shadow: 0 1px 6px rgba(0,0,0,0.65);
+  }
+
+  .countdown {
+    flex-shrink: 0;
+    width: 92px;
+    text-align: center;
+  }
+  .countdown .num {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(247,37,133,0.5);
+  }
+  .countdown .lbl {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    margin-top: 4px;
+  }
+  .countdown.out .num { font-size: 1.05rem; color: #b9ffd0; }
+
+  .info { flex: 1; min-width: 0; }
+  .info h2 {
+    font-size: 1.18rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .info .meta {
+    font-size: 0.82rem;
+    opacity: 0.8;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .actions { flex-shrink: 0; display: flex; gap: 2px; }
+  .del, .edit {
+    background: none; border: none;
+    color: rgba(255,255,255,0.55);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 9px;
+    transition: color .15s, background .15s;
+  }
+  .del:hover { color: #ffb3c8; background: rgba(255,255,255,0.1); }
+  .edit:hover { color: #b9e6ff; background: rgba(255,255,255,0.1); }
+  .del svg, .edit svg { width: 18px; height: 18px; }
+
+  .empty {
+    text-align: center;
+    padding: 70px 20px;
+    opacity: 0.8;
+  }
+  .empty svg { width: 54px; height: 54px; margin: 0 auto 16px; opacity: 0.6; }
+  .empty p { font-size: 0.95rem; }
+
+  /* modal */
+  .overlay {
+    position: fixed; inset: 0;
+    z-index: 10;
+    background: rgba(10, 0, 24, 0.55);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .overlay.show { display: flex; }
+  .modal {
+    width: 100%;
+    max-width: 420px;
+    border-radius: 20px;
+    padding: 26px;
+    background: rgba(40, 8, 70, 0.92);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.22);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .modal h3 { font-size: 1.2rem; margin-bottom: 20px; }
+
+  .set-section { margin-bottom: 22px; }
+  .set-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    opacity: 0.75;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .set-desc { font-size: 0.84rem; opacity: 0.7; margin-bottom: 12px; }
+  .set-row { display: flex; gap: 10px; }
+  .set-row button { flex: 1; padding: 11px; border-radius: 11px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; transition: transform .15s; }
+  .set-row button:hover { transform: translateY(-1px); }
+  .set-note { font-size: 0.82rem; margin-top: 10px; min-height: 0; }
+  .set-note.ok { color: #b9ffd0; }
+  .set-note.bad { color: #ffb3c8; }
+
+  .changelog {
+    max-height: 230px;
+    overflow-y: auto;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .cl-entry + .cl-entry { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.12); }
+  .cl-ver { font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .cl-current {
+    font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 2px 8px; border-radius: 20px;
+    background: linear-gradient(135deg, #ffd6f4, #ff8fd6); color: #2a0845; font-weight: 700;
+  }
+  .changelog ul { margin: 0; padding-left: 18px; }
+  .changelog li { font-size: 0.84rem; opacity: 0.88; margin-bottom: 5px; line-height: 1.4; }
+  .set-version { text-align: center; font-size: 0.78rem; opacity: 0.55; margin-bottom: 16px; }
+  .field { margin-bottom: 16px; position: relative; }
+  .name-row { display: flex; gap: 8px; }
+  .name-row input { flex: 1; }
+  .lookup-btn {
+    flex-shrink: 0;
+    width: 46px;
+    border-radius: 11px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.1);
+    color: #ffd6f4;
+    cursor: pointer;
+    display: grid; place-items: center;
+    transition: background .15s, transform .15s;
+  }
+  .lookup-btn:hover { background: rgba(255,255,255,0.18); transform: translateY(-1px); }
+  .lookup-btn svg { width: 19px; height: 19px; }
+  .lookup-btn.busy { pointer-events: none; }
+  .lookup-btn.busy svg { animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .results {
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    margin-top: 6px;
+    z-index: 5;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(45, 10, 78, 0.98);
+    border: 1px solid rgba(255,255,255,0.22);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.5);
+    max-height: 230px;
+    overflow-y: auto;
+    display: none;
+  }
+  .results.show { display: block; }
+  .results .res {
+    padding: 11px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    transition: background .12s;
+  }
+  .results .res:last-child { border-bottom: none; }
+  .results .res:hover { background: rgba(255,255,255,0.12); }
+  .results .res .rn { font-size: 0.92rem; font-weight: 600; }
+  .results .res .rd { font-size: 0.76rem; opacity: 0.7; margin-top: 2px; }
+  .results .res .rdate { color: #b9ffd0; }
+  .results .note { padding: 13px 14px; font-size: 0.84rem; opacity: 0.75; }
+  .field label {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    opacity: 0.75;
+    margin-bottom: 7px;
+  }
+  .field input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 11px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border .15s, background .15s;
+  }
+  .field input:focus { border-color: #ff8fd6; background: rgba(255,255,255,0.16); }
+  .field input::placeholder { color: rgba(255,255,255,0.45); }
+  .field input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; }
+
+  .bg-row { display: flex; align-items: center; gap: 8px; }
+  .swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sw {
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform .12s;
+  }
+  .sw:hover { transform: scale(1.12); }
+  .sw.sel { border-color: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,0.35); }
+  .sw.none {
+    background: rgba(255,255,255,0.12);
+    display: grid; place-items: center;
+    color: rgba(255,255,255,0.7);
+  }
+  .sw.none svg { width: 16px; height: 16px; }
+  .bg-row .custom-swatch {
+    position: relative;
+    margin: 0;
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    cursor: pointer;
+    overflow: hidden;
+    display: grid; place-items: center;
+    background: rgba(255,255,255,0.1);
+    border: 2px dashed rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.75);
+    transition: transform .12s, border-color .15s;
+  }
+  .bg-row .custom-swatch:hover { transform: scale(1.12); border-color: rgba(255,255,255,0.7); }
+  /* once a custom colour is chosen the chip fills with it and behaves like a preset */
+  .bg-row .custom-swatch.has-color { border-style: solid; border-color: transparent; }
+  .custom-swatch.sel { border-color: #fff !important; box-shadow: 0 0 0 2px rgba(0,0,0,0.35); }
+  .custom-swatch input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .custom-swatch svg { width: 16px; height: 16px; }
+  .custom-swatch.has-color svg { display: none; }
+  .img-row { display: flex; gap: 8px; margin-top: 12px; }
+  .img-row input[type=text] {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 0.85rem;
+    outline: none;
+  }
+  .img-row input[type=text]:focus { border-color: #ff8fd6; background: rgba(255,255,255,0.16); }
+  .img-row input::placeholder { color: rgba(255,255,255,0.45); }
+  .img-search-btn {
+    flex-shrink: 0;
+    width: 42px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.1);
+    color: #ffd6f4;
+    cursor: pointer;
+    display: grid; place-items: center;
+    transition: background .15s;
+  }
+  .img-search-btn:hover { background: rgba(255,255,255,0.18); }
+  .img-search-btn svg { width: 17px; height: 17px; }
+
+  .err {
+    min-height: 0;
+    font-size: 0.82rem;
+    color: #ffb3c8;
+    margin-top: 14px;
+    display: none;
+  }
+  .err.show { display: block; }
+  .field input.invalid { border-color: #ff6b9d; background: rgba(255,107,157,0.12); }
+
+  .modal-actions { display: flex; gap: 12px; margin-top: 14px; }
+  .modal-actions button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 11px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: transform .15s, opacity .15s;
+  }
+  .modal-actions button:hover { transform: translateY(-1px); }
+  .btn-cancel {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+  }
+  .btn-save {
+    color: #2a0845;
+    background: linear-gradient(135deg, #ffd6f4, #ff8fd6);
+  }
+  .btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  @media (max-width: 480px) {
+    .wrap { padding: 22px 14px 70px; }
+    header.top h1 { font-size: 1.25rem; }
+    header.top p { display: none; }
+    .add-btn span { display: none; }
+    .add-btn { padding: 11px 13px; }
+    .countdown { width: 74px; }
+    .countdown .num { font-size: 1.7rem; }
+    .card { padding: 16px; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap" id="wrap">
+    <header class="top">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" width="26" height="26"><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13.5" r="1"/><rect x="2" y="6" width="20" height="12" rx="5"/></svg>
+      </div>
+      <div>
+        <h1>NexGame</h1>
+        <p>Your upcoming game release countdown</p>
+      </div>
+      <button class="icon-btn settings-open" id="settingsOpen" title="Settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <button class="group-toggle" id="groupToggle" title="Group by month">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+      </button>
+      <div class="view-toggle" id="viewToggle">
+        <button data-view="list" class="vt-btn" title="List view">
+          <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        </button>
+        <button data-view="grid" class="vt-btn" title="Grid view">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </button>
+      </div>
+      <button class="add-btn" id="openAdd">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Track a game</span>
+      </button>
+    </header>
+
+    <div class="list" id="list"></div>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h3 id="modalTitle">Track a game</h3>
+      <div class="field">
+        <label for="gName">Game title</label>
+        <div class="name-row">
+          <input type="text" id="gName" placeholder="e.g. Grand Theft Auto VI" maxlength="80" autocomplete="off">
+          <button class="lookup-btn" id="lookupBtn" title="Find release date online">
+            <svg viewBox="0 0 24 24" id="lookupIcon"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          </button>
+        </div>
+        <div class="results" id="results"></div>
+      </div>
+      <div class="field">
+        <label for="gDate">Release date</label>
+        <input type="date" id="gDate">
+      </div>
+      <div class="field">
+        <label>Card background</label>
+        <div class="bg-row">
+          <div class="swatches" id="swatches"></div>
+          <label class="custom-swatch" id="customSwatch" title="Custom colour">
+            <input type="color" id="gColor" value="#7209b7">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </label>
+        </div>
+        <div class="img-row">
+          <input type="text" id="gImageUrl" placeholder="…or paste an image URL" autocomplete="off">
+          <button type="button" class="img-search-btn" id="imgSearchBtn" title="Search images on Brave">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="err" id="formErr"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="cancelBtn">Cancel</button>
+        <button class="btn-save" id="saveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="settingsOverlay">
+    <div class="modal">
+      <h3>Settings</h3>
+
+      <div class="set-section">
+        <div class="set-label">Backup &amp; restore</div>
+        <p class="set-desc">Save all your tracked games to a file, or restore from one.</p>
+        <div class="set-row">
+          <button class="btn-save" id="backupBtn">Backup to file</button>
+          <button class="btn-cancel" id="restoreBtn">Restore from file</button>
+          <input type="file" id="restoreFile" accept="application/json,.json" hidden>
+        </div>
+        <div class="set-note" id="restoreNote"></div>
+      </div>
+
+      <div class="set-section">
+        <div class="set-label">Changelog</div>
+        <div class="changelog">
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.1.0 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Track games with a live days-until-release countdown.</li>
+              <li>Online release-date lookup via Wikidata.</li>
+              <li>Custom card backgrounds: colour swatches or an image URL.</li>
+              <li>Brave image search shortcut for cover art.</li>
+              <li>Add, edit and remove entries.</li>
+              <li>List and grid (cover-art) layouts.</li>
+              <li>Optional grouping by release month.</li>
+              <li>Backup &amp; restore your data.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="set-version">NexGame · Alpha 0.1.0</div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="settingsClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const STORE_KEY = 'nexgame.games.v1';
+  const list = document.getElementById('list');
+  const viewToggle = document.getElementById('viewToggle');
+  const groupToggle = document.getElementById('groupToggle');
+  const overlay = document.getElementById('overlay');
+  const gName = document.getElementById('gName');
+  const gDate = document.getElementById('gDate');
+  const saveBtn = document.getElementById('saveBtn');
+  const lookupBtn = document.getElementById('lookupBtn');
+  const lookupIcon = document.getElementById('lookupIcon');
+  const results = document.getElementById('results');
+  const swatches = document.getElementById('swatches');
+  const gColor = document.getElementById('gColor');
+  const customSwatch = gColor.closest('.custom-swatch');
+  const gImageUrl = document.getElementById('gImageUrl');
+
+  const PRESET_COLORS = ['#7209b7', '#f72585', '#3a0ca3', '#4361ee', '#06d6a0', '#ff7b00', '#e63946'];
+  let pickedColor = null;   // null = default glass
+  let pickedImage = null;   // image url / data-url for the card background
+  let editingId = null;     // id of the entry being edited, or null when adding
+  const modalTitle = document.getElementById('modalTitle');
+
+  let games = load();
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+    catch { return []; }
+  }
+  function save() {
+    localStorage.setItem(STORE_KEY, JSON.stringify(games));
+  }
+
+  // local-timezone day difference between today and an ISO yyyy-mm-dd string
+  function daysUntil(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    const target = new Date(y, m - 1, d);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.round((target - today) / 86400000);
+  }
+
+  function fmtDate(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString(undefined,
+      { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  // DD/MM/YYYY for the grid tiles
+  function fmtSlash(iso) {
+    const [y, m, d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  // "July 2026" — used for the month separators
+  function monthLabel(iso) {
+    const [y, m] = iso.split('-').map(Number);
+    return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  }
+
+  const VIEW_KEY = 'nexgame.view';
+  let viewMode = localStorage.getItem(VIEW_KEY) === 'grid' ? 'grid' : 'list';
+  const GROUP_KEY = 'nexgame.group';
+  let groupByMonth = localStorage.getItem(GROUP_KEY) !== 'off';   // on by default
+
+  function esc(s) {
+    return s.replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  const EDIT_SVG = `<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>`;
+  const DEL_SVG = `<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>`;
+
+  // background inline-style shared by both layouts
+  function bgStyle(g) {
+    if (g.image) {
+      return ` style="background-image: linear-gradient(rgba(15,2,30,0.55), rgba(15,2,30,0.78)), url('${esc(g.image)}'); background-size: cover; background-position: center;"`;
+    }
+    if (g.color) {
+      return ` style="background: linear-gradient(135deg, ${g.color}66, ${g.color}1f), rgba(255,255,255,0.10);"`;
+    }
+    return '';
+  }
+
+  function render() {
+    document.getElementById('wrap').classList.toggle('wide', viewMode === 'grid');
+    list.className = viewMode === 'grid' ? 'grid' : 'list';
+    [...viewToggle.children].forEach(b =>
+      b.classList.toggle('active', b.dataset.view === viewMode));
+    groupToggle.classList.toggle('active', groupByMonth);
+
+    if (!games.length) {
+      list.className = 'list';
+      document.getElementById('wrap').classList.remove('wide');
+      list.innerHTML = `
+        <div class="empty">
+          <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="5"/><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13.5" r="1"/></svg>
+          <p>No games tracked yet.<br>Hit <strong>Track a game</strong> to start your countdown.</p>
+        </div>`;
+      return;
+    }
+
+    // soonest upcoming first; released ones sink to the bottom
+    const sorted = [...games].sort((a, b) => {
+      const da = daysUntil(a.date), db = daysUntil(b.date);
+      const ra = da < 0, rb = db < 0;
+      if (ra !== rb) return ra ? 1 : -1;
+      return da - db;
+    });
+
+    const itemFn = viewMode === 'grid' ? tileHTML : cardHTML;
+    if (!groupByMonth) {
+      list.innerHTML = sorted.map(itemFn).join('');
+      return;
+    }
+    // interleave a separator each time the release month changes
+    let curMonth = '';
+    list.innerHTML = sorted.map(g => {
+      const mk = g.date.slice(0, 7);   // YYYY-MM
+      let sep = '';
+      if (mk !== curMonth) {
+        curMonth = mk;
+        sep = `<div class="month-sep"><span>${esc(monthLabel(g.date))}</span></div>`;
+      }
+      return sep + itemFn(g);
+    }).join('');
+  }
+
+  function cardHTML(g) {
+    const d = daysUntil(g.date);
+    let cd;
+    if (d > 0) {
+      cd = `<div class="countdown"><div class="num">${d}</div><div class="lbl">${d === 1 ? 'day' : 'days'}</div></div>`;
+    } else if (d === 0) {
+      cd = `<div class="countdown out"><div class="num">Today!</div><div class="lbl">🎉</div></div>`;
+    } else {
+      cd = `<div class="countdown out"><div class="num">Out now</div><div class="lbl">${-d}d ago</div></div>`;
+    }
+    const style = bgStyle(g);
+    return `
+      <div class="card${d < 0 ? ' released' : ''}${style ? ' has-bg' : ''}"${style}>
+        ${cd}
+        <div class="info">
+          <h2>${esc(g.name)}</h2>
+          <div class="meta"><span>${fmtDate(g.date)}</span></div>
+        </div>
+        <div class="actions">
+          <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
+          <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
+        </div>
+      </div>`;
+  }
+
+  function tileHTML(g) {
+    const d = daysUntil(g.date);
+    let num, numCls = '', sub;
+    if (d > 0)        { num = d;          sub = `Days until ${fmtSlash(g.date)}`; }
+    else if (d === 0) { num = 'Today';    numCls = ' small'; sub = `Releases ${fmtSlash(g.date)}`; }
+    else              { num = 'Out now';  numCls = ' small'; sub = `Released ${fmtSlash(g.date)}`; }
+    return `
+      <div class="tile${d < 0 ? ' released' : ''}"${bgStyle(g)}>
+        <div class="tile-actions">
+          <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
+          <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
+        </div>
+        <div class="tile-title">${esc(g.name)}</div>
+        <div class="tile-num${numCls}">${num}</div>
+        <div class="tile-sub">${sub}</div>
+      </div>`;
+  }
+
+  // build the colour swatch row (a "None"/default option + presets)
+  function buildSwatches() {
+    swatches.innerHTML =
+      `<div class="sw none" data-color="" title="Default glass">
+         <svg viewBox="0 0 24 24"><path d="M4 4l16 16M20 4L4 20"/></svg>
+       </div>` +
+      PRESET_COLORS.map(c =>
+        `<div class="sw" data-color="${c}" style="background:${c}" title="${c}"></div>`).join('');
+  }
+
+  function selectColor(value, fromCustom) {
+    pickedColor = value || null;
+    [...swatches.children].forEach(el =>
+      el.classList.toggle('sel', !fromCustom && (el.dataset.color || '') === (value || '')));
+    if (fromCustom) {
+      customSwatch.classList.add('has-color', 'sel');
+      customSwatch.style.background = value;
+    } else {
+      // a preset/None was chosen — revert the custom chip to its "+" add state
+      customSwatch.classList.remove('has-color', 'sel');
+      customSwatch.style.background = '';
+    }
+  }
+
+  // an image (when set) overrides the colour as the card background
+  function setImage(url) {
+    pickedImage = url || null;
+  }
+
+  swatches.addEventListener('click', e => {
+    const sw = e.target.closest('.sw');
+    if (sw) selectColor(sw.dataset.color, false);
+  });
+  gColor.addEventListener('input', () => selectColor(gColor.value, true));
+
+  gImageUrl.addEventListener('input', () => setImage(gImageUrl.value.trim()));
+
+  // open Brave image search for the game title in a new tab
+  document.getElementById('imgSearchBtn').addEventListener('click', () => {
+    const q = gName.value.trim();
+    if (!q) { gName.classList.add('invalid'); gName.focus(); return; }
+    window.open('https://search.brave.com/images?q=' + encodeURIComponent(q), '_blank', 'noopener');
+  });
+
+  function openModal(game) {
+    editingId = game ? game.id : null;
+    modalTitle.textContent = game ? 'Edit game' : 'Track a game';
+    saveBtn.textContent = game ? 'Update' : 'Save';
+
+    gName.value = game ? game.name : '';
+    gDate.value = game ? game.date : '';
+    gImageUrl.value = game && game.image ? game.image : '';
+    setImage(game ? game.image : null);
+
+    // restore colour selection
+    if (game && game.color) {
+      if (PRESET_COLORS.includes(game.color)) {
+        selectColor(game.color, false);
+      } else {
+        gColor.value = game.color;
+        selectColor(game.color, true);
+      }
+    } else {
+      selectColor('', false);   // default to glass, "None" selected
+    }
+
+    hideResults();
+    clearErr();
+    overlay.classList.add('show');
+    setTimeout(() => gName.focus(), 50);
+  }
+  function closeModal() { overlay.classList.remove('show'); }
+
+  const formErr = document.getElementById('formErr');
+
+  function clearErr() {
+    formErr.classList.remove('show');
+    gName.classList.remove('invalid');
+    gDate.classList.remove('invalid');
+  }
+
+  function addGame() {
+    const name = gName.value.trim();
+    const date = gDate.value;
+    clearErr();
+    if (!name || !date) {
+      gName.classList.toggle('invalid', !name);
+      gDate.classList.toggle('invalid', !date);
+      formErr.textContent = !name && !date
+        ? 'Please enter a game title and a release date.'
+        : (!name ? 'Please enter a game title.' : 'Please set a release date.');
+      formErr.classList.add('show');
+      (!name ? gName : gDate).focus();
+      return;
+    }
+    const fields = {
+      name,
+      date,
+      color: pickedImage ? null : pickedColor,
+      image: pickedImage || null
+    };
+    if (editingId) {
+      const g = games.find(x => x.id === editingId);
+      if (g) Object.assign(g, fields);
+    } else {
+      games.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), ...fields });
+    }
+    save();
+    render();
+    closeModal();
+  }
+
+  // --- Online release-date lookup via Wikidata (no API key needed) ---
+  const WD = 'https://www.wikidata.org/w/api.php';
+
+  function setBusy(on) {
+    lookupBtn.classList.toggle('busy', on);
+    lookupIcon.innerHTML = on
+      ? '<path d="M21 12a9 9 0 1 1-6.2-8.5"/>'
+      : '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>';
+  }
+
+  function hideResults() { results.classList.remove('show'); results.innerHTML = ''; }
+
+  // earliest P577 (publication date) across an entity's claims, as yyyy-mm-dd
+  function earliestRelease(entity) {
+    const claims = entity.claims && entity.claims.P577;
+    if (!claims) return null;
+    let best = null;
+    for (const c of claims) {
+      const t = c.mainsnak?.datavalue?.value?.time; // e.g. +2025-11-19T00:00:00Z
+      if (!t) continue;
+      const m = t.match(/^\+(\d{4})-(\d{2})-(\d{2})/);
+      if (!m) continue;
+      let [, y, mo, d] = m;
+      if (mo === '00') mo = '01';
+      if (d === '00') d = '01';
+      const iso = `${y}-${mo}-${d}`;
+      if (!best || iso < best) best = iso;
+    }
+    return best;
+  }
+
+  // Wikimedia Commons image url from a P18 (image) claim, if present
+  function entityImage(entity) {
+    const file = entity.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
+    if (!file) return null;
+    return 'https://commons.wikimedia.org/wiki/Special:FilePath/' +
+      encodeURIComponent(file) + '?width=600';
+  }
+
+  async function lookup() {
+    const q = gName.value.trim();
+    if (!q) { gName.focus(); return; }
+    setBusy(true);
+    hideResults();
+    try {
+      const sURL = `${WD}?action=wbsearchentities&search=${encodeURIComponent(q)}` +
+        `&language=en&uselang=en&format=json&type=item&limit=10&origin=*`;
+      const sData = await fetch(sURL).then(r => r.json());
+      const hits = sData.search || [];
+      if (!hits.length) { showNote('No matches found on Wikidata.'); return; }
+
+      const ids = hits.map(h => h.id).join('|');
+      const eURL = `${WD}?action=wbgetentities&ids=${ids}` +
+        `&props=claims|descriptions|labels&languages=en&format=json&origin=*`;
+      const eData = await fetch(eURL).then(r => r.json());
+      const ents = eData.entities || {};
+
+      const rows = hits.map(h => {
+        const e = ents[h.id];
+        return {
+          id: h.id,
+          name: (e?.labels?.en?.value) || h.label,
+          desc: (e?.descriptions?.en?.value) || h.description || '',
+          date: e ? earliestRelease(e) : null,
+          image: e ? entityImage(e) : null
+        };
+      }).filter(r => r.date); // only entities that actually have a release date
+
+      if (!rows.length) { showNote('Found matches, but no release date is listed.'); return; }
+      showResults(rows);
+    } catch {
+      showNote('Lookup failed — check your connection.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function showNote(msg) {
+    results.innerHTML = `<div class="note">${esc(msg)}</div>`;
+    results.classList.add('show');
+  }
+
+  function showResults(rows) {
+    results.innerHTML = rows.map((r, i) => `
+      <div class="res" data-i="${i}">
+        <div class="rn">${esc(r.name)}</div>
+        <div class="rd">${r.desc ? esc(r.desc) + ' · ' : ''}<span class="rdate">${fmtDate(r.date)}</span></div>
+      </div>`).join('');
+    results.classList.add('show');
+    results.onclick = e => {
+      const el = e.target.closest('.res');
+      if (!el) return;
+      const r = rows[+el.dataset.i];
+      gName.value = r.name;
+      gDate.value = r.date;
+      if (r.image) {                 // auto-fill artwork when Wikidata has it
+        gImageUrl.value = r.image;
+        setImage(r.image);
+      }
+      hideResults();
+    };
+  }
+
+  lookupBtn.addEventListener('click', lookup);
+  gName.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && overlay.classList.contains('show')) { e.preventDefault(); e.stopPropagation(); lookup(); }
+  });
+  gName.addEventListener('input', hideResults);
+
+  document.getElementById('openAdd').addEventListener('click', () => openModal());
+  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+  saveBtn.addEventListener('click', addGame);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeModal(); closeSettings(); }
+    if (e.key === 'Enter' && overlay.classList.contains('show')) addGame();
+  });
+
+  list.addEventListener('click', e => {
+    const editBtn = e.target.closest('.edit');
+    if (editBtn) {
+      const g = games.find(x => x.id === editBtn.dataset.id);
+      if (g) openModal(g);
+      return;
+    }
+    const delBtn = e.target.closest('.del');
+    if (delBtn) {
+      games = games.filter(g => g.id !== delBtn.dataset.id);
+      save();
+      render();
+    }
+  });
+
+  viewToggle.addEventListener('click', e => {
+    const btn = e.target.closest('.vt-btn');
+    if (!btn || btn.dataset.view === viewMode) return;
+    viewMode = btn.dataset.view;
+    localStorage.setItem(VIEW_KEY, viewMode);
+    render();
+  });
+
+  groupToggle.addEventListener('click', () => {
+    groupByMonth = !groupByMonth;
+    localStorage.setItem(GROUP_KEY, groupByMonth ? 'on' : 'off');
+    render();
+  });
+
+  // --- Settings: open/close, backup & restore ---
+  const APP_VERSION = 'Alpha 0.1.0';
+  const settingsOverlay = document.getElementById('settingsOverlay');
+  const restoreFile = document.getElementById('restoreFile');
+  const restoreNote = document.getElementById('restoreNote');
+
+  function openSettings() {
+    restoreNote.textContent = '';
+    restoreNote.className = 'set-note';
+    settingsOverlay.classList.add('show');
+  }
+  function closeSettings() { settingsOverlay.classList.remove('show'); }
+
+  document.getElementById('settingsOpen').addEventListener('click', openSettings);
+  document.getElementById('settingsClose').addEventListener('click', closeSettings);
+  settingsOverlay.addEventListener('click', e => { if (e.target === settingsOverlay) closeSettings(); });
+
+  document.getElementById('backupBtn').addEventListener('click', () => {
+    const payload = {
+      app: 'NexGame',
+      version: APP_VERSION,
+      exportedAt: new Date().toISOString(),
+      games
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nexgame-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    restoreNote.textContent = `Backed up ${games.length} game${games.length === 1 ? '' : 's'}.`;
+    restoreNote.className = 'set-note ok';
+  });
+
+  document.getElementById('restoreBtn').addEventListener('click', () => restoreFile.click());
+  restoreFile.addEventListener('change', () => {
+    const f = restoreFile.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        const arr = Array.isArray(data) ? data : data.games;
+        if (!Array.isArray(arr)) throw new Error('no games array');
+        // keep only well-formed entries, and ensure each has an id
+        const clean = arr
+          .filter(g => g && typeof g.name === 'string' && typeof g.date === 'string')
+          .map(g => ({
+            id: g.id || Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            name: g.name,
+            date: g.date,
+            color: g.color || null,
+            image: g.image || null
+          }));
+        if (!clean.length) throw new Error('no valid entries');
+        games = clean;
+        save();
+        render();
+        restoreNote.textContent = `Restored ${clean.length} game${clean.length === 1 ? '' : 's'}.`;
+        restoreNote.className = 'set-note ok';
+      } catch {
+        restoreNote.textContent = 'Could not read that file — is it a NexGame backup?';
+        restoreNote.className = 'set-note bad';
+      }
+    };
+    reader.readAsText(f);
+    restoreFile.value = '';
+  });
+
+  buildSwatches();
+  render();
+</script>
+</body>
+</html>
