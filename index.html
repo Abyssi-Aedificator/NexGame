@@ -157,6 +157,43 @@
   .filter-btn:hover { color: #fff; }
   .filter-btn.active { color: var(--on-accent); background: var(--accent); border-color: transparent; }
 
+  .search-box {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 20px;
+    padding: 0 12px;
+    min-width: 180px;
+    flex: 1;
+    max-width: 420px;
+  }
+  .search-box svg { width: 15px; height: 15px; fill: none; stroke: rgba(255,255,255,0.6); stroke-width: 2.2; stroke-linecap: round; flex: none; }
+  .search-box input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 0.82rem;
+    padding: 8px 0;
+    min-width: 0;
+  }
+  .search-box input::placeholder { color: rgba(255,255,255,0.5); }
+  .search-box button {
+    flex: none;
+    width: 18px; height: 18px;
+    border: none;
+    background: none;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .search-box button:hover { color: #fff; }
+  .search-box button svg { stroke: currentColor; }
+  .search-box button[hidden] { display: none; }
+
   .add-btn {
     margin-left: 10px;
     display: flex;
@@ -726,6 +763,36 @@
     background: var(--accent);
   }
   .btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-danger { background: #e0345c; color: #fff; }
+  .confirm-modal { max-width: 360px; }
+
+  .update-banner {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background: var(--modal-bg);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.18);
+    font-size: 0.86rem;
+    transform: translateY(-100%);
+    transition: transform .25s ease;
+  }
+  .update-banner.show { transform: translateY(0); }
+  .update-banner button {
+    border: none;
+    border-radius: 10px;
+    padding: 7px 14px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--on-accent);
+    background: var(--accent);
+  }
 
   @media (max-width: 480px) {
     .wrap { padding: 22px 14px 70px; }
@@ -740,6 +807,11 @@
 </style>
 </head>
 <body>
+  <div class="update-banner" id="updateBanner">
+    <span id="updateBannerMsg">A new version of NexGame is ready.</span>
+    <button type="button" id="updateBtn">Update now</button>
+  </div>
+
   <div class="wrap" id="wrap">
     <header class="top">
       <div class="logo">
@@ -774,9 +846,17 @@
 
     <div class="filter-row" id="filterToggle">
       <button class="filter-btn" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="none">No Status</button>
       <button class="filter-btn" data-filter="ready">Ready</button>
       <button class="filter-btn" data-filter="prequel">Prequel</button>
       <button class="filter-btn" data-filter="queued">Queued</button>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="searchInput" placeholder="Search games…" autocomplete="off">
+        <button type="button" id="searchClear" title="Clear search" hidden>
+          <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
     </div>
 
     <div class="list" id="list"></div>
@@ -881,7 +961,17 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.3.2 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.4.0 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Search your tracked games by title.</li>
+              <li>Added a "No Status" filter for games with no status set — the Ready filter now only shows games marked Ready.</li>
+              <li>Deleting a game now asks for confirmation first.</li>
+              <li>Released games get their own "Out now" section above "Coming soon", always sorted alphabetically.</li>
+              <li>App updates no longer apply silently — you'll see an "Update now" banner showing the version change, and choose when to refresh.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.3.2</div>
             <ul>
               <li>Coming soon section sorts alphabetically even with the A-Z sort toggle off.</li>
             </ul>
@@ -947,6 +1037,17 @@
     </div>
   </div>
 
+  <div class="overlay" id="confirmOverlay">
+    <div class="modal confirm-modal">
+      <h3>Remove game?</h3>
+      <p class="set-desc" id="confirmMsg"></p>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="confirmCancelBtn">Cancel</button>
+        <button class="btn-danger" id="confirmDeleteBtn">Remove</button>
+      </div>
+    </div>
+  </div>
+
 <script>
   const STORE_KEY = 'nexgame.games.v1';
   const list = document.getElementById('list');
@@ -954,6 +1055,8 @@
   const groupToggle = document.getElementById('groupToggle');
   const sortToggle = document.getElementById('sortToggle');
   const filterToggle = document.getElementById('filterToggle');
+  const searchInput = document.getElementById('searchInput');
+  const searchClear = document.getElementById('searchClear');
   const overlay = document.getElementById('overlay');
   const gName = document.getElementById('gName');
   const gDate = document.getElementById('gDate');
@@ -1038,12 +1141,17 @@
   const SORT_KEY = 'nexgame.sort';
   let sortAlpha = localStorage.getItem(SORT_KEY) === 'alpha';   // off (sort by date) by default
   const FILTER_KEY = 'nexgame.filter';
-  const FILTERS = ['all', 'ready', 'prequel', 'queued'];
+  const FILTERS = ['all', 'none', 'ready', 'prequel', 'queued'];
   let filterMode = FILTERS.includes(localStorage.getItem(FILTER_KEY)) ? localStorage.getItem(FILTER_KEY) : 'all';
   function matchesFilter(g) {
     if (filterMode === 'all') return true;
-    if (filterMode === 'ready') return !g.status || g.status === 'ready';
+    if (filterMode === 'none') return !g.status;
     return g.status === filterMode;
+  }
+
+  let searchQuery = '';
+  function matchesSearch(g) {
+    return !searchQuery || g.name.toLowerCase().includes(searchQuery);
   }
 
   function esc(s) {
@@ -1086,7 +1194,7 @@
       return;
     }
 
-    const visible = games.filter(matchesFilter);
+    const visible = games.filter(g => matchesFilter(g) && matchesSearch(g));
     if (!visible.length) {
       list.className = 'list';
       document.getElementById('wrap').classList.remove('wide');
@@ -1098,22 +1206,18 @@
       return;
     }
 
-    const dated = visible.filter(g => !g.tba);
-    const tbaGames = visible.filter(g => g.tba)
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-    // soonest upcoming first; released ones sink to the bottom
-    const byDate = (a, b) => {
-      const da = daysUntil(a.date), db = daysUntil(b.date);
-      const ra = da < 0, rb = db < 0;
-      if (ra !== rb) return ra ? 1 : -1;
-      return da - db;
-    };
     const byName = (a, b) => a.name.localeCompare(b.name);
+    const dated = visible.filter(g => !g.tba);
+    const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
+    const released = dated.filter(g => daysUntil(g.date) < 0).sort(byName);
+    const tbaGames = visible.filter(g => g.tba).sort(byName);
+
+    // soonest upcoming first
+    const byDate = (a, b) => daysUntil(a.date) - daysUntil(b.date);
 
     // chronological bucket order always comes from byDate; alpha sort is applied
     // either across the whole list (ungrouped) or within each month bucket (grouped)
-    const chronological = dated.sort(byDate);
+    const chronological = upcoming.sort(byDate);
 
     const itemFn = viewMode === 'grid' ? tileHTML : cardHTML;
     let html;
@@ -1138,6 +1242,10 @@
         `<div class="month-sep"><span>${esc(monthLabel(b[0].date))}</span></div>` +
         b.map(itemFn).join('')
       ).join('');
+    }
+    if (released.length) {
+      html += `<div class="month-sep"><span>Out now</span></div>` +
+        released.map(itemFn).join('');
     }
     if (tbaGames.length) {
       html += `<div class="month-sep"><span>Coming soon</span></div>` +
@@ -1470,7 +1578,7 @@
   saveBtn.addEventListener('click', addGame);
   overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeModal(); closeSettings(); }
+    if (e.key === 'Escape') { closeModal(); closeSettings(); closeConfirm(); }
     if (e.key === 'Enter' && overlay.classList.contains('show')) addGame();
   });
 
@@ -1483,11 +1591,33 @@
     }
     const delBtn = e.target.closest('.del');
     if (delBtn) {
-      games = games.filter(g => g.id !== delBtn.dataset.id);
+      const g = games.find(x => x.id === delBtn.dataset.id);
+      if (g) openConfirm(g);
+    }
+  });
+
+  let pendingDeleteId = null;
+  const confirmOverlay = document.getElementById('confirmOverlay');
+  const confirmMsg = document.getElementById('confirmMsg');
+  function openConfirm(g) {
+    pendingDeleteId = g.id;
+    confirmMsg.textContent = `Remove "${g.name}" from your tracked games? This can't be undone.`;
+    confirmOverlay.classList.add('show');
+  }
+  function closeConfirm() {
+    confirmOverlay.classList.remove('show');
+    pendingDeleteId = null;
+  }
+  document.getElementById('confirmCancelBtn').addEventListener('click', closeConfirm);
+  document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+    if (pendingDeleteId) {
+      games = games.filter(g => g.id !== pendingDeleteId);
       save();
       render();
     }
+    closeConfirm();
   });
+  confirmOverlay.addEventListener('click', e => { if (e.target === confirmOverlay) closeConfirm(); });
 
   viewToggle.addEventListener('click', e => {
     const btn = e.target.closest('.vt-btn');
@@ -1509,6 +1639,19 @@
     render();
   });
 
+  searchInput.addEventListener('input', () => {
+    searchQuery = searchInput.value.trim().toLowerCase();
+    searchClear.hidden = !searchQuery;
+    render();
+  });
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    searchQuery = '';
+    searchClear.hidden = true;
+    render();
+    searchInput.focus();
+  });
+
   filterToggle.addEventListener('click', e => {
     const btn = e.target.closest('.filter-btn');
     if (!btn || btn.dataset.filter === filterMode) return;
@@ -1518,7 +1661,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.3.2';
+  const APP_VERSION = 'Alpha 0.4.0';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
@@ -1873,8 +2016,43 @@
   // register the service worker so the app is installable / works offline
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        // a worker already waiting from a previous visit
+        if (reg.waiting) showUpdateBanner(reg);
+        reg.addEventListener('updatefound', () => {
+          const fresh = reg.installing;
+          if (!fresh) return;
+          fresh.addEventListener('statechange', () => {
+            if (fresh.state === 'installed' && reg.waiting) showUpdateBanner(reg);
+          });
+        });
+      }).catch(() => {});
+
+      // once the new worker takes over, reload once to load the new assets
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (reloaded) return;
+        reloaded = true;
+        location.reload();
+      });
     });
+  }
+
+  function showUpdateBanner(reg) {
+    const banner = document.getElementById('updateBanner');
+    const msg = document.getElementById('updateBannerMsg');
+    msg.textContent = 'A new version of NexGame is ready.';
+    fetch('index.html?v=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(html => {
+      const m = html.match(/APP_VERSION\s*=\s*'([^']+)'/);
+      if (m && m[1] && m[1] !== APP_VERSION) {
+        msg.textContent = `Update available: ${APP_VERSION} → ${m[1]}`;
+      }
+    }).catch(() => {});
+    banner.classList.add('show');
+    document.getElementById('updateBtn').onclick = () => {
+      reg.waiting.postMessage('SKIP_WAITING');
+      banner.classList.remove('show');
+    };
   }
 </script>
 </body>

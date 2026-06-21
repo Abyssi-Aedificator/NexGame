@@ -1,5 +1,5 @@
 // NexGame service worker — offline cache (also satisfies PWA installability)
-const CACHE = 'nexgame-v5';
+const CACHE = 'nexgame-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -9,7 +9,12 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+});
+
+// stay in "waiting" state until the page explicitly asks us to take over
+self.addEventListener('message', e => {
+  if (e.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
