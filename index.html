@@ -37,6 +37,7 @@
     --results-bg: rgba(45, 10, 78, 0.98);
     --scrim-a: rgba(15, 2, 30, 0.55);
     --scrim-b: rgba(15, 2, 30, 0.80);
+    --num-glow: rgba(247, 37, 133, 0.5);
   }
 
   body {
@@ -141,6 +142,21 @@
   .vt-btn:hover { color: #fff; }
   .vt-btn.active { color: var(--on-accent); background: var(--accent); }
 
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  .filter-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: color .15s, background .15s, border-color .15s;
+  }
+  .filter-btn:hover { color: #fff; }
+  .filter-btn.active { color: var(--on-accent); background: var(--accent); border-color: transparent; }
+
   .add-btn {
     margin-left: 10px;
     display: flex;
@@ -237,6 +253,7 @@
   }
   .tile-actions {
     position: absolute; top: 10px; right: 10px;
+    z-index: 2;
     display: flex; gap: 2px;
     opacity: 0;
     transition: opacity .15s;
@@ -281,7 +298,7 @@
     font-weight: 800;
     line-height: 1;
     color: #fff;
-    text-shadow: 0 2px 10px rgba(247,37,133,0.5);
+    text-shadow: 0 2px 10px var(--num-glow);
   }
   .countdown .lbl {
     font-size: 0.7rem;
@@ -290,7 +307,7 @@
     opacity: 0.8;
     margin-top: 4px;
   }
-  .countdown.out .num { font-size: 1.05rem; color: #b9ffd0; }
+  .countdown.out .num { font-size: 1.05rem; color: var(--accent-2); }
 
   .info { flex: 1; min-width: 0; }
   .info h2 {
@@ -305,7 +322,23 @@
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
+    align-items: center;
   }
+
+  .tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--accent-2);
+    color: var(--accent-2);
+    opacity: 1;
+    white-space: nowrap;
+  }
+  .tile-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+  .tile-tags .tag { background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.4); color: #fff; }
 
   .actions { flex-shrink: 0; display: flex; gap: 2px; }
   .del, .edit {
@@ -456,6 +489,78 @@
   .results .res .rd { font-size: 0.76rem; opacity: 0.7; margin-top: 2px; }
   .results .res .rdate { color: #b9ffd0; }
   .results .note { padding: 13px 14px; font-size: 0.84rem; opacity: 0.75; }
+
+  .import-modal { max-width: 680px; }
+  .import-list {
+    max-height: 50vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .imp-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    cursor: pointer;
+  }
+  .imp-row input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--accent-2); flex: none; }
+  .imp-name { flex: 1; font-size: 0.88rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .imp-name.imp-dup { text-decoration: line-through; opacity: 0.55; }
+  .imp-status { font-size: 0.78rem; opacity: 0.65; white-space: nowrap; }
+  .imp-date {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.8rem;
+    padding: 4px 6px;
+    color-scheme: dark;
+  }
+  .imp-tba {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.74rem;
+    opacity: 0.8;
+    white-space: nowrap;
+    flex: none;
+  }
+  .imp-tba input[type="checkbox"] { width: 14px; height: 14px; }
+  .imp-item:last-child .imp-row { border-bottom: none; }
+  .imp-research {
+    flex: none;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .imp-research:hover { background: rgba(255,255,255,0.18); }
+  .imp-research svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+  .imp-cand-list {
+    padding: 4px 12px 10px 40px;
+    background: rgba(0,0,0,0.18);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .imp-item:last-child .imp-cand-list { border-bottom: none; }
+  .imp-cand {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  .imp-cand:hover { background: rgba(255,255,255,0.12); }
+  .imp-cand-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .imp-cand-desc { opacity: 0.6; font-weight: 400; }
+  .imp-cand-date { opacity: 0.75; white-space: nowrap; }
+  .imp-cand-empty { font-size: 0.78rem; opacity: 0.6; padding: 7px 8px; }
   .field label {
     display: block;
     font-size: 0.78rem;
@@ -478,6 +583,52 @@
   .field input:focus { border-color: var(--accent-2); background: rgba(255,255,255,0.16); }
   .field input::placeholder { color: rgba(255,255,255,0.45); }
   .field input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; }
+  .field input#gDate:disabled { opacity: 0.4; }
+  .chk-row { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 10px; }
+  .chk-row .chk { margin: 0; }
+  .chk {
+    display: flex !important;
+    align-items: center;
+    gap: 9px;
+    margin: 10px 0 0;
+    font-size: 0.82rem;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    opacity: 0.9 !important;
+    cursor: pointer;
+    user-select: none;
+  }
+  .chk input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .chk .box {
+    flex-shrink: 0;
+    width: 19px;
+    height: 19px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s, border-color .15s;
+  }
+  .chk .box svg {
+    width: 12px;
+    height: 12px;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity .15s, transform .15s;
+    stroke: var(--on-accent);
+    stroke-width: 3;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .chk input:checked ~ .box {
+    background: var(--accent);
+    border-color: transparent;
+  }
+  .chk input:checked ~ .box svg { opacity: 1; transform: scale(1); }
+  .chk input:focus-visible ~ .box { border-color: var(--accent-2); }
 
   .bg-row { display: flex; align-items: center; gap: 8px; }
   .swatches { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -618,6 +769,13 @@
       </button>
     </header>
 
+    <div class="filter-row" id="filterToggle">
+      <button class="filter-btn" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="ready">Ready</button>
+      <button class="filter-btn" data-filter="prequel">Prequel</button>
+      <button class="filter-btn" data-filter="queued">Queued</button>
+    </div>
+
     <div class="list" id="list"></div>
   </div>
 
@@ -637,6 +795,11 @@
       <div class="field">
         <label for="gDate">Release date</label>
         <input type="date" id="gDate">
+        <label class="chk">
+          <input type="checkbox" id="gTba">
+          <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+          <span>Coming soon (no date yet)</span>
+        </label>
       </div>
       <div class="field">
         <label>Card background</label>
@@ -652,6 +815,26 @@
           <button type="button" class="img-search-btn" id="imgSearchBtn" title="Search images on Brave">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           </button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <div class="chk-row">
+          <label class="chk">
+            <input type="radio" name="gStatus" id="gStatusReady" value="ready">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Ready</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="gStatus" id="gStatusPrequel" value="prequel">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Prequel</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="gStatus" id="gStatusQueued" value="queued">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Queued</span>
+          </label>
         </div>
       </div>
       <div class="err" id="formErr"></div>
@@ -683,10 +866,29 @@
       </div>
 
       <div class="set-section">
+        <div class="set-label">Import wishlist</div>
+        <p class="set-desc">Import a text file with one game title per line — we'll look up each release date on Wikidata.</p>
+        <div class="set-row">
+          <button class="btn-save" id="importBtn">Import from text file</button>
+          <input type="file" id="importFile" accept=".txt,text/plain" hidden>
+        </div>
+      </div>
+
+      <div class="set-section">
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.2.0 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.3.0 <span class="cl-current">current</span></div>
+            <ul>
+              <li>The days-remaining countdown glow now matches the selected colour theme.</li>
+              <li>Mark a game "Coming soon" instead of a date — these sink into their own section at the bottom of the list.</li>
+              <li>Set a single status on a game — Ready, Prequel, or Queued — shown as a badge on each entry.</li>
+              <li>Filter the list: All, Ready, Prequel, or Queued only. The Ready filter also includes games with no status set.</li>
+              <li>Import a wishlist from a text file (one title per line) — release dates are looked up automatically on Wikidata.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.2.0</div>
             <ul>
               <li>Installable as an app on Android Chrome (Add to Home screen).</li>
               <li>Works offline via a service worker.</li>
@@ -716,14 +918,49 @@
     </div>
   </div>
 
+  <div class="overlay" id="importOverlay">
+    <div class="modal import-modal">
+      <h3>Import wishlist</h3>
+      <p class="set-desc">Looking up each title on Wikidata. Untick anything you don't want, or fix the date, then add.</p>
+      <div class="import-list" id="importList"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="importCancelBtn">Cancel</button>
+        <button class="btn-save" id="importAddBtn">Add selected</button>
+      </div>
+    </div>
+  </div>
+
 <script>
   const STORE_KEY = 'nexgame.games.v1';
   const list = document.getElementById('list');
   const viewToggle = document.getElementById('viewToggle');
   const groupToggle = document.getElementById('groupToggle');
+  const filterToggle = document.getElementById('filterToggle');
   const overlay = document.getElementById('overlay');
   const gName = document.getElementById('gName');
   const gDate = document.getElementById('gDate');
+  const gTba = document.getElementById('gTba');
+  const statusRadios = [...document.querySelectorAll('input[name="gStatus"]')];
+
+  // allow clicking the already-selected status radio to clear it (no status)
+  // note: clicking a <label> only forwards a synthetic "click" to its nested
+  // <input> — "mousedown" fires on the label itself, so listen there instead.
+  statusRadios.forEach(r => {
+    r.closest('.chk').addEventListener('mousedown', () => {
+      statusRadios.forEach(x => { x.dataset.wasChecked = x.checked ? 'true' : 'false'; });
+    });
+    r.addEventListener('click', () => {
+      if (r.dataset.wasChecked === 'true') r.checked = false;
+    });
+  });
+
+  function getStatus() {
+    const sel = statusRadios.find(r => r.checked);
+    return sel ? sel.value : null;
+  }
+  function setStatus(value) {
+    statusRadios.forEach(r => { r.checked = r.value === value; });
+  }
   const saveBtn = document.getElementById('saveBtn');
   const lookupBtn = document.getElementById('lookupBtn');
   const lookupIcon = document.getElementById('lookupIcon');
@@ -780,6 +1017,14 @@
   let viewMode = localStorage.getItem(VIEW_KEY) === 'grid' ? 'grid' : 'list';
   const GROUP_KEY = 'nexgame.group';
   let groupByMonth = localStorage.getItem(GROUP_KEY) !== 'off';   // on by default
+  const FILTER_KEY = 'nexgame.filter';
+  const FILTERS = ['all', 'ready', 'prequel', 'queued'];
+  let filterMode = FILTERS.includes(localStorage.getItem(FILTER_KEY)) ? localStorage.getItem(FILTER_KEY) : 'all';
+  function matchesFilter(g) {
+    if (filterMode === 'all') return true;
+    if (filterMode === 'ready') return !g.status || g.status === 'ready';
+    return g.status === filterMode;
+  }
 
   function esc(s) {
     return s.replace(/[&<>"']/g, c =>
@@ -806,6 +1051,8 @@
     [...viewToggle.children].forEach(b =>
       b.classList.toggle('active', b.dataset.view === viewMode));
     groupToggle.classList.toggle('active', groupByMonth);
+    [...filterToggle.children].forEach(b =>
+      b.classList.toggle('active', b.dataset.filter === filterMode));
 
     if (!games.length) {
       list.className = 'list';
@@ -818,8 +1065,23 @@
       return;
     }
 
+    const visible = games.filter(matchesFilter);
+    if (!visible.length) {
+      list.className = 'list';
+      document.getElementById('wrap').classList.remove('wide');
+      list.innerHTML = `
+        <div class="empty">
+          <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="5"/><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13.5" r="1"/></svg>
+          <p>No games match this filter.</p>
+        </div>`;
+      return;
+    }
+
+    const dated = visible.filter(g => !g.tba);
+    const tbaGames = visible.filter(g => g.tba);
+
     // soonest upcoming first; released ones sink to the bottom
-    const sorted = [...games].sort((a, b) => {
+    const sorted = dated.sort((a, b) => {
       const da = daysUntil(a.date), db = daysUntil(b.date);
       const ra = da < 0, rb = db < 0;
       if (ra !== rb) return ra ? 1 : -1;
@@ -827,24 +1089,54 @@
     });
 
     const itemFn = viewMode === 'grid' ? tileHTML : cardHTML;
+    let html;
     if (!groupByMonth) {
-      list.innerHTML = sorted.map(itemFn).join('');
-      return;
+      html = sorted.map(itemFn).join('');
+    } else {
+      // interleave a separator each time the release month changes
+      let curMonth = '';
+      html = sorted.map(g => {
+        const mk = g.date.slice(0, 7);   // YYYY-MM
+        let sep = '';
+        if (mk !== curMonth) {
+          curMonth = mk;
+          sep = `<div class="month-sep"><span>${esc(monthLabel(g.date))}</span></div>`;
+        }
+        return sep + itemFn(g);
+      }).join('');
     }
-    // interleave a separator each time the release month changes
-    let curMonth = '';
-    list.innerHTML = sorted.map(g => {
-      const mk = g.date.slice(0, 7);   // YYYY-MM
-      let sep = '';
-      if (mk !== curMonth) {
-        curMonth = mk;
-        sep = `<div class="month-sep"><span>${esc(monthLabel(g.date))}</span></div>`;
-      }
-      return sep + itemFn(g);
-    }).join('');
+    if (tbaGames.length) {
+      html += `<div class="month-sep"><span>Coming soon</span></div>` +
+        tbaGames.map(itemFn).join('');
+    }
+    list.innerHTML = html;
+  }
+
+  const STATUS_LABEL = { ready: 'Ready', prequel: 'Prequel', queued: 'Queued' };
+
+  // small status badge: ready / prequel / queued
+  function tagsHTML(g) {
+    const label = STATUS_LABEL[g.status];
+    return label ? `<span class="tag">${label}</span>` : '';
   }
 
   function cardHTML(g) {
+    const tags = tagsHTML(g);
+    if (g.tba) {
+      const style = bgStyle(g);
+      return `
+        <div class="card${style ? ' has-bg' : ''}"${style}>
+          <div class="countdown out"><div class="num">Coming</div><div class="lbl">soon</div></div>
+          <div class="info">
+            <h2>${esc(g.name)}</h2>
+            <div class="meta"><span>Release date TBA</span>${tags}</div>
+          </div>
+          <div class="actions">
+            <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
+            <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
+          </div>
+        </div>`;
+    }
     const d = daysUntil(g.date);
     let cd;
     if (d > 0) {
@@ -860,7 +1152,7 @@
         ${cd}
         <div class="info">
           <h2>${esc(g.name)}</h2>
-          <div class="meta"><span>${fmtDate(g.date)}</span></div>
+          <div class="meta"><span>${fmtDate(g.date)}</span>${tags}</div>
         </div>
         <div class="actions">
           <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
@@ -870,6 +1162,23 @@
   }
 
   function tileHTML(g) {
+    const tags = tagsHTML(g);
+    const tagsRow = tags ? `<div class="tile-tags">${tags}</div>` : '';
+    if (g.tba) {
+      return `
+        <div class="tile"${bgStyle(g)}>
+          <div class="tile-actions">
+            <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
+            <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
+          </div>
+          <div>
+            <div class="tile-title">${esc(g.name)}</div>
+            ${tagsRow}
+          </div>
+          <div class="tile-num small">Coming soon</div>
+          <div class="tile-sub">Release date TBA</div>
+        </div>`;
+    }
     const d = daysUntil(g.date);
     let num, numCls = '', sub;
     if (d > 0)        { num = d;          sub = `Days until ${fmtSlash(g.date)}`; }
@@ -881,7 +1190,10 @@
           <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
           <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
         </div>
-        <div class="tile-title">${esc(g.name)}</div>
+        <div>
+          <div class="tile-title">${esc(g.name)}</div>
+          ${tagsRow}
+        </div>
         <div class="tile-num${numCls}">${num}</div>
         <div class="tile-sub">${sub}</div>
       </div>`;
@@ -924,6 +1236,11 @@
 
   gImageUrl.addEventListener('input', () => setImage(gImageUrl.value.trim()));
 
+  gTba.addEventListener('change', () => {
+    gDate.disabled = gTba.checked;
+    if (gTba.checked) gDate.classList.remove('invalid');
+  });
+
   // open Brave image search for the game title in a new tab
   document.getElementById('imgSearchBtn').addEventListener('click', () => {
     const q = gName.value.trim();
@@ -937,7 +1254,10 @@
     saveBtn.textContent = game ? 'Update' : 'Save';
 
     gName.value = game ? game.name : '';
-    gDate.value = game ? game.date : '';
+    gDate.value = game && !game.tba ? game.date : '';
+    gTba.checked = !!(game && game.tba);
+    gDate.disabled = gTba.checked;
+    setStatus(game ? game.status : null);
     gImageUrl.value = game && game.image ? game.image : '';
     setImage(game ? game.image : null);
 
@@ -970,21 +1290,24 @@
 
   function addGame() {
     const name = gName.value.trim();
+    const tba = gTba.checked;
     const date = gDate.value;
     clearErr();
-    if (!name || !date) {
+    if (!name || (!tba && !date)) {
       gName.classList.toggle('invalid', !name);
-      gDate.classList.toggle('invalid', !date);
-      formErr.textContent = !name && !date
+      gDate.classList.toggle('invalid', !tba && !date);
+      formErr.textContent = !name && (!tba && !date)
         ? 'Please enter a game title and a release date.'
-        : (!name ? 'Please enter a game title.' : 'Please set a release date.');
+        : (!name ? 'Please enter a game title.' : 'Please set a release date, or check "Coming soon".');
       formErr.classList.add('show');
       (!name ? gName : gDate).focus();
       return;
     }
     const fields = {
       name,
-      date,
+      date: tba ? null : date,
+      tba,
+      status: getStatus(),
       color: pickedImage ? null : pickedColor,
       image: pickedImage || null
     };
@@ -1146,8 +1469,16 @@
     render();
   });
 
+  filterToggle.addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn || btn.dataset.filter === filterMode) return;
+    filterMode = btn.dataset.filter;
+    localStorage.setItem(FILTER_KEY, filterMode);
+    render();
+  });
+
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.2.0';
+  const APP_VERSION = 'Alpha 0.3.0';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
@@ -1160,7 +1491,7 @@
       blob1: 'rgba(114, 9, 183, 0.55)', blob2: 'rgba(247, 37, 133, 0.45)', meta: '#1a0033',
       accent: 'linear-gradient(135deg, #ffd6f4, #ff8fd6)', accent2: '#ff8fd6', accentSoft: '#ffd6f4',
       onAccent: '#2a0845', modalBg: 'rgba(40, 8, 70, 0.92)', resultsBg: 'rgba(45, 10, 78, 0.98)',
-      scrimA: 'rgba(15, 2, 30, 0.55)', scrimB: 'rgba(15, 2, 30, 0.80)'
+      scrimA: 'rgba(15, 2, 30, 0.55)', scrimB: 'rgba(15, 2, 30, 0.80)', numGlow: 'rgba(247, 37, 133, 0.5)'
     },
     ocean: {
       label: 'Ocean',
@@ -1168,7 +1499,7 @@
       blob1: 'rgba(3, 98, 128, 0.55)', blob2: 'rgba(20, 184, 166, 0.45)', meta: '#021024',
       accent: 'linear-gradient(135deg, #a5f3fc, #22d3ee)', accent2: '#22d3ee', accentSoft: '#a5f3fc',
       onAccent: '#022a30', modalBg: 'rgba(5, 27, 48, 0.93)', resultsBg: 'rgba(7, 34, 58, 0.98)',
-      scrimA: 'rgba(2, 14, 26, 0.55)', scrimB: 'rgba(2, 14, 26, 0.80)'
+      scrimA: 'rgba(2, 14, 26, 0.55)', scrimB: 'rgba(2, 14, 26, 0.80)', numGlow: 'rgba(34, 211, 238, 0.55)'
     },
     sunset: {
       label: 'Sunset',
@@ -1176,7 +1507,7 @@
       blob1: 'rgba(232, 93, 4, 0.5)', blob2: 'rgba(255, 186, 8, 0.42)', meta: '#2a0a18',
       accent: 'linear-gradient(135deg, #ffe0a3, #ff8e3c)', accent2: '#ff8e3c', accentSoft: '#ffe0a3',
       onAccent: '#3a1405', modalBg: 'rgba(46, 16, 12, 0.93)', resultsBg: 'rgba(58, 22, 16, 0.98)',
-      scrimA: 'rgba(26, 8, 4, 0.55)', scrimB: 'rgba(26, 8, 4, 0.80)'
+      scrimA: 'rgba(26, 8, 4, 0.55)', scrimB: 'rgba(26, 8, 4, 0.80)', numGlow: 'rgba(255, 142, 60, 0.55)'
     },
     forest: {
       label: 'Forest',
@@ -1184,7 +1515,7 @@
       blob1: 'rgba(27, 122, 75, 0.55)', blob2: 'rgba(123, 211, 137, 0.4)', meta: '#04140c',
       accent: 'linear-gradient(135deg, #bff7c8, #34d17a)', accent2: '#34d17a', accentSoft: '#bff7c8',
       onAccent: '#04160d', modalBg: 'rgba(7, 30, 21, 0.93)', resultsBg: 'rgba(9, 38, 27, 0.98)',
-      scrimA: 'rgba(4, 18, 11, 0.55)', scrimB: 'rgba(4, 18, 11, 0.80)'
+      scrimA: 'rgba(4, 18, 11, 0.55)', scrimB: 'rgba(4, 18, 11, 0.80)', numGlow: 'rgba(52, 209, 122, 0.55)'
     },
     midnight: {
       label: 'Midnight',
@@ -1192,7 +1523,7 @@
       blob1: 'rgba(31, 42, 82, 0.6)', blob2: 'rgba(65, 90, 144, 0.45)', meta: '#0a0a14',
       accent: 'linear-gradient(135deg, #cdd8ff, #7d97e8)', accent2: '#7d97e8', accentSoft: '#cdd8ff',
       onAccent: '#0a0f20', modalBg: 'rgba(15, 21, 42, 0.94)', resultsBg: 'rgba(21, 29, 56, 0.98)',
-      scrimA: 'rgba(8, 8, 18, 0.55)', scrimB: 'rgba(8, 8, 18, 0.80)'
+      scrimA: 'rgba(8, 8, 18, 0.55)', scrimB: 'rgba(8, 8, 18, 0.80)', numGlow: 'rgba(125, 151, 232, 0.55)'
     }
   };
   const THEME_KEY = 'nexgame.theme';
@@ -1213,6 +1544,7 @@
     root.setProperty('--results-bg', t.resultsBg);
     root.setProperty('--scrim-a', t.scrimA);
     root.setProperty('--scrim-b', t.scrimB);
+    root.setProperty('--num-glow', t.numGlow);
     const meta = document.querySelector('meta[name=theme-color]');
     if (meta) meta.content = t.meta;
   }
@@ -1278,11 +1610,14 @@
         if (!Array.isArray(arr)) throw new Error('no games array');
         // keep only well-formed entries, and ensure each has an id
         const clean = arr
-          .filter(g => g && typeof g.name === 'string' && typeof g.date === 'string')
+          .filter(g => g && typeof g.name === 'string' && (typeof g.date === 'string' || g.tba))
           .map(g => ({
             id: g.id || Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
             name: g.name,
-            date: g.date,
+            date: g.tba ? null : g.date,
+            tba: !!g.tba,
+            status: STATUS_LABEL[g.status] ? g.status
+              : (g.prequelPlayed ? 'prequel' : (g.queued ? 'queued' : null)),
             color: g.color || null,
             image: g.image || null
           }));
@@ -1299,6 +1634,197 @@
     };
     reader.readAsText(f);
     restoreFile.value = '';
+  });
+
+  // --- Import wishlist: text file (one title per line) -> Wikidata lookup -> bulk add ---
+  const importBtn = document.getElementById('importBtn');
+  const importFileInput = document.getElementById('importFile');
+  const importOverlay = document.getElementById('importOverlay');
+  const importList = document.getElementById('importList');
+  const importCancelBtn = document.getElementById('importCancelBtn');
+  const importAddBtn = document.getElementById('importAddBtn');
+  let importRows = []; // { name, status: 'pending'|'searching'|'found'|'none', date, image, include }
+
+  importBtn.addEventListener('click', () => importFileInput.click());
+  importFileInput.addEventListener('change', () => {
+    const f = importFileInput.files[0];
+    importFileInput.value = '';
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const names = reader.result.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+      if (!names.length) return;
+      closeSettings();
+      openImport(names);
+    };
+    reader.readAsText(f);
+  });
+
+  function openImport(names) {
+    const existing = new Set(games.map(g => g.name.trim().toLowerCase()));
+    importRows = names.map(name => ({
+      name, status: 'pending', date: null, image: null, include: false,
+      dup: existing.has(name.trim().toLowerCase())
+    }));
+    renderImportList();
+    importOverlay.classList.add('show');
+    runImportLookups();
+  }
+  function closeImport() {
+    importOverlay.classList.remove('show');
+    importRows = [];
+  }
+
+  function renderImportList() {
+    importList.innerHTML = importRows.map((r, i) => {
+      const canInclude = !r.dup && (r.tba || r.status === 'found');
+      let mid;
+      if (r.dup) mid = '<span class="imp-status">Already tracked</span>';
+      else if (r.tba) mid = '';
+      else if (r.status === 'searching') mid = '<span class="imp-status">Searching…</span>';
+      else if (r.status === 'found') mid = `<input type="date" class="imp-date" data-i="${i}" value="${r.date || ''}">`;
+      else if (r.status === 'none') mid = '<span class="imp-status">No match</span>';
+      else mid = '<span class="imp-status">…</span>';
+      const researchBtn = (r.dup || r.status === 'searching' || r.status === 'pending') ? '' : `
+          <button type="button" class="imp-research" data-i="${i}" title="Search again">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          </button>`;
+      const candPanel = r.showCandidates ? `
+        <div class="imp-cand-list">
+          ${r.candidates.length ? r.candidates.map((c, ci) => `
+            <div class="imp-cand" data-i="${i}" data-ci="${ci}">
+              <span class="imp-cand-name">${esc(c.name)}${c.desc ? ` <span class="imp-cand-desc">— ${esc(c.desc)}</span>` : ''}</span>
+              <span class="imp-cand-date">${fmtDate(c.date)}</span>
+            </div>`).join('') : '<div class="imp-cand-empty">No other dated matches found.</div>'}
+        </div>` : '';
+      return `
+        <div class="imp-item">
+          <label class="imp-row">
+            <input type="checkbox" class="imp-check" data-i="${i}" ${r.include ? 'checked' : ''} ${canInclude ? '' : 'disabled'}>
+            <span class="imp-name${r.dup ? ' imp-dup' : ''}">${esc(r.name)}</span>
+            ${mid}
+            ${r.dup ? '' : `<span class="imp-tba">
+              <input type="checkbox" class="imp-tba-chk" data-i="${i}" ${r.tba ? 'checked' : ''}><span>Coming soon</span>
+            </span>`}
+            ${researchBtn}
+          </label>
+          ${candPanel}
+        </div>`;
+    }).join('');
+  }
+
+  importList.addEventListener('change', e => {
+    const chk = e.target.closest('.imp-check');
+    if (chk) { importRows[+chk.dataset.i].include = chk.checked; return; }
+    const d = e.target.closest('.imp-date');
+    if (d) { importRows[+d.dataset.i].date = d.value; return; }
+    const t = e.target.closest('.imp-tba-chk');
+    if (t) {
+      const r = importRows[+t.dataset.i];
+      r.tba = t.checked;
+      if (r.tba) { r.include = true; r.date = null; }
+      else r.include = r.status === 'found';
+      renderImportList();
+    }
+  });
+
+  importList.addEventListener('click', e => {
+    const btn = e.target.closest('.imp-research');
+    if (btn) { e.preventDefault(); researchRow(+btn.dataset.i); return; }
+    const cand = e.target.closest('.imp-cand');
+    if (cand) {
+      const r = importRows[+cand.dataset.i];
+      const c = r.candidates[+cand.dataset.ci];
+      r.date = c.date;
+      r.image = c.image;
+      r.status = 'found';
+      r.tba = false;
+      r.include = true;
+      r.showCandidates = false;
+      renderImportList();
+    }
+  });
+
+  async function researchRow(i) {
+    const r = importRows[i];
+    r.showCandidates = true;
+    r.candidates = r.candidates || [];
+    renderImportList();
+    try {
+      const sURL = `${WD}?action=wbsearchentities&search=${encodeURIComponent(r.name)}` +
+        `&language=en&uselang=en&format=json&type=item&limit=10&origin=*`;
+      const hits = (await fetch(sURL).then(x => x.json())).search || [];
+      let candidates = [];
+      if (hits.length) {
+        const ids = hits.map(h => h.id).join('|');
+        const eURL = `${WD}?action=wbgetentities&ids=${ids}&props=claims|descriptions|labels&languages=en&format=json&origin=*`;
+        const eData = await fetch(eURL).then(x => x.json());
+        const ents = eData.entities || {};
+        candidates = hits.map(h => {
+          const e = ents[h.id];
+          const date = e ? earliestRelease(e) : null;
+          return date ? {
+            name: (e?.labels?.en?.value) || h.label,
+            desc: (e?.descriptions?.en?.value) || h.description || '',
+            date,
+            image: e ? entityImage(e) : null
+          } : null;
+        }).filter(Boolean);
+      }
+      r.candidates = candidates;
+    } catch {
+      r.candidates = [];
+    }
+    renderImportList();
+  }
+
+  async function runImportLookups() {
+    for (const r of importRows) {
+      if (r.dup) continue;
+      r.status = 'searching';
+      renderImportList();
+      try {
+        const sURL = `${WD}?action=wbsearchentities&search=${encodeURIComponent(r.name)}` +
+          `&language=en&uselang=en&format=json&type=item&limit=10&origin=*`;
+        const hits = (await fetch(sURL).then(x => x.json())).search || [];
+        let best = null;
+        if (hits.length) {
+          const ids = hits.map(h => h.id).join('|');
+          const eURL = `${WD}?action=wbgetentities&ids=${ids}&props=claims&languages=en&format=json&origin=*`;
+          const ents = (await fetch(eURL).then(x => x.json())).entities || {};
+          for (const h of hits) {
+            const e = ents[h.id];
+            const date = e ? earliestRelease(e) : null;
+            if (date) { best = { date, image: entityImage(e) }; break; }
+          }
+        }
+        if (best) { r.status = 'found'; r.date = best.date; r.image = best.image; r.include = true; }
+        else { r.status = 'none'; r.tba = true; r.include = true; }
+      } catch {
+        r.status = 'none'; r.tba = true; r.include = true;
+      }
+      renderImportList();
+    }
+  }
+
+  importCancelBtn.addEventListener('click', closeImport);
+  importOverlay.addEventListener('click', e => { if (e.target === importOverlay) closeImport(); });
+
+  importAddBtn.addEventListener('click', () => {
+    const toAdd = importRows.filter(r => r.include && (r.date || r.tba));
+    toAdd.forEach(r => {
+      games.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        name: r.name,
+        date: r.tba ? null : r.date,
+        tba: !!r.tba,
+        status: null,
+        color: null,
+        image: r.image || null
+      });
+    });
+    if (toAdd.length) { save(); render(); }
+    closeImport();
   });
 
   buildSwatches();
