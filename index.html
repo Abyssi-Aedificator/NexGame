@@ -881,7 +881,13 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.3.1 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.3.2 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Coming soon section sorts alphabetically even with the A-Z sort toggle off.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.3.1</div>
             <ul>
               <li>Sort the list alphabetically (A-Z) instead of by release date — can be combined with grouping by month.</li>
             </ul>
@@ -894,6 +900,8 @@
               <li>Set a single status on a game — Ready, Prequel, or Queued — shown as a badge on each entry.</li>
               <li>Filter the list: All, Ready, Prequel, or Queued only. The Ready filter also includes games with no status set.</li>
               <li>Import a wishlist from a text file (one title per line) — release dates are looked up automatically on Wikidata.</li>
+              <li>Import: re-search any title to pick a different release-date match, or mark it "Coming soon" if nothing fits.</li>
+              <li>Import: titles you already track are detected, struck through, and skipped automatically.</li>
             </ul>
           </div>
           <div class="cl-entry">
@@ -1092,7 +1100,7 @@
 
     const dated = visible.filter(g => !g.tba);
     const tbaGames = visible.filter(g => g.tba)
-      .sort((a, b) => sortAlpha ? a.name.localeCompare(b.name) : 0);
+      .sort((a, b) => a.name.localeCompare(b.name));
 
     // soonest upcoming first; released ones sink to the bottom
     const byDate = (a, b) => {
@@ -1510,7 +1518,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.3.1';
+  const APP_VERSION = 'Alpha 0.3.2';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
