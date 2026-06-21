@@ -72,7 +72,7 @@
   .wrap {
     position: relative;
     z-index: 1;
-    max-width: 760px;
+    max-width: 860px;
     margin: 0 auto;
     padding: 32px 20px 80px;
     transition: max-width .25s ease;
@@ -142,7 +142,7 @@
   .vt-btn:hover { color: #fff; }
   .vt-btn.active { color: var(--on-accent); background: var(--accent); }
 
-  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  .filter-row { display: flex; gap: 8px; flex-wrap: nowrap; margin-bottom: 18px; }
   .filter-btn {
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.18);
@@ -156,6 +156,46 @@
   }
   .filter-btn:hover { color: #fff; }
   .filter-btn.active { color: var(--on-accent); background: var(--accent); border-color: transparent; }
+  .filter-select {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.85);
+    cursor: pointer;
+    padding: 8px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    outline: none;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color-scheme: dark;
+    accent-color: var(--accent-2);
+    transition: color .15s, background .15s, border-color .15s;
+  }
+  .filter-select:hover { color: #fff; border-color: rgba(255,255,255,0.32); }
+  .filter-select option {
+    background: var(--results-bg);
+    color: #fff;
+  }
+  .filter-select option:checked { background: var(--accent-2); color: var(--on-accent); }
+
+  .reset-filters-btn {
+    flex: none;
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 50%;
+    color: rgba(255,255,255,0.75);
+    cursor: pointer;
+    transition: color .15s, background .15s, border-color .15s, transform .15s;
+  }
+  .reset-filters-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .reset-filters-btn:hover { color: #fff; border-color: rgba(255,255,255,0.32); background: rgba(255,255,255,0.16); }
+  .reset-filters-btn:active { transform: rotate(-70deg); }
 
   .search-box {
     margin-left: auto;
@@ -166,8 +206,8 @@
     border: 1px solid rgba(255,255,255,0.18);
     border-radius: 20px;
     padding: 0 12px;
-    min-width: 180px;
-    flex: 1;
+    min-width: 80px;
+    flex: 2 1 0;
     max-width: 420px;
   }
   .search-box svg { width: 15px; height: 15px; fill: none; stroke: rgba(255,255,255,0.6); stroke-width: 2.2; stroke-linecap: round; flex: none; }
@@ -376,6 +416,16 @@
   }
   .tile-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
   .tile-tags .tag { background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.4); color: #fff; }
+
+  .tag-type { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.08); }
+  .tag-type.tag-dlc { border-color: #4cc9f0; color: #4cc9f0; }
+  .tag-type.tag-patch { border-color: #ffb703; color: #ffb703; }
+
+  .tag-hype-under { border-color: #8d99ae; color: #8d99ae; }
+  .tag-hype-casual { border-color: #4cc9f0; color: #4cc9f0; }
+  .tag-hype-high { border-color: #ffd60a; color: #ffd60a; }
+  .tag-hype-critical { border-color: #ff7b00; color: #ff7b00; }
+  .tag-hype-terminal { border-color: #ff3366; color: #ff3366; }
 
   .actions { flex-shrink: 0; display: flex; gap: 2px; }
   .del, .edit {
@@ -606,7 +656,7 @@
     opacity: 0.75;
     margin-bottom: 7px;
   }
-  .field input {
+  .field input, .field select {
     width: 100%;
     padding: 12px 14px;
     border-radius: 11px;
@@ -617,8 +667,14 @@
     outline: none;
     transition: border .15s, background .15s;
   }
-  .field input:focus { border-color: var(--accent-2); background: rgba(255,255,255,0.16); }
+  .field input:focus, .field select:focus { border-color: var(--accent-2); background: rgba(255,255,255,0.16); }
   .field input::placeholder { color: rgba(255,255,255,0.45); }
+  .field select { color-scheme: dark; accent-color: var(--accent-2); }
+  .field select option {
+    background: var(--results-bg);
+    color: #fff;
+  }
+  .field select option:checked { background: var(--accent-2); color: var(--on-accent); }
   .field input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; }
   .field input#gDate:disabled { opacity: 0.4; }
   .chk-row { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 10px; }
@@ -907,11 +963,29 @@
     </header>
 
     <div class="filter-row" id="filterToggle">
-      <button class="filter-btn" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="none">No Status</button>
-      <button class="filter-btn" data-filter="ready">Ready</button>
-      <button class="filter-btn" data-filter="prequel">Prequel</button>
-      <button class="filter-btn" data-filter="queued">Queued</button>
+      <select class="filter-select" id="statusFilter" title="Filter by status">
+        <option value="all">All statuses</option>
+        <option value="none">No Status</option>
+        <option value="ready">Ready</option>
+        <option value="prequel">Prequel</option>
+        <option value="queued">Queued</option>
+      </select>
+      <select class="filter-select" id="typeFilter" title="Filter by type">
+        <option value="all">All types</option>
+        <option value="none">No Type</option>
+        <option value="game">Game</option>
+        <option value="dlc">DLC</option>
+        <option value="patch">Patch</option>
+      </select>
+      <select class="filter-select" id="hypeFilter" title="Filter by hype">
+        <option value="all">All hype</option>
+        <option value="none">No Hype</option>
+        <option value="under">Under the Radar</option>
+        <option value="casual">Casual Interest</option>
+        <option value="high">High Expectation</option>
+        <option value="critical">Critical Mass</option>
+        <option value="terminal">Terminal Hype</option>
+      </select>
       <div class="search-box">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         <input type="text" id="searchInput" placeholder="Search games…" autocomplete="off">
@@ -919,6 +993,9 @@
           <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
       </div>
+      <button type="button" class="reset-filters-btn" id="resetFiltersBtn" title="Reset all filters and search">
+        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 2.6-6.3M3 4v5h5"/></svg>
+      </button>
     </div>
 
     <div class="list" id="list"></div>
@@ -963,6 +1040,26 @@
         </div>
       </div>
       <div class="field">
+        <label>Type</label>
+        <div class="chk-row">
+          <label class="chk">
+            <input type="radio" name="gType" id="gTypeGame" value="game">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Game</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="gType" id="gTypeDlc" value="dlc">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>DLC</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="gType" id="gTypePatch" value="patch">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Patch</span>
+          </label>
+        </div>
+      </div>
+      <div class="field">
         <label>Status</label>
         <div class="chk-row">
           <label class="chk">
@@ -981,6 +1078,17 @@
             <span>Queued</span>
           </label>
         </div>
+      </div>
+      <div class="field">
+        <label>Hype</label>
+        <select id="gHype">
+          <option value="">No hype set</option>
+          <option value="under">Under the Radar</option>
+          <option value="casual">Casual Interest</option>
+          <option value="high">High Expectation</option>
+          <option value="critical">Critical Mass</option>
+          <option value="terminal">Terminal Hype</option>
+        </select>
       </div>
       <div class="err" id="formErr"></div>
       <div class="modal-actions">
@@ -1023,11 +1131,24 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.5.0 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.6.0 <span class="cl-current">current</span></div>
             <ul>
-              <li>A side jump-to navigation appears on wider screens, linking to each month, "Out now", and "Coming soon".</li>
               <li>The side navigation now sits closer to the content with section icons, and hides automatically when there isn't enough room.</li>
               <li>Added a "Top" shortcut in the side navigation to jump back to the top of the page.</li>
+              <li>Games can now be tagged as Game, DLC, or Patch, shown as a badge on each entry.</li>
+              <li>Added a Hype level (Under the Radar to Terminal Hype) you can set per game, shown as a colour-coded badge.</li>
+              <li>Status, Type, and Hype filters are now compact dropdowns so they fit alongside search on one line.</li>
+              <li>The filter dropdowns now match the selected theme's colours, and a reset button clears all filters and search at once.</li>
+              <li>Added "No Type" and "No Hype" options to their respective filters.</li>
+              <li>The Type field can now be left unset (like Status), so "No Type" actually matches untagged games.</li>
+              <li>The Hype dropdown in the add/edit form now matches the selected theme's colours.</li>
+              <li>Widened the list view for more breathing room.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.5.0</div>
+            <ul>
+              <li>A side jump-to navigation appears on wider screens, linking to each month, "Out now", and "Coming soon".</li>
             </ul>
           </div>
           <div class="cl-entry">
@@ -1132,13 +1253,31 @@
   const gDate = document.getElementById('gDate');
   const gTba = document.getElementById('gTba');
   const statusRadios = [...document.querySelectorAll('input[name="gStatus"]')];
+  const typeRadios = [...document.querySelectorAll('input[name="gType"]')];
+  const gHype = document.getElementById('gHype');
 
-  // allow clicking the already-selected status radio to clear it (no status)
+  function getType() {
+    const sel = typeRadios.find(r => r.checked);
+    return sel ? sel.value : null;
+  }
+  function setType(value) {
+    typeRadios.forEach(r => { r.checked = r.value === value; });
+  }
+
+  // allow clicking the already-selected status/type radio to clear it (no status / no type)
   // note: clicking a <label> only forwards a synthetic "click" to its nested
   // <input> — "mousedown" fires on the label itself, so listen there instead.
   statusRadios.forEach(r => {
     r.closest('.chk').addEventListener('mousedown', () => {
       statusRadios.forEach(x => { x.dataset.wasChecked = x.checked ? 'true' : 'false'; });
+    });
+    r.addEventListener('click', () => {
+      if (r.dataset.wasChecked === 'true') r.checked = false;
+    });
+  });
+  typeRadios.forEach(r => {
+    r.closest('.chk').addEventListener('mousedown', () => {
+      typeRadios.forEach(x => { x.dataset.wasChecked = x.checked ? 'true' : 'false'; });
     });
     r.addEventListener('click', () => {
       if (r.dataset.wasChecked === 'true') r.checked = false;
@@ -1213,10 +1352,17 @@
   const FILTER_KEY = 'nexgame.filter';
   const FILTERS = ['all', 'none', 'ready', 'prequel', 'queued'];
   let filterMode = FILTERS.includes(localStorage.getItem(FILTER_KEY)) ? localStorage.getItem(FILTER_KEY) : 'all';
+  const TYPE_FILTER_KEY = 'nexgame.typeFilter';
+  const TYPE_FILTERS = ['all', 'none', 'game', 'dlc', 'patch'];
+  let typeFilterMode = TYPE_FILTERS.includes(localStorage.getItem(TYPE_FILTER_KEY)) ? localStorage.getItem(TYPE_FILTER_KEY) : 'all';
+  const HYPE_FILTER_KEY = 'nexgame.hypeFilter';
+  const HYPE_FILTERS = ['all', 'none', 'under', 'casual', 'high', 'critical', 'terminal'];
+  let hypeFilterMode = HYPE_FILTERS.includes(localStorage.getItem(HYPE_FILTER_KEY)) ? localStorage.getItem(HYPE_FILTER_KEY) : 'all';
   function matchesFilter(g) {
-    if (filterMode === 'all') return true;
-    if (filterMode === 'none') return !g.status;
-    return g.status === filterMode;
+    if (filterMode === 'none' ? !!g.status : (filterMode !== 'all' && g.status !== filterMode)) return false;
+    if (typeFilterMode === 'none' ? !!g.type : (typeFilterMode !== 'all' && g.type !== typeFilterMode)) return false;
+    if (hypeFilterMode === 'none' ? !!g.hype : (hypeFilterMode !== 'all' && g.hype !== hypeFilterMode)) return false;
+    return true;
   }
 
   let searchQuery = '';
@@ -1250,8 +1396,9 @@
       b.classList.toggle('active', b.dataset.view === viewMode));
     groupToggle.classList.toggle('active', groupByMonth);
     sortToggle.classList.toggle('active', sortAlpha);
-    [...filterToggle.children].forEach(b =>
-      b.classList.toggle('active', b.dataset.filter === filterMode));
+    document.getElementById('statusFilter').value = filterMode;
+    document.getElementById('typeFilter').value = typeFilterMode;
+    document.getElementById('hypeFilter').value = hypeFilterMode;
 
     if (!games.length) {
       list.className = 'list';
@@ -1374,11 +1521,23 @@
   });
 
   const STATUS_LABEL = { ready: 'Ready', prequel: 'Prequel', queued: 'Queued' };
+  const TYPE_LABEL = { dlc: 'DLC', patch: 'Patch' };
+  const HYPE_LABEL = {
+    under: 'Under the Radar',
+    casual: 'Casual Interest',
+    high: 'High Expectation',
+    critical: 'Critical Mass',
+    terminal: 'Terminal Hype'
+  };
 
   // small status badge: ready / prequel / queued
   function tagsHTML(g) {
     const label = STATUS_LABEL[g.status];
-    return label ? `<span class="tag">${label}</span>` : '';
+    const typeLabel = TYPE_LABEL[g.type];
+    const hypeLabel = HYPE_LABEL[g.hype];
+    return (typeLabel ? `<span class="tag tag-type tag-${g.type}">${typeLabel}</span>` : '')
+      + (label ? `<span class="tag">${label}</span>` : '')
+      + (hypeLabel ? `<span class="tag tag-hype tag-hype-${g.hype}">${hypeLabel}</span>` : '');
   }
 
   function cardHTML(g) {
@@ -1519,6 +1678,8 @@
     gTba.checked = !!(game && game.tba);
     gDate.disabled = gTba.checked;
     setStatus(game ? game.status : null);
+    setType(game ? game.type : null);
+    gHype.value = game && game.hype ? game.hype : '';
     gImageUrl.value = game && game.image ? game.image : '';
     setImage(game ? game.image : null);
 
@@ -1569,6 +1730,8 @@
       date: tba ? null : date,
       tba,
       status: getStatus(),
+      type: getType(),
+      hype: gHype.value || null,
       color: pickedImage ? null : pickedColor,
       image: pickedImage || null
     };
@@ -1781,16 +1944,36 @@
     document.getElementById(btn.dataset.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
-  filterToggle.addEventListener('click', e => {
-    const btn = e.target.closest('.filter-btn');
-    if (!btn || btn.dataset.filter === filterMode) return;
-    filterMode = btn.dataset.filter;
+  document.getElementById('statusFilter').addEventListener('change', e => {
+    filterMode = e.target.value;
     localStorage.setItem(FILTER_KEY, filterMode);
+    render();
+  });
+  document.getElementById('typeFilter').addEventListener('change', e => {
+    typeFilterMode = e.target.value;
+    localStorage.setItem(TYPE_FILTER_KEY, typeFilterMode);
+    render();
+  });
+  document.getElementById('hypeFilter').addEventListener('change', e => {
+    hypeFilterMode = e.target.value;
+    localStorage.setItem(HYPE_FILTER_KEY, hypeFilterMode);
+    render();
+  });
+  document.getElementById('resetFiltersBtn').addEventListener('click', () => {
+    filterMode = 'all';
+    typeFilterMode = 'all';
+    hypeFilterMode = 'all';
+    localStorage.setItem(FILTER_KEY, filterMode);
+    localStorage.setItem(TYPE_FILTER_KEY, typeFilterMode);
+    localStorage.setItem(HYPE_FILTER_KEY, hypeFilterMode);
+    searchQuery = '';
+    searchInput.value = '';
+    searchClear.hidden = true;
     render();
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.5.0';
+  const APP_VERSION = 'Alpha 0.6.0';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
@@ -1930,6 +2113,8 @@
             tba: !!g.tba,
             status: STATUS_LABEL[g.status] ? g.status
               : (g.prequelPlayed ? 'prequel' : (g.queued ? 'queued' : null)),
+            type: ['game', 'dlc', 'patch'].includes(g.type) ? g.type : null,
+            hype: HYPE_LABEL[g.hype] ? g.hype : null,
             color: g.color || null,
             image: g.image || null
           }));
