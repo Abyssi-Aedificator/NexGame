@@ -870,7 +870,7 @@
   @media (min-width: 1040px) {
     .side-nav { display: flex; }
   }
-  .side-nav.nav-cramped { display: none; }
+  .side-nav.nav-cramped, .side-nav.nav-empty { display: none; }
   .side-nav button {
     display: flex;
     align-items: center;
@@ -886,6 +886,17 @@
     white-space: nowrap;
     text-align: left;
     transition: background .15s, color .15s, border-color .15s, transform .15s;
+  }
+  .side-nav .sn-label { flex: 1; }
+  .side-nav .sn-count {
+    flex: none;
+    font-size: 0.66rem;
+    font-weight: 700;
+    opacity: 0.7;
+    background: rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 1px 6px;
+    margin-left: 4px;
   }
   .side-nav button svg {
     width: 14px; height: 14px;
@@ -907,6 +918,76 @@
   .side-nav button.sn-now:hover { background: color-mix(in srgb, var(--accent-2) 18%, transparent); }
   .side-nav button.sn-soon { color: var(--accent-2); opacity: 0.85; }
   .side-nav button.sn-soon:hover { background: color-mix(in srgb, var(--accent-2) 18%, transparent); }
+
+  .stats-panel {
+    position: fixed;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+    width: 220px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    transition: right .2s ease;
+  }
+  @media (min-width: 1340px) {
+    .stats-panel { display: flex; }
+  }
+  .stats-panel.stats-cramped, .stats-panel.stats-empty { display: none; }
+  .stats-panel .stat-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stats-panel .stat-hero .num {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .stats-panel .stat-hero .lbl {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    opacity: 0.7;
+  }
+  .stats-panel .stat-group { display: flex; flex-direction: column; gap: 6px; }
+  .stats-panel .stat-group-title {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    opacity: 0.55;
+    font-weight: 700;
+  }
+  .stats-panel .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+  }
+  .stats-panel .stat-row .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex: none;
+    background: var(--accent-2);
+  }
+  .stats-panel .stat-row .stat-name { flex: 1; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stats-panel .stat-row .stat-count { font-weight: 700; opacity: 0.95; }
+  .stats-panel hr { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 0; }
+  .stats-panel .stat-next { display: flex; flex-direction: column; gap: 2px; }
+  .stats-panel .stat-next-name {
+    font-size: 0.84rem; font-weight: 700;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .stats-panel .stat-next-days { font-size: 0.74rem; opacity: 0.7; }
   .update-banner button {
     border: none;
     border-radius: 10px;
@@ -937,6 +1018,7 @@
   </div>
 
   <nav class="side-nav" id="sideNav"></nav>
+  <aside class="stats-panel" id="statsPanel"></aside>
 
   <div class="wrap" id="wrap">
     <header class="top">
@@ -1139,7 +1221,17 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.6.2 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.7.0 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Added a stats panel on wider screens showing totals, next release, and breakdowns by Status, Type, and Hype.</li>
+              <li>The side navigation now shows a count next to each month, "Out now", and "Coming soon".</li>
+              <li>Fixed the side navigation showing as an empty box when no games match the current filters.</li>
+              <li>Fixed the stats panel showing as an empty box when there are no games tracked.</li>
+              <li>The stats panel now hides any category with a count of 0, instead of cluttering the list with zeros.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.6.2</div>
             <ul>
               <li>Added a new game Type: EAR.</li>
               <li>Replaced the 🎉 emoji on "Today!" releases with a theme-coloured sparkle icon.</li>
@@ -1423,6 +1515,7 @@
     document.getElementById('statusFilter').value = filterMode;
     document.getElementById('typeFilter').value = typeFilterMode;
     document.getElementById('hypeFilter').value = hypeFilterMode;
+    renderStatsPanel();
 
     if (!games.length) {
       list.className = 'list';
@@ -1465,9 +1558,9 @@
     const itemFn = viewMode === 'grid' ? tileHTML : cardHTML;
     const navSections = [];
     let secId = 0;
-    function sepHTML(label, navLabel, kind) {
+    function sepHTML(label, navLabel, kind, count) {
       const id = 'sec-' + (secId++);
-      navSections.push({ id, label: navLabel, kind });
+      navSections.push({ id, label: navLabel, kind, count });
       return `<div class="month-sep" id="${id}"><span>${esc(label)}</span></div>`;
     }
 
@@ -1490,15 +1583,15 @@
       });
       if (sortAlpha) buckets.forEach(b => b.sort(byName));
       html = buckets.map(b =>
-        sepHTML(monthLabel(b[0].date), shortMonthLabel(b[0].date), 'month') +
+        sepHTML(monthLabel(b[0].date), shortMonthLabel(b[0].date), 'month', b.length) +
         b.map(itemFn).join('')
       ).join('');
     }
     if (released.length) {
-      html += sepHTML('Out now', 'Out now', 'now') + released.map(itemFn).join('');
+      html += sepHTML('Out now', 'Out now', 'now', released.length) + released.map(itemFn).join('');
     }
     if (tbaGames.length) {
-      html += sepHTML('Coming soon', 'Soon', 'soon') + tbaGames.map(itemFn).join('');
+      html += sepHTML('Coming soon', 'Soon', 'soon', tbaGames.length) + tbaGames.map(itemFn).join('');
     }
     list.innerHTML = html;
     if (navSections.length) navSections.unshift({ id: 'top', label: 'Top', kind: 'top' });
@@ -1519,8 +1612,9 @@
 
   function renderSideNav(sections) {
     const nav = document.getElementById('sideNav');
+    nav.classList.toggle('nav-empty', !sections.length);
     nav.innerHTML = sections.map(s =>
-      `<button type="button" class="sn-${s.kind}" data-target="${s.id}">${NAV_ICONS[s.kind]}<span>${esc(s.label)}</span></button>`
+      `<button type="button" class="sn-${s.kind}" data-target="${s.id}">${NAV_ICONS[s.kind]}<span class="sn-label">${esc(s.label)}</span>${s.count != null ? `<span class="sn-count">${s.count}</span>` : ''}</button>`
     ).join('');
     positionSideNav();
     requestAnimationFrame(positionSideNav);
@@ -1553,6 +1647,92 @@
     critical: 'Critical Mass',
     terminal: 'Terminal Hype'
   };
+  const TYPE_COLOR = { dlc: '#4cc9f0', patch: '#ffb703', ear: '#06d6a0' };
+  const HYPE_COLOR = { under: '#8d99ae', casual: '#4cc9f0', high: '#ffd60a', critical: '#ff7b00', terminal: '#ff3366' };
+
+  function statRow(name, count, color) {
+    if (!count) return '';
+    return `<div class="stat-row"><span class="dot"${color ? ` style="background:${color}"` : ''}></span><span class="stat-name">${esc(name)}</span><span class="stat-count">${count}</span></div>`;
+  }
+  // wraps a group of stat rows; omits the whole group (title + divider) if every row was empty
+  function statGroup(title, rows) {
+    const html = rows.filter(Boolean).join('');
+    if (!html) return '';
+    return `<hr><div class="stat-group"><div class="stat-group-title">${esc(title)}</div>${html}</div>`;
+  }
+
+  function renderStatsPanel() {
+    const panel = document.getElementById('statsPanel');
+    panel.classList.toggle('stats-empty', !games.length);
+    if (!games.length) { panel.innerHTML = ''; return; }
+
+    const dated = games.filter(g => !g.tba);
+    const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
+    const outNow = dated.filter(g => daysUntil(g.date) < 0);
+    const soon = games.filter(g => g.tba);
+    const next = upcoming.sort((a, b) => daysUntil(a.date) - daysUntil(b.date))[0];
+
+    const statusCounts = { ready: 0, prequel: 0, queued: 0, none: 0 };
+    const typeCounts = { dlc: 0, patch: 0, ear: 0, none: 0 };
+    const hypeCounts = { under: 0, casual: 0, high: 0, critical: 0, terminal: 0, none: 0 };
+    games.forEach(g => {
+      statusCounts[g.status && STATUS_LABEL[g.status] ? g.status : 'none']++;
+      typeCounts[g.type && TYPE_LABEL[g.type] ? g.type : 'none']++;
+      hypeCounts[g.hype && HYPE_LABEL[g.hype] ? g.hype : 'none']++;
+    });
+
+    panel.innerHTML = `
+      <div class="stat-hero">
+        <div class="num">${games.length}</div>
+        <div class="lbl">Games tracked</div>
+      </div>
+      ${next ? `<div class="stat-next"><div class="stat-group-title">Next up</div><div class="stat-next-name">${esc(next.name)}</div><div class="stat-next-days">${daysUntil(next.date)} day${daysUntil(next.date) === 1 ? '' : 's'}</div></div>` : ''}
+      ${statGroup('Overview', [
+        statRow('Upcoming', upcoming.length),
+        statRow('Out now', outNow.length),
+        statRow('Coming soon', soon.length)
+      ])}
+      ${statGroup('Status', [
+        statRow('Ready', statusCounts.ready),
+        statRow('Prequel', statusCounts.prequel),
+        statRow('Queued', statusCounts.queued),
+        statRow('No status', statusCounts.none)
+      ])}
+      ${statGroup('Type', [
+        statRow('DLC', typeCounts.dlc, TYPE_COLOR.dlc),
+        statRow('Patch', typeCounts.patch, TYPE_COLOR.patch),
+        statRow('EAR', typeCounts.ear, TYPE_COLOR.ear),
+        statRow('Game', typeCounts.none)
+      ])}
+      ${statGroup('Hype', [
+        statRow('Under the Radar', hypeCounts.under, HYPE_COLOR.under),
+        statRow('Casual Interest', hypeCounts.casual, HYPE_COLOR.casual),
+        statRow('High Expectation', hypeCounts.high, HYPE_COLOR.high),
+        statRow('Critical Mass', hypeCounts.critical, HYPE_COLOR.critical),
+        statRow('Terminal Hype', hypeCounts.terminal, HYPE_COLOR.terminal),
+        statRow('No hype', hypeCounts.none)
+      ])}`;
+    positionStatsPanel();
+    requestAnimationFrame(positionStatsPanel);
+  }
+
+  function positionStatsPanel() {
+    const panel = document.getElementById('statsPanel');
+    if (!panel.innerHTML.trim()) return;
+    const wrapRect = document.getElementById('wrap').getBoundingClientRect();
+    const panelWidth = panel.offsetWidth || 220;
+    const space = window.innerWidth - wrapRect.right;
+    if (space < panelWidth + 34) {
+      panel.classList.add('stats-cramped');
+      return;
+    }
+    panel.classList.remove('stats-cramped');
+    panel.style.right = (space - panelWidth - 22) + 'px';
+  }
+  window.addEventListener('resize', positionStatsPanel);
+  document.getElementById('wrap').addEventListener('transitionend', e => {
+    if (e.propertyName === 'max-width') positionStatsPanel();
+  });
 
   // small status badge: ready / prequel / queued
   function tagList(g) {
@@ -2009,7 +2189,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.6.2';
+  const APP_VERSION = 'Alpha 0.7.0';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
