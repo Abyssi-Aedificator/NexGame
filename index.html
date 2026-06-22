@@ -414,8 +414,9 @@
     opacity: 1;
     white-space: nowrap;
   }
-  .tile-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
-  .tile-tags .tag { background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.4); color: #fff; }
+  .tile-tags { display: flex; gap: 6px; flex-wrap: nowrap; margin-top: 5px; overflow: hidden; }
+  .tile-tags .tag { background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.4); color: #fff; flex-shrink: 0; }
+  .tile-tags .tag-more { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3); }
 
   .tag-type { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.08); }
   .tag-type.tag-dlc { border-color: #4cc9f0; color: #4cc9f0; }
@@ -963,22 +964,21 @@
     </header>
 
     <div class="filter-row" id="filterToggle">
+      <select class="filter-select" id="typeFilter" title="Filter by type">
+        <option value="all">All Types</option>
+        <option value="none">No Type</option>
+        <option value="dlc">DLC</option>
+        <option value="patch">Patch</option>
+      </select>
       <select class="filter-select" id="statusFilter" title="Filter by status">
-        <option value="all">All statuses</option>
+        <option value="all">All Status</option>
         <option value="none">No Status</option>
         <option value="ready">Ready</option>
         <option value="prequel">Prequel</option>
         <option value="queued">Queued</option>
       </select>
-      <select class="filter-select" id="typeFilter" title="Filter by type">
-        <option value="all">All types</option>
-        <option value="none">No Type</option>
-        <option value="game">Game</option>
-        <option value="dlc">DLC</option>
-        <option value="patch">Patch</option>
-      </select>
       <select class="filter-select" id="hypeFilter" title="Filter by hype">
-        <option value="all">All hype</option>
+        <option value="all">All Hype</option>
         <option value="none">No Hype</option>
         <option value="under">Under the Radar</option>
         <option value="casual">Casual Interest</option>
@@ -1042,11 +1042,6 @@
       <div class="field">
         <label>Type</label>
         <div class="chk-row">
-          <label class="chk">
-            <input type="radio" name="gType" id="gTypeGame" value="game">
-            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
-            <span>Game</span>
-          </label>
           <label class="chk">
             <input type="radio" name="gType" id="gTypeDlc" value="dlc">
             <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
@@ -1131,7 +1126,16 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.6.0 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.6.1 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Removed the "Game" option from Type — leaving Type unset now means the entry is just a regular game.</li>
+              <li>Reordered the filter dropdowns to Type, Status, Hype, matching the add/edit form.</li>
+              <li>Fixed badges overlapping the countdown number in grid view — only 2 badges show, with a "+N" chip for the rest.</li>
+              <li>Standardized filter dropdown capitalization to "All Types", "All Status", "All Hype".</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.6.0</div>
             <ul>
               <li>The side navigation now sits closer to the content with section icons, and hides automatically when there isn't enough room.</li>
               <li>Added a "Top" shortcut in the side navigation to jump back to the top of the page.</li>
@@ -1353,7 +1357,7 @@
   const FILTERS = ['all', 'none', 'ready', 'prequel', 'queued'];
   let filterMode = FILTERS.includes(localStorage.getItem(FILTER_KEY)) ? localStorage.getItem(FILTER_KEY) : 'all';
   const TYPE_FILTER_KEY = 'nexgame.typeFilter';
-  const TYPE_FILTERS = ['all', 'none', 'game', 'dlc', 'patch'];
+  const TYPE_FILTERS = ['all', 'none', 'dlc', 'patch'];
   let typeFilterMode = TYPE_FILTERS.includes(localStorage.getItem(TYPE_FILTER_KEY)) ? localStorage.getItem(TYPE_FILTER_KEY) : 'all';
   const HYPE_FILTER_KEY = 'nexgame.hypeFilter';
   const HYPE_FILTERS = ['all', 'none', 'under', 'casual', 'high', 'critical', 'terminal'];
@@ -1531,13 +1535,25 @@
   };
 
   // small status badge: ready / prequel / queued
-  function tagsHTML(g) {
+  function tagList(g) {
     const label = STATUS_LABEL[g.status];
     const typeLabel = TYPE_LABEL[g.type];
     const hypeLabel = HYPE_LABEL[g.hype];
-    return (typeLabel ? `<span class="tag tag-type tag-${g.type}">${typeLabel}</span>` : '')
-      + (label ? `<span class="tag">${label}</span>` : '')
-      + (hypeLabel ? `<span class="tag tag-hype tag-hype-${g.hype}">${hypeLabel}</span>` : '');
+    const tags = [];
+    if (typeLabel) tags.push(`<span class="tag tag-type tag-${g.type}">${typeLabel}</span>`);
+    if (label) tags.push(`<span class="tag">${label}</span>`);
+    if (hypeLabel) tags.push(`<span class="tag tag-hype tag-hype-${g.hype}">${hypeLabel}</span>`);
+    return tags;
+  }
+  function tagsHTML(g) {
+    return tagList(g).join('');
+  }
+  // grid tiles are narrow — cap visible badges and roll the rest into a "+N" chip
+  function tileTagsHTML(g) {
+    const tags = tagList(g);
+    const shown = tags.slice(0, 2);
+    const extra = tags.length - shown.length;
+    return shown.join('') + (extra > 0 ? `<span class="tag tag-more">+${extra}</span>` : '');
   }
 
   function cardHTML(g) {
@@ -1582,7 +1598,7 @@
   }
 
   function tileHTML(g) {
-    const tags = tagsHTML(g);
+    const tags = tileTagsHTML(g);
     const tagsRow = tags ? `<div class="tile-tags">${tags}</div>` : '';
     if (g.tba) {
       return `
@@ -1973,7 +1989,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.6.0';
+  const APP_VERSION = 'Alpha 0.6.1';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
