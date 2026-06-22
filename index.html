@@ -385,6 +385,12 @@
     margin-top: 4px;
   }
   .countdown.out .num { font-size: 1.05rem; color: var(--accent-2); }
+  .sparkle-lbl { display: flex; justify-content: center; }
+  .sparkle-lbl svg {
+    width: 14px; height: 14px;
+    fill: none; stroke: var(--accent-2);
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  }
 
   .info { flex: 1; min-width: 0; }
   .info h2 {
@@ -421,6 +427,7 @@
   .tag-type { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.08); }
   .tag-type.tag-dlc { border-color: #4cc9f0; color: #4cc9f0; }
   .tag-type.tag-patch { border-color: #ffb703; color: #ffb703; }
+  .tag-type.tag-ear { border-color: #06d6a0; color: #06d6a0; }
 
   .tag-hype-under { border-color: #8d99ae; color: #8d99ae; }
   .tag-hype-casual { border-color: #4cc9f0; color: #4cc9f0; }
@@ -969,6 +976,7 @@
         <option value="none">No Type</option>
         <option value="dlc">DLC</option>
         <option value="patch">Patch</option>
+        <option value="ear">EAR</option>
       </select>
       <select class="filter-select" id="statusFilter" title="Filter by status">
         <option value="all">All Status</option>
@@ -1052,6 +1060,11 @@
             <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
             <span>Patch</span>
           </label>
+          <label class="chk">
+            <input type="radio" name="gType" id="gTypeEar" value="ear">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>EAR</span>
+          </label>
         </div>
       </div>
       <div class="field">
@@ -1126,7 +1139,14 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.6.1 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.6.2 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Added a new game Type: EAR.</li>
+              <li>Replaced the 🎉 emoji on "Today!" releases with a theme-coloured sparkle icon.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.6.1</div>
             <ul>
               <li>Removed the "Game" option from Type — leaving Type unset now means the entry is just a regular game.</li>
               <li>Reordered the filter dropdowns to Type, Status, Hype, matching the add/edit form.</li>
@@ -1357,7 +1377,7 @@
   const FILTERS = ['all', 'none', 'ready', 'prequel', 'queued'];
   let filterMode = FILTERS.includes(localStorage.getItem(FILTER_KEY)) ? localStorage.getItem(FILTER_KEY) : 'all';
   const TYPE_FILTER_KEY = 'nexgame.typeFilter';
-  const TYPE_FILTERS = ['all', 'none', 'dlc', 'patch'];
+  const TYPE_FILTERS = ['all', 'none', 'dlc', 'patch', 'ear'];
   let typeFilterMode = TYPE_FILTERS.includes(localStorage.getItem(TYPE_FILTER_KEY)) ? localStorage.getItem(TYPE_FILTER_KEY) : 'all';
   const HYPE_FILTER_KEY = 'nexgame.hypeFilter';
   const HYPE_FILTERS = ['all', 'none', 'under', 'casual', 'high', 'critical', 'terminal'];
@@ -1525,7 +1545,7 @@
   });
 
   const STATUS_LABEL = { ready: 'Ready', prequel: 'Prequel', queued: 'Queued' };
-  const TYPE_LABEL = { dlc: 'DLC', patch: 'Patch' };
+  const TYPE_LABEL = { dlc: 'DLC', patch: 'Patch', ear: 'EAR' };
   const HYPE_LABEL = {
     under: 'Under the Radar',
     casual: 'Casual Interest',
@@ -1578,7 +1598,7 @@
     if (d > 0) {
       cd = `<div class="countdown"><div class="num">${d}</div><div class="lbl">${d === 1 ? 'day' : 'days'}</div></div>`;
     } else if (d === 0) {
-      cd = `<div class="countdown out"><div class="num">Today!</div><div class="lbl">🎉</div></div>`;
+      cd = `<div class="countdown out"><div class="num">Today!</div><div class="lbl sparkle-lbl"><svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2 2M15.7 15.7l2 2M6.3 17.7l2-2M15.7 8.3l2-2"/></svg></div></div>`;
     } else {
       cd = `<div class="countdown out"><div class="num">Out now</div><div class="lbl">${-d}d ago</div></div>`;
     }
@@ -1989,7 +2009,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.6.1';
+  const APP_VERSION = 'Alpha 0.6.2';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
@@ -2129,7 +2149,7 @@
             tba: !!g.tba,
             status: STATUS_LABEL[g.status] ? g.status
               : (g.prequelPlayed ? 'prequel' : (g.queued ? 'queued' : null)),
-            type: ['game', 'dlc', 'patch'].includes(g.type) ? g.type : null,
+            type: ['dlc', 'patch', 'ear'].includes(g.type) ? g.type : null,
             hype: HYPE_LABEL[g.hype] ? g.hype : null,
             color: g.color || null,
             image: g.image || null
