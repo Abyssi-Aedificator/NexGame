@@ -434,7 +434,7 @@
   .tag-hype-terminal { border-color: #ff3366; color: #ff3366; }
 
   .actions { flex-shrink: 0; display: flex; gap: 2px; }
-  .del, .edit {
+  .del, .edit, .archive {
     background: none; border: none;
     color: rgba(255,255,255,0.55);
     cursor: pointer;
@@ -444,7 +444,8 @@
   }
   .del:hover { color: #ffb3c8; background: rgba(255,255,255,0.1); }
   .edit:hover { color: #b9e6ff; background: rgba(255,255,255,0.1); }
-  .del svg, .edit svg { width: 18px; height: 18px; }
+  .archive:hover { color: #c8b9ff; background: rgba(255,255,255,0.1); }
+  .del svg, .edit svg, .archive svg { width: 18px; height: 18px; }
 
   .empty {
     text-align: center;
@@ -584,12 +585,23 @@
   .results .note { padding: 13px 14px; font-size: 0.84rem; opacity: 0.75; }
 
   .import-modal { max-width: 680px; }
-  .import-list {
+  .archived-modal { max-width: 680px; }
+  .archived-list, .import-list {
     max-height: 50vh;
     overflow-y: auto;
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.15);
   }
+  .archived-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .archived-name { flex: 1; font-size: 0.88rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .archived-restore { background: none; border: none; color: #a0d8a0; cursor: pointer; padding: 6px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; transition: all .15s; }
+  .archived-restore:hover { background: rgba(255,255,255,0.1); color: #d0ffb0; }
   .imp-row {
     display: flex;
     align-items: center;
@@ -829,6 +841,25 @@
   .confirm-modal { max-width: 360px; }
 
   .analytics-modal { max-width: 760px; }
+  .an-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .an-filters .filter-select {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.9);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .an-filters .filter-select:hover { background: rgba(255,255,255,0.12); }
+  .an-filters .filter-select:focus { outline: none; border-color: var(--accent-2); box-shadow: 0 0 0 2px rgba(0,0,0,0.2), inset 0 0 0 3px var(--accent-2); }
   .an-section { margin-bottom: 26px; }
   .an-section:last-child { margin-bottom: 0; }
   .an-title {
@@ -1102,6 +1133,9 @@
       <button class="icon-btn settings-open" id="analyticsOpen" title="Analytics">
         <svg viewBox="0 0 24 24"><path d="M4 19V9M11 19V5M18 19v-7"/><path d="M2 19h20"/></svg>
       </button>
+      <button class="icon-btn settings-open" id="archivedOpen" title="Archived">
+        <svg viewBox="0 0 24 24"><path d="M3 8h18M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4"/></svg>
+      </button>
       <button class="group-toggle" id="groupToggle" title="Group by month">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
       </button>
@@ -1304,7 +1338,14 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.9.2 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.10.0 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Added an archiving feature to hide games without deleting them, with a dedicated Archived page to view and restore them.</li>
+              <li>Added Status and Hype filters to the Analytics page to focus insights on specific game categories.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.9.2</div>
             <ul>
               <li>Removed "Casual Interest" and "Critical Mass" from the Hype levels.</li>
             </ul>
@@ -1484,8 +1525,20 @@
     </div>
   </div>
 
+  <div class="overlay" id="archivedOverlay">
+    <div class="modal archived-modal">
+      <h3>Archived games</h3>
+      <div class="archived-list" id="archivedList"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="archivedClose">Close</button>
+      </div>
+    </div>
+  </div>
+
 <script>
   const STORE_KEY = 'nexgame.games.v1';
+  const ARCHIVED_KEY = 'nexgame.archived.v1';
+  let archived = (() => { try { return JSON.parse(localStorage.getItem(ARCHIVED_KEY)) || []; } catch { return []; } })();
   const list = document.getElementById('list');
   const viewToggle = document.getElementById('viewToggle');
   const groupToggle = document.getElementById('groupToggle');
@@ -1603,6 +1656,10 @@
   const HYPE_FILTER_KEY = 'nexgame.hypeFilter';
   const HYPE_FILTERS = ['all', 'none', 'under', 'high', 'terminal'];
   let hypeFilterMode = HYPE_FILTERS.includes(localStorage.getItem(HYPE_FILTER_KEY)) ? localStorage.getItem(HYPE_FILTER_KEY) : 'all';
+  const AN_STATUS_FILTER_KEY = 'nexgame.analyticsStatusFilter';
+  const AN_HYPE_FILTER_KEY = 'nexgame.analyticsHypeFilter';
+  let analyticsStatusFilter = localStorage.getItem(AN_STATUS_FILTER_KEY) || 'all';
+  let analyticsHypeFilter = localStorage.getItem(AN_HYPE_FILTER_KEY) || 'all';
   function matchesFilter(g) {
     if (filterMode === 'none' ? !!g.status : (filterMode !== 'all' && g.status !== filterMode)) return false;
     if (typeFilterMode === 'none' ? !!g.type : (typeFilterMode !== 'all' && g.type !== typeFilterMode)) return false;
@@ -1622,6 +1679,7 @@
 
   const EDIT_SVG = `<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>`;
   const DEL_SVG = `<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>`;
+  const ARCHIVE_SVG = `<svg viewBox="0 0 24 24"><path d="M3 8h18M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4"/></svg>`;
 
   // background inline-style shared by both layouts
   function bgStyle(g) {
@@ -1891,6 +1949,7 @@
           </div>
           <div class="actions">
             <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
+            <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
             <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
           </div>
         </div>`;
@@ -1914,6 +1973,7 @@
         </div>
         <div class="actions">
           <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
+          <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
           <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
         </div>
       </div>`;
@@ -1927,6 +1987,7 @@
         <div class="tile"${bgStyle(g)}>
           <div class="tile-actions">
             <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
+            <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
             <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
           </div>
           <div>
@@ -1946,6 +2007,7 @@
       <div class="tile${d < 0 ? ' released' : ''}"${bgStyle(g)}>
         <div class="tile-actions">
           <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
+          <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
           <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
         </div>
         <div>
@@ -2209,6 +2271,12 @@
       if (g) openModal(g);
       return;
     }
+    const archiveBtn = e.target.closest('.archive');
+    if (archiveBtn) {
+      const g = games.find(x => x.id === archiveBtn.dataset.id);
+      if (g) archiveGame(g);
+      return;
+    }
     const delBtn = e.target.closest('.del');
     if (delBtn) {
       const g = games.find(x => x.id === delBtn.dataset.id);
@@ -2239,6 +2307,29 @@
       danger: true,
       onConfirm: () => { games = games.filter(x => x.id !== g.id); save(); render(); }
     });
+  }
+  function archiveGame(g) {
+    const idx = games.findIndex(x => x.id === g.id);
+    if (idx !== -1) {
+      archived.push(games[idx]);
+      games.splice(idx, 1);
+      saveArchived();
+      save();
+      render();
+    }
+  }
+  function unarchiveGame(g) {
+    const idx = archived.findIndex(x => x.id === g.id);
+    if (idx !== -1) {
+      games.push(archived[idx]);
+      archived.splice(idx, 1);
+      saveArchived();
+      save();
+      render();
+    }
+  }
+  function saveArchived() {
+    localStorage.setItem(ARCHIVED_KEY, JSON.stringify(archived));
   }
   function closeConfirm() {
     confirmOverlay.classList.remove('show');
@@ -2369,7 +2460,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.9.2';
+  const APP_VERSION = 'Alpha 0.10.0';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
@@ -2470,6 +2561,39 @@
   document.getElementById('analyticsClose').addEventListener('click', closeAnalytics);
   analyticsOverlay.addEventListener('click', e => { if (e.target === analyticsOverlay) closeAnalytics(); });
 
+  const archivedOverlay = document.getElementById('archivedOverlay');
+  const archivedList = document.getElementById('archivedList');
+  function renderArchivedList() {
+    if (!archived.length) {
+      archivedList.innerHTML = '<div style="padding: 20px; text-align: center; opacity: 0.6;">No archived games yet.</div>';
+      return;
+    }
+    archivedList.innerHTML = archived.map(g => {
+      const d = daysUntil(g.date);
+      const date = g.tba ? 'Coming soon' : fmtDate(g.date);
+      return `<div class="archived-item">
+        <div class="archived-name">${esc(g.name)}</div>
+        <span style="font-size: 0.78rem; opacity: 0.7;">${date}</span>
+        <button class="archived-restore" data-id="${g.id}">Restore</button>
+      </div>`;
+    }).join('');
+    document.querySelectorAll('.archived-restore').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const g = archived.find(x => x.id === e.target.dataset.id);
+        if (g) unarchiveGame(g);
+        renderArchivedList();
+      });
+    });
+  }
+  function openArchivedPage() {
+    renderArchivedList();
+    archivedOverlay.classList.add('show');
+  }
+  function closeArchivedPage() { archivedOverlay.classList.remove('show'); }
+  document.getElementById('archivedOpen').addEventListener('click', openArchivedPage);
+  document.getElementById('archivedClose').addEventListener('click', closeArchivedPage);
+  archivedOverlay.addEventListener('click', e => { if (e.target === archivedOverlay) closeArchivedPage(); });
+
   // renders a fixed, ordered set of buckets (zero counts included) — for distributions, not category breakdowns
   function anBucketRows(order, labels, counts, colors) {
     const max = Math.max(1, ...order.map(k => counts[k] || 0));
@@ -2505,7 +2629,17 @@
       return;
     }
 
-    const dated = games.filter(g => !g.tba);
+    const filteredGames = games.filter(g => {
+      if (analyticsStatusFilter !== 'all') {
+        if (analyticsStatusFilter === 'none' ? g.status : (g.status !== analyticsStatusFilter)) return false;
+      }
+      if (analyticsHypeFilter !== 'all') {
+        if (analyticsHypeFilter === 'none' ? g.hype : (g.hype !== analyticsHypeFilter)) return false;
+      }
+      return true;
+    });
+
+    const dated = filteredGames.filter(g => !g.tba);
     const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
     const avgLead = upcoming.length
       ? Math.round(upcoming.reduce((s, g) => s + daysUntil(g.date), 0) / upcoming.length)
@@ -2592,6 +2726,23 @@
     }).join('') + '</div>' : '<div class="an-empty">No upcoming dated games yet.</div>';
 
     content.innerHTML = `
+      <div class="an-filters">
+        <select id="anStatusFilter" class="filter-select">
+          <option value="all">All Status</option>
+          <option value="none">No Status</option>
+          <option value="queued">Queued</option>
+          <option value="prequel">Prequel</option>
+          <option value="link">Link</option>
+          <option value="ready">Ready</option>
+        </select>
+        <select id="anHypeFilter" class="filter-select">
+          <option value="all">All Hype</option>
+          <option value="none">No Hype</option>
+          <option value="under">Under the Radar</option>
+          <option value="high">Idealistic Case</option>
+          <option value="terminal">Terminal Hype</option>
+        </select>
+      </div>
       <div class="an-section">
         <div class="an-insights">
           <div class="an-insight"><div class="num">${avgLead != null ? avgLead : '—'}</div><div class="lbl">Avg. days until release</div></div>
@@ -2612,6 +2763,27 @@
         <div class="an-title">Lead time of upcoming releases</div>
         ${anBucketRows(['week', 'month', 'quarter', 'half', 'far'], leadLabels, leadBuckets)}
       </div>`;
+    // Attach filter listeners after rendering
+    setTimeout(() => {
+      const statusSelect = document.getElementById('anStatusFilter');
+      const hypeSelect = document.getElementById('anHypeFilter');
+      if (statusSelect) {
+        statusSelect.value = analyticsStatusFilter;
+        statusSelect.onchange = (e) => {
+          analyticsStatusFilter = e.target.value;
+          localStorage.setItem(AN_STATUS_FILTER_KEY, analyticsStatusFilter);
+          renderAnalytics();
+        };
+      }
+      if (hypeSelect) {
+        hypeSelect.value = analyticsHypeFilter;
+        hypeSelect.onchange = (e) => {
+          analyticsHypeFilter = e.target.value;
+          localStorage.setItem(AN_HYPE_FILTER_KEY, analyticsHypeFilter);
+          renderAnalytics();
+        };
+      }
+    }, 0);
   }
 
   function openSettings() {
@@ -2630,7 +2802,8 @@
       app: 'NexGame',
       version: APP_VERSION,
       exportedAt: new Date().toISOString(),
-      games
+      games,
+      archived
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -2639,7 +2812,8 @@
     a.download = `nexgame-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    restoreNote.textContent = `Backed up ${games.length} game${games.length === 1 ? '' : 's'}.`;
+    const total = games.length + archived.length;
+    restoreNote.textContent = `Backed up ${games.length} active and ${archived.length} archived game${total === 1 ? '' : 's'}.`;
     restoreNote.className = 'set-note ok';
   });
 
@@ -2653,26 +2827,31 @@
         const data = JSON.parse(reader.result);
         const arr = Array.isArray(data) ? data : data.games;
         if (!Array.isArray(arr)) throw new Error('no games array');
-        // keep only well-formed entries, and ensure each has an id
+        const cleanGame = g => ({
+          id: g.id || Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          name: g.name,
+          date: g.tba ? null : g.date,
+          tba: !!g.tba,
+          status: STATUS_LABEL[g.status] ? g.status
+            : (g.prequelPlayed ? 'prequel' : (g.queued ? 'queued' : null)),
+          type: ['dlc', 'patch', 'ear'].includes(g.type) ? g.type : null,
+          hype: HYPE_LABEL[g.hype] ? g.hype : null,
+          color: g.color || null,
+          image: g.image || null
+        });
         const clean = arr
           .filter(g => g && typeof g.name === 'string' && (typeof g.date === 'string' || g.tba))
-          .map(g => ({
-            id: g.id || Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-            name: g.name,
-            date: g.tba ? null : g.date,
-            tba: !!g.tba,
-            status: STATUS_LABEL[g.status] ? g.status
-              : (g.prequelPlayed ? 'prequel' : (g.queued ? 'queued' : null)),
-            type: ['dlc', 'patch', 'ear'].includes(g.type) ? g.type : null,
-            hype: HYPE_LABEL[g.hype] ? g.hype : null,
-            color: g.color || null,
-            image: g.image || null
-          }));
+          .map(cleanGame);
         if (!clean.length) throw new Error('no valid entries');
         games = clean;
+        archived = (data.archived || [])
+          .filter(g => g && typeof g.name === 'string' && (typeof g.date === 'string' || g.tba))
+          .map(cleanGame);
         save();
+        saveArchived();
         render();
-        restoreNote.textContent = `Restored ${clean.length} game${clean.length === 1 ? '' : 's'}.`;
+        const total = clean.length + archived.length;
+        restoreNote.textContent = `Restored ${clean.length} active and ${archived.length} archived game${total === 1 ? '' : 's'}.`;
         restoreNote.className = 'set-note ok';
       } catch {
         restoreNote.textContent = 'Could not read that file — is it a NexGame backup?';
