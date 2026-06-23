@@ -982,12 +982,6 @@
   .stats-panel .stat-row .stat-name { flex: 1; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .stats-panel .stat-row .stat-count { font-weight: 700; opacity: 0.95; }
   .stats-panel hr { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 0; }
-  .stats-panel .stat-next { display: flex; flex-direction: column; gap: 2px; }
-  .stats-panel .stat-next-name {
-    font-size: 0.84rem; font-weight: 700;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .stats-panel .stat-next-days { font-size: 0.74rem; opacity: 0.7; }
   .update-banner button {
     border: none;
     border-radius: 10px;
@@ -1230,7 +1224,13 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.8.0 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.8.1 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Removed the "Next up" section from the stats panel.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.8.0</div>
             <ul>
               <li>Added a "Reset all Hype" button in Settings to clear the Hype level from every tracked game, with a confirmation first.</li>
               <li>Renamed the "High Expectation" Hype level to "Idealistic Case" and changed its colour from yellow to green.</li>
@@ -1686,7 +1686,6 @@
     const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
     const outNow = dated.filter(g => daysUntil(g.date) < 0);
     const soon = games.filter(g => g.tba);
-    const next = upcoming.sort((a, b) => daysUntil(a.date) - daysUntil(b.date))[0];
 
     const statusCounts = { ready: 0, prequel: 0, queued: 0, none: 0 };
     const typeCounts = { dlc: 0, patch: 0, ear: 0, none: 0 };
@@ -1702,7 +1701,6 @@
         <div class="num">${games.length}</div>
         <div class="lbl">Games tracked</div>
       </div>
-      ${next ? `<div class="stat-next"><div class="stat-group-title">Next up</div><div class="stat-next-name">${esc(next.name)}</div><div class="stat-next-days">${daysUntil(next.date)} day${daysUntil(next.date) === 1 ? '' : 's'}</div></div>` : ''}
       ${statGroup('Overview', [
         statRow('Upcoming', upcoming.length),
         statRow('Out now', outNow.length),
@@ -2240,7 +2238,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.8.0';
+  const APP_VERSION = 'Alpha 0.8.1';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
