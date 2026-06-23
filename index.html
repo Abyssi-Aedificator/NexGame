@@ -830,6 +830,78 @@
   .btn-danger { background: #e0345c; color: #fff; }
   .confirm-modal { max-width: 360px; }
 
+  .analytics-modal { max-width: 760px; }
+  .an-section { margin-bottom: 26px; }
+  .an-section:last-child { margin-bottom: 0; }
+  .an-title {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    opacity: 0.75;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+  .an-insights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  .an-insight {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .an-insight .num { font-size: 1.6rem; font-weight: 800; line-height: 1; }
+  .an-insight .lbl { font-size: 0.72rem; opacity: 0.7; margin-top: 4px; }
+  .an-bars { display: flex; flex-direction: column; gap: 10px; }
+  .an-bar-row { display: flex; align-items: center; gap: 10px; }
+  .an-bar-name { width: 130px; flex: none; font-size: 0.8rem; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .an-bar-track { flex: 1; height: 10px; border-radius: 6px; background: rgba(255,255,255,0.08); overflow: hidden; }
+  .an-bar-fill { height: 100%; border-radius: 6px; background: var(--accent-2); transition: width .3s ease; }
+  .an-bar-count { width: 34px; flex: none; text-align: right; font-size: 0.8rem; font-weight: 700; }
+  .an-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 140px;
+    padding-top: 10px;
+    overflow-x: auto;
+  }
+  .an-chart-col {
+    flex: 1 0 auto;
+    min-width: 26px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .an-chart-bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    background: var(--accent-2);
+    min-height: 2px;
+    position: relative;
+  }
+  .an-chart-bar.is-past { opacity: 0.45; }
+  .an-chart-count {
+    font-size: 0.62rem;
+    font-weight: 700;
+    opacity: 0.85;
+  }
+  .an-chart-label {
+    font-size: 0.6rem;
+    opacity: 0.6;
+    white-space: nowrap;
+    transform: rotate(0deg);
+  }
+  .an-chart-delta { font-size: 0.62rem; font-weight: 700; opacity: 0.8; }
+  .an-chart-delta.is-up { color: #06d6a0; }
+  .an-chart-delta.is-down { color: #ff3366; }
+  .an-empty { font-size: 0.85rem; opacity: 0.6; padding: 10px 0; }
+
   .update-banner {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -1026,6 +1098,9 @@
       <button class="icon-btn settings-open" id="settingsOpen" title="Settings">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
+      <button class="icon-btn settings-open" id="analyticsOpen" title="Analytics">
+        <svg viewBox="0 0 24 24"><path d="M4 19V9M11 19V5M18 19v-7"/><path d="M2 19h20"/></svg>
+      </button>
       <button class="group-toggle" id="groupToggle" title="Group by month">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
       </button>
@@ -1057,9 +1132,10 @@
       <select class="filter-select" id="statusFilter" title="Filter by status">
         <option value="all">All Status</option>
         <option value="none">No Status</option>
-        <option value="ready">Ready</option>
-        <option value="prequel">Prequel</option>
         <option value="queued">Queued</option>
+        <option value="prequel">Prequel</option>
+        <option value="link">Link</option>
+        <option value="ready">Ready</option>
       </select>
       <select class="filter-select" id="hypeFilter" title="Filter by hype">
         <option value="all">All Hype</option>
@@ -1147,9 +1223,9 @@
         <label>Status</label>
         <div class="chk-row">
           <label class="chk">
-            <input type="radio" name="gStatus" id="gStatusReady" value="ready">
+            <input type="radio" name="gStatus" id="gStatusQueued" value="queued">
             <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
-            <span>Ready</span>
+            <span>Queued</span>
           </label>
           <label class="chk">
             <input type="radio" name="gStatus" id="gStatusPrequel" value="prequel">
@@ -1157,9 +1233,14 @@
             <span>Prequel</span>
           </label>
           <label class="chk">
-            <input type="radio" name="gStatus" id="gStatusQueued" value="queued">
+            <input type="radio" name="gStatus" id="gStatusLink" value="link">
             <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
-            <span>Queued</span>
+            <span>Link</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="gStatus" id="gStatusReady" value="ready">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Ready</span>
           </label>
         </div>
       </div>
@@ -1207,8 +1288,10 @@
         <p class="set-desc">Bulk-clear a field across every tracked game.</p>
         <div class="set-row">
           <button class="btn-cancel" id="resetHypeBtn">Reset all Hype</button>
+          <button class="btn-cancel" id="resetStatusBtn">Reset all Status</button>
         </div>
         <div class="set-note" id="resetHypeNote"></div>
+        <div class="set-note" id="resetStatusNote"></div>
       </div>
 
       <div class="set-section">
@@ -1224,7 +1307,16 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.8.1 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.9.0 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Added a "Reset all Status" button in Settings to clear the Status from every tracked game, with a confirmation first.</li>
+              <li>Reordered Status to Queued, Prequel, Ready in both the add/edit form and the filter.</li>
+              <li>Added an Analytics page with a releases-by-month chart, quarterly trend, lead-time distribution, and release day-of-week breakdown.</li>
+              <li>Added a new "Link" Status, between Prequel and Ready.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.8.1</div>
             <ul>
               <li>Removed the "Next up" section from the stats panel.</li>
             </ul>
@@ -1344,6 +1436,16 @@
 
       <div class="modal-actions">
         <button class="btn-cancel" id="settingsClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="analyticsOverlay">
+    <div class="modal analytics-modal">
+      <h3>Analytics</h3>
+      <div id="analyticsContent"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="analyticsClose">Close</button>
       </div>
     </div>
   </div>
@@ -1482,7 +1584,7 @@
   const SORT_KEY = 'nexgame.sort';
   let sortAlpha = localStorage.getItem(SORT_KEY) === 'alpha';   // off (sort by date) by default
   const FILTER_KEY = 'nexgame.filter';
-  const FILTERS = ['all', 'none', 'ready', 'prequel', 'queued'];
+  const FILTERS = ['all', 'none', 'ready', 'prequel', 'link', 'queued'];
   let filterMode = FILTERS.includes(localStorage.getItem(FILTER_KEY)) ? localStorage.getItem(FILTER_KEY) : 'all';
   const TYPE_FILTER_KEY = 'nexgame.typeFilter';
   const TYPE_FILTERS = ['all', 'none', 'dlc', 'patch', 'ear'];
@@ -1654,7 +1756,7 @@
     if (e.propertyName === 'max-width') positionSideNav();
   });
 
-  const STATUS_LABEL = { ready: 'Ready', prequel: 'Prequel', queued: 'Queued' };
+  const STATUS_LABEL = { ready: 'Ready', prequel: 'Prequel', link: 'Link', queued: 'Queued' };
   const TYPE_LABEL = { dlc: 'DLC', patch: 'Patch', ear: 'EAR' };
   const HYPE_LABEL = {
     under: 'Under the Radar',
@@ -1687,7 +1789,7 @@
     const outNow = dated.filter(g => daysUntil(g.date) < 0);
     const soon = games.filter(g => g.tba);
 
-    const statusCounts = { ready: 0, prequel: 0, queued: 0, none: 0 };
+    const statusCounts = { ready: 0, prequel: 0, link: 0, queued: 0, none: 0 };
     const typeCounts = { dlc: 0, patch: 0, ear: 0, none: 0 };
     const hypeCounts = { under: 0, casual: 0, high: 0, critical: 0, terminal: 0, none: 0 };
     games.forEach(g => {
@@ -1709,6 +1811,7 @@
       ${statGroup('Status', [
         statRow('Ready', statusCounts.ready),
         statRow('Prequel', statusCounts.prequel),
+        statRow('Link', statusCounts.link),
         statRow('Queued', statusCounts.queued),
         statRow('No status', statusCounts.none)
       ])}
@@ -2090,7 +2193,7 @@
   saveBtn.addEventListener('click', addGame);
   overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeModal(); closeSettings(); closeConfirm(); }
+    if (e.key === 'Escape') { closeModal(); closeSettings(); closeConfirm(); closeAnalytics(); }
     if (e.key === 'Enter' && overlay.classList.contains('show')) addGame();
   });
 
@@ -2162,6 +2265,29 @@
         render();
         resetHypeNote.textContent = `Hype cleared on ${count} game${count === 1 ? '' : 's'}.`;
         resetHypeNote.className = 'set-note ok';
+      }
+    });
+  });
+
+  document.getElementById('resetStatusBtn').addEventListener('click', () => {
+    const resetStatusNote = document.getElementById('resetStatusNote');
+    const count = games.filter(g => g.status).length;
+    if (!count) {
+      resetStatusNote.textContent = 'No games have a Status set.';
+      resetStatusNote.className = 'set-note';
+      return;
+    }
+    openConfirmAction({
+      title: 'Reset all Status?',
+      message: `Clear the Status from ${count} game${count === 1 ? '' : 's'}? This can't be undone.`,
+      actionLabel: 'Reset Status',
+      danger: true,
+      onConfirm: () => {
+        games.forEach(g => { g.status = null; });
+        save();
+        render();
+        resetStatusNote.textContent = `Status cleared on ${count} game${count === 1 ? '' : 's'}.`;
+        resetStatusNote.className = 'set-note ok';
       }
     });
   });
@@ -2238,7 +2364,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.8.1';
+  const APP_VERSION = 'Alpha 0.9.0';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
@@ -2328,6 +2454,164 @@
 
   applyTheme(themeName);
   buildThemes();
+
+  const analyticsOverlay = document.getElementById('analyticsOverlay');
+  function openAnalytics() {
+    renderAnalytics();
+    analyticsOverlay.classList.add('show');
+  }
+  function closeAnalytics() { analyticsOverlay.classList.remove('show'); }
+  document.getElementById('analyticsOpen').addEventListener('click', openAnalytics);
+  document.getElementById('analyticsClose').addEventListener('click', closeAnalytics);
+  analyticsOverlay.addEventListener('click', e => { if (e.target === analyticsOverlay) closeAnalytics(); });
+
+  // renders a fixed, ordered set of buckets (zero counts included) — for distributions, not category breakdowns
+  function anBucketRows(order, labels, counts, colors) {
+    const max = Math.max(1, ...order.map(k => counts[k] || 0));
+    return '<div class="an-bars">' + order.map(k => `
+      <div class="an-bar-row">
+        <div class="an-bar-name">${esc(labels[k])}</div>
+        <div class="an-bar-track"><div class="an-bar-fill" style="width:${((counts[k] || 0) / max * 100).toFixed(1)}%;${colors && colors[k] ? `background:${colors[k]}` : ''}"></div></div>
+        <div class="an-bar-count">${counts[k] || 0}</div>
+      </div>`).join('') + '</div>';
+  }
+
+  const WEEKDAY_LABEL = { 0: 'Sunday', 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday', 6: 'Saturday' };
+  const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+  function quarterKey(iso) {
+    const [y, m] = iso.split('-').map(Number);
+    return `${y}-Q${Math.ceil(m / 3)}`;
+  }
+  function quarterLabel(key) {
+    const [y, q] = key.split('-Q');
+    return `Q${q} '${y.slice(2)}`;
+  }
+  // step a "YYYY-QN" key forward by one quarter
+  function nextQuarterKey(key) {
+    const [y, q] = key.split('-Q').map(Number);
+    return q === 4 ? `${y + 1}-Q1` : `${y}-Q${q + 1}`;
+  }
+
+  function renderAnalytics() {
+    const content = document.getElementById('analyticsContent');
+    if (!games.length) {
+      content.innerHTML = '<div class="an-empty">Track some games to see analytics.</div>';
+      return;
+    }
+
+    const dated = games.filter(g => !g.tba);
+    const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
+    const avgLead = upcoming.length
+      ? Math.round(upcoming.reduce((s, g) => s + daysUntil(g.date), 0) / upcoming.length)
+      : null;
+
+    // releases per month, across all dated entries (past + future) — the one chart the stats panel doesn't show
+    const monthCounts = {};
+    dated.forEach(g => {
+      const mk = g.date.slice(0, 7);
+      monthCounts[mk] = (monthCounts[mk] || 0) + 1;
+    });
+    const monthKeys = Object.keys(monthCounts).sort();
+    const curMonthKey = new Date().toISOString().slice(0, 7);
+    const maxMonthCount = monthKeys.length ? Math.max(...monthKeys.map(k => monthCounts[k])) : 0;
+    const busiest = monthKeys.reduce((best, k) => (!best || monthCounts[k] > monthCounts[best]) ? k : best, null);
+
+    const monthChartHTML = monthKeys.length ? '<div class="an-chart">' + monthKeys.map(k => `
+      <div class="an-chart-col">
+        <div class="an-chart-count">${monthCounts[k]}</div>
+        <div class="an-chart-bar${k < curMonthKey ? ' is-past' : ''}" style="height:${Math.max(4, monthCounts[k] / maxMonthCount * 100)}%"></div>
+        <div class="an-chart-label">${esc(shortMonthLabel(k + '-01'))}</div>
+      </div>`).join('') + '</div>' : '<div class="an-empty">No dated games yet.</div>';
+
+    // longest gap with no releases, among upcoming dates (today's "quiet stretch" ahead)
+    let longestGap = null;
+    const upcomingDatesSorted = [...new Set(upcoming.map(g => g.date))].sort();
+    for (let i = 1; i < upcomingDatesSorted.length; i++) {
+      const gap = Math.round((new Date(upcomingDatesSorted[i]) - new Date(upcomingDatesSorted[i - 1])) / 86400000);
+      if (!longestGap || gap > longestGap.days) {
+        longestGap = { days: gap, from: upcomingDatesSorted[i - 1], to: upcomingDatesSorted[i] };
+      }
+    }
+
+    // which weekday games most commonly release on
+    const weekdayCounts = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+    dated.forEach(g => {
+      const [y, m, d] = g.date.split('-').map(Number);
+      weekdayCounts[new Date(y, m - 1, d).getDay()]++;
+    });
+    const topWeekday = WEEKDAY_ORDER.reduce((best, k) => (weekdayCounts[k] > (weekdayCounts[best] || 0) ? k : best), WEEKDAY_ORDER[0]);
+
+    // lead-time distribution for what's still upcoming
+    const leadBuckets = { week: 0, month: 0, quarter: 0, half: 0, far: 0 };
+    upcoming.forEach(g => {
+      const d = daysUntil(g.date);
+      if (d <= 7) leadBuckets.week++;
+      else if (d <= 30) leadBuckets.month++;
+      else if (d <= 90) leadBuckets.quarter++;
+      else if (d <= 180) leadBuckets.half++;
+      else leadBuckets.far++;
+    });
+    const leadLabels = { week: 'Within a week', month: 'Within a month', quarter: '1–3 months', half: '3–6 months', far: '6+ months' };
+
+    // quarterly trend: counts per quarter, only from the current quarter onward, with quarter-over-quarter change
+    const curQ = quarterKey(new Date().toISOString().slice(0, 10));
+    const qCounts = {};
+    dated.forEach(g => {
+      const qk = quarterKey(g.date);
+      if (qk >= curQ) qCounts[qk] = (qCounts[qk] || 0) + 1;
+    });
+    const qKeysPresent = Object.keys(qCounts).sort();
+    const qKeys = [];
+    if (qKeysPresent.length) {
+      let k = curQ < qKeysPresent[0] ? curQ : qKeysPresent[0];
+      const last = qKeysPresent[qKeysPresent.length - 1];
+      while (k <= last) { qKeys.push(k); k = nextQuarterKey(k); }
+    }
+    const maxQCount = qKeys.length ? Math.max(1, ...qKeys.map(k => qCounts[k] || 0)) : 1;
+    const quarterChartHTML = qKeys.length ? '<div class="an-chart">' + qKeys.map((k, i) => {
+      const count = qCounts[k] || 0;
+      const prev = i > 0 ? (qCounts[qKeys[i - 1]] || 0) : null;
+      let delta = '';
+      if (prev != null && prev > 0) {
+        const pct = Math.round((count - prev) / prev * 100);
+        delta = `<div class="an-chart-delta${pct > 0 ? ' is-up' : pct < 0 ? ' is-down' : ''}">${pct > 0 ? '▲' : pct < 0 ? '▼' : '–'}${pct !== 0 ? Math.abs(pct) + '%' : ''}</div>`;
+      }
+      return `
+      <div class="an-chart-col">
+        ${delta}
+        <div class="an-chart-count">${count}</div>
+        <div class="an-chart-bar" style="height:${Math.max(4, count / maxQCount * 100)}%"></div>
+        <div class="an-chart-label">${esc(quarterLabel(k))}</div>
+      </div>`;
+    }).join('') + '</div>' : '<div class="an-empty">No upcoming dated games yet.</div>';
+
+    content.innerHTML = `
+      <div class="an-section">
+        <div class="an-insights">
+          <div class="an-insight"><div class="num">${avgLead != null ? avgLead : '—'}</div><div class="lbl">Avg. days until release</div></div>
+          <div class="an-insight"><div class="num">${busiest ? shortMonthLabel(busiest + '-01') : '—'}</div><div class="lbl">Busiest month${busiest ? ` (${monthCounts[busiest]})` : ''}</div></div>
+          <div class="an-insight"><div class="num">${esc(WEEKDAY_LABEL[topWeekday])}</div><div class="lbl">Most common release day</div></div>
+          <div class="an-insight"><div class="num">${longestGap ? longestGap.days + 'd' : '—'}</div><div class="lbl">Longest gap ahead${longestGap ? ` (${fmtSlash(longestGap.from)} – ${fmtSlash(longestGap.to)})` : ''}</div></div>
+        </div>
+      </div>
+      <div class="an-section">
+        <div class="an-title">Releases by month</div>
+        ${monthChartHTML}
+      </div>
+      <div class="an-section">
+        <div class="an-title">Quarterly trend</div>
+        ${quarterChartHTML}
+      </div>
+      <div class="an-section">
+        <div class="an-title">Lead time of upcoming releases</div>
+        ${anBucketRows(['week', 'month', 'quarter', 'half', 'far'], leadLabels, leadBuckets)}
+      </div>
+      <div class="an-section">
+        <div class="an-title">Release day of the week</div>
+        ${anBucketRows(WEEKDAY_ORDER, WEEKDAY_LABEL, weekdayCounts)}
+      </div>`;
+  }
 
   function openSettings() {
     restoreNote.textContent = '';
