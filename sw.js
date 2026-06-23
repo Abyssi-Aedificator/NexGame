@@ -1,5 +1,5 @@
 // NexGame service worker — offline cache (also satisfies PWA installability)
-const CACHE = 'nexgame-v13';
+const CACHE = 'nexgame-v14';
 const ASSETS = [
   './',
   './index.html',

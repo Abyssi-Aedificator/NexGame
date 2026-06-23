@@ -431,7 +431,7 @@
 
   .tag-hype-under { border-color: #8d99ae; color: #8d99ae; }
   .tag-hype-casual { border-color: #4cc9f0; color: #4cc9f0; }
-  .tag-hype-high { border-color: #ffd60a; color: #ffd60a; }
+  .tag-hype-high { border-color: #06d6a0; color: #06d6a0; }
   .tag-hype-critical { border-color: #ff7b00; color: #ff7b00; }
   .tag-hype-terminal { border-color: #ff3366; color: #ff3366; }
 
@@ -1072,7 +1072,7 @@
         <option value="none">No Hype</option>
         <option value="under">Under the Radar</option>
         <option value="casual">Casual Interest</option>
-        <option value="high">High Expectation</option>
+        <option value="high">Idealistic Case</option>
         <option value="critical">Critical Mass</option>
         <option value="terminal">Terminal Hype</option>
       </select>
@@ -1175,7 +1175,7 @@
           <option value="">No hype set</option>
           <option value="under">Under the Radar</option>
           <option value="casual">Casual Interest</option>
-          <option value="high">High Expectation</option>
+          <option value="high">Idealistic Case</option>
           <option value="critical">Critical Mass</option>
           <option value="terminal">Terminal Hype</option>
         </select>
@@ -1209,6 +1209,15 @@
       </div>
 
       <div class="set-section">
+        <div class="set-label">Data tools</div>
+        <p class="set-desc">Bulk-clear a field across every tracked game.</p>
+        <div class="set-row">
+          <button class="btn-cancel" id="resetHypeBtn">Reset all Hype</button>
+        </div>
+        <div class="set-note" id="resetHypeNote"></div>
+      </div>
+
+      <div class="set-section">
         <div class="set-label">Import wishlist</div>
         <p class="set-desc">Import a text file with one game title per line — we'll look up each release date on Wikidata.</p>
         <div class="set-row">
@@ -1221,7 +1230,14 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.7.0 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.8.0 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Added a "Reset all Hype" button in Settings to clear the Hype level from every tracked game, with a confirmation first.</li>
+              <li>Renamed the "High Expectation" Hype level to "Idealistic Case" and changed its colour from yellow to green.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.7.0</div>
             <ul>
               <li>Added a stats panel on wider screens showing totals, next release, and breakdowns by Status, Type, and Hype.</li>
               <li>The side navigation now shows a count next to each month, "Out now", and "Coming soon".</li>
@@ -1346,7 +1362,7 @@
 
   <div class="overlay" id="confirmOverlay">
     <div class="modal confirm-modal">
-      <h3>Remove game?</h3>
+      <h3 id="confirmTitle">Remove game?</h3>
       <p class="set-desc" id="confirmMsg"></p>
       <div class="modal-actions">
         <button class="btn-cancel" id="confirmCancelBtn">Cancel</button>
@@ -1643,12 +1659,12 @@
   const HYPE_LABEL = {
     under: 'Under the Radar',
     casual: 'Casual Interest',
-    high: 'High Expectation',
+    high: 'Idealistic Case',
     critical: 'Critical Mass',
     terminal: 'Terminal Hype'
   };
   const TYPE_COLOR = { dlc: '#4cc9f0', patch: '#ffb703', ear: '#06d6a0' };
-  const HYPE_COLOR = { under: '#8d99ae', casual: '#4cc9f0', high: '#ffd60a', critical: '#ff7b00', terminal: '#ff3366' };
+  const HYPE_COLOR = { under: '#8d99ae', casual: '#4cc9f0', high: '#06d6a0', critical: '#ff7b00', terminal: '#ff3366' };
 
   function statRow(name, count, color) {
     if (!count) return '';
@@ -1707,7 +1723,7 @@
       ${statGroup('Hype', [
         statRow('Under the Radar', hypeCounts.under, HYPE_COLOR.under),
         statRow('Casual Interest', hypeCounts.casual, HYPE_COLOR.casual),
-        statRow('High Expectation', hypeCounts.high, HYPE_COLOR.high),
+        statRow('Idealistic Case', hypeCounts.high, HYPE_COLOR.high),
         statRow('Critical Mass', hypeCounts.critical, HYPE_COLOR.critical),
         statRow('Terminal Hype', hypeCounts.terminal, HYPE_COLOR.terminal),
         statRow('No hype', hypeCounts.none)
@@ -2094,28 +2110,63 @@
     }
   });
 
-  let pendingDeleteId = null;
   const confirmOverlay = document.getElementById('confirmOverlay');
   const confirmMsg = document.getElementById('confirmMsg');
-  function openConfirm(g) {
-    pendingDeleteId = g.id;
-    confirmMsg.textContent = `Remove "${g.name}" from your tracked games? This can't be undone.`;
+  const confirmTitle = document.getElementById('confirmTitle');
+  const confirmActionBtn = document.getElementById('confirmDeleteBtn');
+  let confirmAction = null;
+  // generic confirm dialog: pass what to show and what to run if the user confirms
+  function openConfirmAction({ title, message, actionLabel, danger = true, onConfirm }) {
+    confirmTitle.textContent = title;
+    confirmMsg.textContent = message;
+    confirmActionBtn.textContent = actionLabel;
+    confirmActionBtn.classList.toggle('btn-danger', danger);
+    confirmActionBtn.classList.toggle('btn-save', !danger);
+    confirmAction = onConfirm;
     confirmOverlay.classList.add('show');
+  }
+  function openConfirm(g) {
+    openConfirmAction({
+      title: 'Remove game?',
+      message: `Remove "${g.name}" from your tracked games? This can't be undone.`,
+      actionLabel: 'Remove',
+      danger: true,
+      onConfirm: () => { games = games.filter(x => x.id !== g.id); save(); render(); }
+    });
   }
   function closeConfirm() {
     confirmOverlay.classList.remove('show');
-    pendingDeleteId = null;
+    confirmAction = null;
   }
   document.getElementById('confirmCancelBtn').addEventListener('click', closeConfirm);
-  document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
-    if (pendingDeleteId) {
-      games = games.filter(g => g.id !== pendingDeleteId);
-      save();
-      render();
-    }
+  confirmActionBtn.addEventListener('click', () => {
+    if (confirmAction) confirmAction();
     closeConfirm();
   });
   confirmOverlay.addEventListener('click', e => { if (e.target === confirmOverlay) closeConfirm(); });
+
+  document.getElementById('resetHypeBtn').addEventListener('click', () => {
+    const resetHypeNote = document.getElementById('resetHypeNote');
+    const count = games.filter(g => g.hype).length;
+    if (!count) {
+      resetHypeNote.textContent = 'No games have a Hype level set.';
+      resetHypeNote.className = 'set-note';
+      return;
+    }
+    openConfirmAction({
+      title: 'Reset all Hype?',
+      message: `Clear the Hype level from ${count} game${count === 1 ? '' : 's'}? This can't be undone.`,
+      actionLabel: 'Reset Hype',
+      danger: true,
+      onConfirm: () => {
+        games.forEach(g => { g.hype = null; });
+        save();
+        render();
+        resetHypeNote.textContent = `Hype cleared on ${count} game${count === 1 ? '' : 's'}.`;
+        resetHypeNote.className = 'set-note ok';
+      }
+    });
+  });
 
   viewToggle.addEventListener('click', e => {
     const btn = e.target.closest('.vt-btn');
@@ -2189,7 +2240,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.7.0';
+  const APP_VERSION = 'Alpha 0.8.0';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
