@@ -430,9 +430,7 @@
   .tag-type.tag-ear { border-color: #06d6a0; color: #06d6a0; }
 
   .tag-hype-under { border-color: #8d99ae; color: #8d99ae; }
-  .tag-hype-casual { border-color: #4cc9f0; color: #4cc9f0; }
   .tag-hype-high { border-color: #06d6a0; color: #06d6a0; }
-  .tag-hype-critical { border-color: #ff7b00; color: #ff7b00; }
   .tag-hype-terminal { border-color: #ff3366; color: #ff3366; }
 
   .actions { flex-shrink: 0; display: flex; gap: 2px; }
@@ -1144,9 +1142,7 @@
         <option value="all">All Hype</option>
         <option value="none">No Hype</option>
         <option value="under">Under the Radar</option>
-        <option value="casual">Casual Interest</option>
         <option value="high">Idealistic Case</option>
-        <option value="critical">Critical Mass</option>
         <option value="terminal">Terminal Hype</option>
       </select>
       <div class="search-box">
@@ -1252,9 +1248,7 @@
         <select id="gHype">
           <option value="">No hype set</option>
           <option value="under">Under the Radar</option>
-          <option value="casual">Casual Interest</option>
           <option value="high">Idealistic Case</option>
-          <option value="critical">Critical Mass</option>
           <option value="terminal">Terminal Hype</option>
         </select>
       </div>
@@ -1310,7 +1304,13 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.9.1 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.9.2 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Removed "Casual Interest" and "Critical Mass" from the Hype levels.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.9.1</div>
             <ul>
               <li>Resized the stats panel so it fits within the screen instead of overflowing.</li>
               <li>Removed the "Release day of the week" section from the Analytics page.</li>
@@ -1601,7 +1601,7 @@
   const TYPE_FILTERS = ['all', 'none', 'dlc', 'patch', 'ear'];
   let typeFilterMode = TYPE_FILTERS.includes(localStorage.getItem(TYPE_FILTER_KEY)) ? localStorage.getItem(TYPE_FILTER_KEY) : 'all';
   const HYPE_FILTER_KEY = 'nexgame.hypeFilter';
-  const HYPE_FILTERS = ['all', 'none', 'under', 'casual', 'high', 'critical', 'terminal'];
+  const HYPE_FILTERS = ['all', 'none', 'under', 'high', 'terminal'];
   let hypeFilterMode = HYPE_FILTERS.includes(localStorage.getItem(HYPE_FILTER_KEY)) ? localStorage.getItem(HYPE_FILTER_KEY) : 'all';
   function matchesFilter(g) {
     if (filterMode === 'none' ? !!g.status : (filterMode !== 'all' && g.status !== filterMode)) return false;
@@ -1771,13 +1771,11 @@
   const TYPE_LABEL = { dlc: 'DLC', patch: 'Patch', ear: 'EAR' };
   const HYPE_LABEL = {
     under: 'Under the Radar',
-    casual: 'Casual Interest',
     high: 'Idealistic Case',
-    critical: 'Critical Mass',
     terminal: 'Terminal Hype'
   };
   const TYPE_COLOR = { dlc: '#4cc9f0', patch: '#ffb703', ear: '#06d6a0' };
-  const HYPE_COLOR = { under: '#8d99ae', casual: '#4cc9f0', high: '#06d6a0', critical: '#ff7b00', terminal: '#ff3366' };
+  const HYPE_COLOR = { under: '#8d99ae', high: '#06d6a0', terminal: '#ff3366' };
 
   function statRow(name, count, color) {
     if (!count) return '';
@@ -1802,7 +1800,7 @@
 
     const statusCounts = { ready: 0, prequel: 0, link: 0, queued: 0, none: 0 };
     const typeCounts = { dlc: 0, patch: 0, ear: 0, none: 0 };
-    const hypeCounts = { under: 0, casual: 0, high: 0, critical: 0, terminal: 0, none: 0 };
+    const hypeCounts = { under: 0, high: 0, terminal: 0, none: 0 };
     games.forEach(g => {
       statusCounts[g.status && STATUS_LABEL[g.status] ? g.status : 'none']++;
       typeCounts[g.type && TYPE_LABEL[g.type] ? g.type : 'none']++;
@@ -1833,9 +1831,7 @@
       ])}
       ${statGroup('Hype', [
         statRow('Under the Radar', hypeCounts.under, HYPE_COLOR.under),
-        statRow('Casual Interest', hypeCounts.casual, HYPE_COLOR.casual),
         statRow('Idealistic Case', hypeCounts.high, HYPE_COLOR.high),
-        statRow('Critical Mass', hypeCounts.critical, HYPE_COLOR.critical),
         statRow('Terminal Hype', hypeCounts.terminal, HYPE_COLOR.terminal)
       ])}`;
     positionStatsPanel();
@@ -2373,7 +2369,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.9.1';
+  const APP_VERSION = 'Alpha 0.9.2';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
