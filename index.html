@@ -1383,7 +1383,13 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.11.2 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.11.3 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Released games in the "Out now" section no longer show their price badge.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.11.2</div>
             <ul>
               <li>Added a Price filter (No Price / Has Price / Estimated Price) alongside the Type, Status, and Hype filters.</li>
             </ul>
@@ -2054,7 +2060,7 @@
       <div class="card${d < 0 ? ' released' : ''}${style ? ' has-bg' : ''}"${style}>
         ${cd}
         <div class="info">
-          <div class="title-row"><h2>${esc(g.name)}</h2>${priceBadgeHTML(g)}</div>
+          <div class="title-row"><h2>${esc(g.name)}</h2>${d < 0 ? '' : priceBadgeHTML(g)}</div>
           <div class="meta"><span>${fmtDate(g.date)}</span>${tags}</div>
         </div>
         <div class="actions">
@@ -2557,7 +2563,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.11.2';
+  const APP_VERSION = 'Alpha 0.11.3';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
