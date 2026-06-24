@@ -1383,7 +1383,13 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.11.3 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.11.4 <span class="cl-current">current</span></div>
+            <ul>
+              <li>The "Out now" section is now ordered by release date (most recently released first) instead of alphabetically.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.11.3</div>
             <ul>
               <li>Released games in the "Out now" section no longer show their price badge.</li>
             </ul>
@@ -1817,7 +1823,8 @@
     const byName = (a, b) => a.name.localeCompare(b.name);
     const dated = visible.filter(g => !g.tba);
     const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
-    const released = dated.filter(g => daysUntil(g.date) < 0).sort(byName);
+    const byReleaseDateDesc = (a, b) => daysUntil(b.date) - daysUntil(a.date);
+    const released = dated.filter(g => daysUntil(g.date) < 0).sort(sortAlpha ? byName : byReleaseDateDesc);
     const tbaGames = visible.filter(g => g.tba).sort(byName);
 
     // soonest upcoming first
@@ -2563,7 +2570,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.11.3';
+  const APP_VERSION = 'Alpha 0.11.4';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
