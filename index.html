@@ -393,11 +393,24 @@
   }
 
   .info { flex: 1; min-width: 0; }
+  .title-row { display: flex; align-items: center; gap: 8px; min-width: 0; margin-bottom: 4px; }
   .info h2 {
     font-size: 1.18rem;
     font-weight: 700;
-    margin-bottom: 4px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+  .price-badge {
+    flex: none;
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(6px);
+    color: rgba(255,255,255,0.92);
   }
   .info .meta {
     font-size: 0.82rem;
@@ -989,6 +1002,16 @@
     transition: background .15s, color .15s, border-color .15s, transform .15s;
   }
   .side-nav .sn-label { flex: 1; }
+  .side-nav .sn-sum {
+    flex: none;
+    font-size: 0.66rem;
+    font-weight: 700;
+    opacity: 0.85;
+    color: var(--accent-2);
+    margin-left: 4px;
+    white-space: nowrap;
+    text-align: right;
+  }
   .side-nav .sn-count {
     flex: none;
     font-size: 0.66rem;
@@ -998,6 +1021,8 @@
     border-radius: 10px;
     padding: 1px 6px;
     margin-left: 4px;
+    min-width: 14px;
+    text-align: center;
   }
   .side-nav button svg {
     width: 14px; height: 14px;
@@ -1286,6 +1311,10 @@
           <option value="terminal">Terminal Hype</option>
         </select>
       </div>
+      <div class="field">
+        <label for="gPrice">Price</label>
+        <input type="number" id="gPrice" placeholder="e.g. 59.99" min="0" step="0.01" inputmode="decimal">
+      </div>
       <div class="err" id="formErr"></div>
       <div class="modal-actions">
         <button class="btn-cancel" id="cancelBtn">Cancel</button>
@@ -1338,7 +1367,15 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.10.0 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.11.0 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Added a Price field per game — the side navigation now shows the total price next to the game count for each month.</li>
+              <li>Each game now shows its price in a glass badge next to its title.</li>
+              <li>Fixed the side navigation overlapping the game list on some screen sizes, and evened out the spacing on both sides of the game list.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.10.0</div>
             <ul>
               <li>Added an archiving feature to hide games without deleting them, with a dedicated Archived page to view and restore them.</li>
               <li>Added Status and Hype filters to the Analytics page to focus insights on specific game categories.</li>
@@ -1553,6 +1590,7 @@
   const statusRadios = [...document.querySelectorAll('input[name="gStatus"]')];
   const typeRadios = [...document.querySelectorAll('input[name="gType"]')];
   const gHype = document.getElementById('gHype');
+  const gPrice = document.getElementById('gPrice');
 
   function getType() {
     const sel = typeRadios.find(r => r.checked);
@@ -1633,6 +1671,10 @@
   function fmtSlash(iso) {
     const [y, m, d] = iso.split('-');
     return `${d}/${m}/${y}`;
+  }
+
+  function fmtPrice(n) {
+    return '$' + n.toLocaleString(undefined, { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
   }
 
   // "July 2026" — used for the month separators
@@ -1745,10 +1787,14 @@
     const itemFn = viewMode === 'grid' ? tileHTML : cardHTML;
     const navSections = [];
     let secId = 0;
-    function sepHTML(label, navLabel, kind, count) {
+    function sepHTML(label, navLabel, kind, count, sum) {
       const id = 'sec-' + (secId++);
-      navSections.push({ id, label: navLabel, kind, count });
+      navSections.push({ id, label: navLabel, kind, count, sum });
       return `<div class="month-sep" id="${id}"><span>${esc(label)}</span></div>`;
+    }
+    function priceSum(arr) {
+      const total = arr.reduce((s, g) => s + (typeof g.price === 'number' ? g.price : 0), 0);
+      return total > 0 ? total : null;
     }
 
     let html;
@@ -1770,7 +1816,7 @@
       });
       if (sortAlpha) buckets.forEach(b => b.sort(byName));
       html = buckets.map(b =>
-        sepHTML(monthLabel(b[0].date), shortMonthLabel(b[0].date), 'month', b.length) +
+        sepHTML(monthLabel(b[0].date), shortMonthLabel(b[0].date), 'month', b.length, priceSum(b)) +
         b.map(itemFn).join('')
       ).join('');
     }
@@ -1801,7 +1847,7 @@
     const nav = document.getElementById('sideNav');
     nav.classList.toggle('nav-empty', !sections.length);
     nav.innerHTML = sections.map(s =>
-      `<button type="button" class="sn-${s.kind}" data-target="${s.id}">${NAV_ICONS[s.kind]}<span class="sn-label">${esc(s.label)}</span>${s.count != null ? `<span class="sn-count">${s.count}</span>` : ''}</button>`
+      `<button type="button" class="sn-${s.kind}" data-target="${s.id}">${NAV_ICONS[s.kind]}<span class="sn-label">${esc(s.label)}</span>${s.sum != null ? `<span class="sn-sum">${fmtPrice(s.sum)}</span>` : ''}${s.count != null ? `<span class="sn-count">${s.count}</span>` : ''}</button>`
     ).join('');
     positionSideNav();
     requestAnimationFrame(positionSideNav);
@@ -1810,13 +1856,13 @@
   function positionSideNav() {
     const nav = document.getElementById('sideNav');
     const wrapRect = document.getElementById('wrap').getBoundingClientRect();
+    nav.classList.remove('nav-cramped'); // measure at full width — never trust offsetWidth while display:none
     const navWidth = nav.offsetWidth || 110;
     const space = wrapRect.left;
     if (space < navWidth + 34) {
       nav.classList.add('nav-cramped');
       return;
     }
-    nav.classList.remove('nav-cramped');
     nav.style.left = (space - navWidth - 22) + 'px';
   }
   window.addEventListener('resize', positionSideNav);
@@ -1901,7 +1947,7 @@
     if (!panel.innerHTML.trim()) return;
     const wrapRect = document.getElementById('wrap').getBoundingClientRect();
     const panelWidth = panel.offsetWidth || 220;
-    const space = window.innerWidth - wrapRect.right;
+    const space = document.documentElement.clientWidth - wrapRect.right;
     if (space < panelWidth + 34) {
       panel.classList.add('stats-cramped');
       return;
@@ -1928,6 +1974,9 @@
   function tagsHTML(g) {
     return tagList(g).join('');
   }
+  function priceBadgeHTML(g) {
+    return typeof g.price === 'number' ? `<span class="price-badge">${fmtPrice(g.price)}</span>` : '';
+  }
   // grid tiles are narrow — cap visible badges and roll the rest into a "+N" chip
   function tileTagsHTML(g) {
     const tags = tagList(g);
@@ -1944,7 +1993,7 @@
         <div class="card${style ? ' has-bg' : ''}"${style}>
           <div class="countdown out"><div class="num">Coming</div><div class="lbl">soon</div></div>
           <div class="info">
-            <h2>${esc(g.name)}</h2>
+            <div class="title-row"><h2>${esc(g.name)}</h2>${priceBadgeHTML(g)}</div>
             <div class="meta"><span>Release date TBA</span>${tags}</div>
           </div>
           <div class="actions">
@@ -1968,7 +2017,7 @@
       <div class="card${d < 0 ? ' released' : ''}${style ? ' has-bg' : ''}"${style}>
         ${cd}
         <div class="info">
-          <h2>${esc(g.name)}</h2>
+          <div class="title-row"><h2>${esc(g.name)}</h2>${priceBadgeHTML(g)}</div>
           <div class="meta"><span>${fmtDate(g.date)}</span>${tags}</div>
         </div>
         <div class="actions">
@@ -2080,6 +2129,7 @@
     setStatus(game ? game.status : null);
     setType(game ? game.type : null);
     gHype.value = game && game.hype ? game.hype : '';
+    gPrice.value = game && typeof game.price === 'number' ? game.price : '';
     gImageUrl.value = game && game.image ? game.image : '';
     setImage(game ? game.image : null);
 
@@ -2132,6 +2182,7 @@
       status: getStatus(),
       type: getType(),
       hype: gHype.value || null,
+      price: gPrice.value !== '' ? Math.round(parseFloat(gPrice.value) * 100) / 100 : null,
       color: pickedImage ? null : pickedColor,
       image: pickedImage || null
     };
@@ -2460,7 +2511,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.10.0';
+  const APP_VERSION = 'Alpha 0.11.0';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
@@ -2836,6 +2887,7 @@
             : (g.prequelPlayed ? 'prequel' : (g.queued ? 'queued' : null)),
           type: ['dlc', 'patch', 'ear'].includes(g.type) ? g.type : null,
           hype: HYPE_LABEL[g.hype] ? g.hype : null,
+          price: typeof g.price === 'number' ? g.price : null,
           color: g.color || null,
           image: g.image || null
         });
