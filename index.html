@@ -1207,6 +1207,12 @@
         <option value="high">Idealistic Case</option>
         <option value="terminal">Terminal Hype</option>
       </select>
+      <select class="filter-select" id="priceFilter" title="Filter by price">
+        <option value="all">All Prices</option>
+        <option value="none">No Price</option>
+        <option value="set">Has Price</option>
+        <option value="estimated">Estimated Price</option>
+      </select>
       <div class="search-box">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         <input type="text" id="searchInput" placeholder="Search games…" autocomplete="off">
@@ -1377,7 +1383,13 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.11.1 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.11.2 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Added a Price filter (No Price / Has Price / Estimated Price) alongside the Type, Status, and Hype filters.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.11.1</div>
             <ul>
               <li>Added an "Estimated" checkbox next to the Price field — estimated prices show with a ~ prefix on the badge.</li>
             </ul>
@@ -1715,6 +1727,9 @@
   const HYPE_FILTER_KEY = 'nexgame.hypeFilter';
   const HYPE_FILTERS = ['all', 'none', 'under', 'high', 'terminal'];
   let hypeFilterMode = HYPE_FILTERS.includes(localStorage.getItem(HYPE_FILTER_KEY)) ? localStorage.getItem(HYPE_FILTER_KEY) : 'all';
+  const PRICE_FILTER_KEY = 'nexgame.priceFilter';
+  const PRICE_FILTERS = ['all', 'none', 'set', 'estimated'];
+  let priceFilterMode = PRICE_FILTERS.includes(localStorage.getItem(PRICE_FILTER_KEY)) ? localStorage.getItem(PRICE_FILTER_KEY) : 'all';
   const AN_STATUS_FILTER_KEY = 'nexgame.analyticsStatusFilter';
   const AN_HYPE_FILTER_KEY = 'nexgame.analyticsHypeFilter';
   let analyticsStatusFilter = localStorage.getItem(AN_STATUS_FILTER_KEY) || 'all';
@@ -1723,6 +1738,10 @@
     if (filterMode === 'none' ? !!g.status : (filterMode !== 'all' && g.status !== filterMode)) return false;
     if (typeFilterMode === 'none' ? !!g.type : (typeFilterMode !== 'all' && g.type !== typeFilterMode)) return false;
     if (hypeFilterMode === 'none' ? !!g.hype : (hypeFilterMode !== 'all' && g.hype !== hypeFilterMode)) return false;
+    const hasPrice = typeof g.price === 'number';
+    if (priceFilterMode === 'none' && hasPrice) return false;
+    if (priceFilterMode === 'set' && !hasPrice) return false;
+    if (priceFilterMode === 'estimated' && !(hasPrice && g.priceEstimated)) return false;
     return true;
   }
 
@@ -1761,6 +1780,7 @@
     document.getElementById('statusFilter').value = filterMode;
     document.getElementById('typeFilter').value = typeFilterMode;
     document.getElementById('hypeFilter').value = hypeFilterMode;
+    document.getElementById('priceFilter').value = priceFilterMode;
     renderStatsPanel();
 
     if (!games.length) {
@@ -2516,13 +2536,20 @@
     localStorage.setItem(HYPE_FILTER_KEY, hypeFilterMode);
     render();
   });
+  document.getElementById('priceFilter').addEventListener('change', e => {
+    priceFilterMode = e.target.value;
+    localStorage.setItem(PRICE_FILTER_KEY, priceFilterMode);
+    render();
+  });
   document.getElementById('resetFiltersBtn').addEventListener('click', () => {
     filterMode = 'all';
     typeFilterMode = 'all';
     hypeFilterMode = 'all';
+    priceFilterMode = 'all';
     localStorage.setItem(FILTER_KEY, filterMode);
     localStorage.setItem(TYPE_FILTER_KEY, typeFilterMode);
     localStorage.setItem(HYPE_FILTER_KEY, hypeFilterMode);
+    localStorage.setItem(PRICE_FILTER_KEY, priceFilterMode);
     searchQuery = '';
     searchInput.value = '';
     searchClear.hidden = true;
@@ -2530,7 +2557,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.11.1';
+  const APP_VERSION = 'Alpha 0.11.2';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
