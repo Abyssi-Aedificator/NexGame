@@ -151,7 +151,7 @@
     padding: 8px 14px;
     border-radius: 20px;
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 400;
     transition: color .15s, background .15s, border-color .15s;
   }
   .filter-btn:hover { color: #fff; }
@@ -181,6 +181,116 @@
     color: #fff;
   }
   .filter-select option:checked { background: var(--accent-2); color: var(--on-accent); }
+  .filter-picker {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 150px;
+  }
+  .filter-picker summary {
+    height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 20px;
+    color: rgba(255,255,255,0.85);
+    cursor: pointer;
+    padding: 0 10px;
+    font-size: 0.78rem;
+    font-weight: 400;
+    white-space: nowrap;
+    list-style: none;
+    transition: color .15s, background .15s, border-color .15s;
+  }
+  .filter-picker summary::-webkit-details-marker { display: none; }
+  .filter-picker summary:hover,
+  .filter-picker[open] summary {
+    color: #fff;
+    border-color: rgba(255,255,255,0.32);
+  }
+  .filter-summary-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .filter-count {
+    flex: none;
+    min-width: 18px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    color: var(--on-accent);
+    background: var(--accent);
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  .filter-caret {
+    flex: none;
+    width: 14px; height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.7;
+    transition: transform .15s;
+  }
+  .filter-picker[open] .filter-caret { transform: rotate(180deg); }
+  .filter-menu {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 210px;
+    padding: 8px;
+    border-radius: 14px;
+    background: var(--results-bg);
+    border: 1px solid rgba(255,255,255,0.16);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  }
+  .filter-option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 9px;
+    border-radius: 10px;
+    color: rgba(255,255,255,0.82);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 400;
+  }
+  .filter-option:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.09);
+  }
+  .filter-option input { position: absolute; opacity: 0; pointer-events: none; }
+  .filter-option .box {
+    flex: none;
+    width: 16px; height: 16px;
+    display: grid;
+    place-items: center;
+    border-radius: 5px;
+    border: 1px solid rgba(255,255,255,0.28);
+    background: rgba(255,255,255,0.08);
+  }
+  .filter-option svg {
+    width: 12px; height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+  }
+  .filter-option input:checked + .box {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: transparent;
+  }
+  .filter-option input:checked + .box svg { opacity: 1; }
 
   .reset-filters-btn {
     flex: none;
@@ -1131,6 +1241,11 @@
     header.top p { display: none; }
     .add-btn span { display: none; }
     .add-btn { padding: 11px 13px; }
+    .filter-row { flex-wrap: wrap; }
+    .filter-select, .filter-picker { flex: 1 1 calc(50% - 4px); max-width: none; }
+    .filter-menu { width: min(210px, calc(100vw - 28px)); }
+    .search-box { order: 4; flex: 1 1 calc(100% - 46px); }
+    .reset-filters-btn { order: 5; }
     .countdown { width: 74px; }
     .countdown .num { font-size: 1.7rem; }
     .card { padding: 16px; gap: 12px; }
@@ -1185,34 +1300,122 @@
     </header>
 
     <div class="filter-row" id="filterToggle">
-      <select class="filter-select" id="typeFilter" title="Filter by type">
-        <option value="all">All Types</option>
-        <option value="none">No Type</option>
-        <option value="dlc">DLC</option>
-        <option value="patch">Patch</option>
-        <option value="ear">EAR</option>
-      </select>
-      <select class="filter-select" id="statusFilter" title="Filter by status">
-        <option value="all">All Status</option>
-        <option value="none">No Status</option>
-        <option value="queued">Queued</option>
-        <option value="prequel">Prequel</option>
-        <option value="link">Link</option>
-        <option value="ready">Ready</option>
-      </select>
-      <select class="filter-select" id="hypeFilter" title="Filter by hype">
-        <option value="all">All Hype</option>
-        <option value="none">No Hype</option>
-        <option value="under">Under the Radar</option>
-        <option value="high">Idealistic Case</option>
-        <option value="terminal">Terminal Hype</option>
-      </select>
-      <select class="filter-select" id="priceFilter" title="Filter by price">
-        <option value="all">All Prices</option>
-        <option value="none">No Price</option>
-        <option value="set">Has Price</option>
-        <option value="estimated">Estimated Price</option>
-      </select>
+      <details class="filter-picker" id="typeFilter">
+        <summary title="Choose type categories to display">
+          <span class="filter-summary-text" id="typeFilterSummary">All Types</span>
+          <span class="filter-count" id="typeFilterCount">4</span>
+          <svg class="filter-caret" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+        <div class="filter-menu" role="group" aria-label="Choose type categories to display">
+          <label class="filter-option">
+            <input type="checkbox" value="none">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>No Type</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="dlc">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>DLC</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="patch">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Patch</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="ear">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>EAR</span>
+          </label>
+        </div>
+      </details>
+      <details class="filter-picker" id="statusFilter">
+        <summary title="Choose status categories to display">
+          <span class="filter-summary-text" id="statusFilterSummary">All Status</span>
+          <span class="filter-count" id="statusFilterCount">5</span>
+          <svg class="filter-caret" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+        <div class="filter-menu" role="group" aria-label="Choose status categories to display">
+          <label class="filter-option">
+            <input type="checkbox" value="none">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>No Status</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="queued">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Queued</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="prequel">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Prequel</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="link">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Link</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="ready">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Ready</span>
+          </label>
+        </div>
+      </details>
+      <details class="filter-picker" id="hypeFilter">
+        <summary title="Choose hype categories to display">
+          <span class="filter-summary-text" id="hypeFilterSummary">All Hype</span>
+          <span class="filter-count" id="hypeFilterCount">4</span>
+          <svg class="filter-caret" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+        <div class="filter-menu" role="group" aria-label="Choose hype categories to display">
+          <label class="filter-option">
+            <input type="checkbox" value="none">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>No Hype</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="under">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Under the Radar</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="high">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Idealistic Case</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="terminal">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Terminal Hype</span>
+          </label>
+        </div>
+      </details>
+      <details class="filter-picker" id="priceFilter">
+        <summary title="Choose price categories to display">
+          <span class="filter-summary-text" id="priceFilterSummary">All Prices</span>
+          <span class="filter-count" id="priceFilterCount">3</span>
+          <svg class="filter-caret" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+        <div class="filter-menu" role="group" aria-label="Choose price categories to display">
+          <label class="filter-option">
+            <input type="checkbox" value="none">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>No Price</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="set">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Has Price</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="estimated">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Estimated Price</span>
+          </label>
+        </div>
+      </details>
       <div class="search-box">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         <input type="text" id="searchInput" placeholder="Search games…" autocomplete="off">
@@ -1383,7 +1586,13 @@
         <div class="set-label">Changelog</div>
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-ver">Alpha 0.11.4 <span class="cl-current">current</span></div>
+            <div class="cl-ver">Alpha 0.12.0 <span class="cl-current">current</span></div>
+            <ul>
+              <li>Changed Type, Status, Hype, and Price into compact multi-select checklist display choosers.</li>
+            </ul>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-ver">Alpha 0.11.4</div>
             <ul>
               <li>The "Out now" section is now ordered by release date (most recently released first) instead of alphabetically.</li>
             </ul>
@@ -1731,29 +1940,84 @@
   const SORT_KEY = 'nexgame.sort';
   let sortAlpha = localStorage.getItem(SORT_KEY) === 'alpha';   // off (sort by date) by default
   const FILTER_KEY = 'nexgame.filter';
-  const FILTERS = ['all', 'none', 'ready', 'prequel', 'link', 'queued'];
-  let filterMode = FILTERS.includes(localStorage.getItem(FILTER_KEY)) ? localStorage.getItem(FILTER_KEY) : 'all';
+  const STATUS_FILTERS = ['none', 'queued', 'prequel', 'link', 'ready'];
+  const STATUS_FILTER_SUMMARY = {
+    none: 'No Status',
+    queued: 'Queued',
+    prequel: 'Prequel',
+    link: 'Link',
+    ready: 'Ready'
+  };
   const TYPE_FILTER_KEY = 'nexgame.typeFilter';
-  const TYPE_FILTERS = ['all', 'none', 'dlc', 'patch', 'ear'];
-  let typeFilterMode = TYPE_FILTERS.includes(localStorage.getItem(TYPE_FILTER_KEY)) ? localStorage.getItem(TYPE_FILTER_KEY) : 'all';
+  const TYPE_FILTERS = ['none', 'dlc', 'patch', 'ear'];
+  const TYPE_FILTER_SUMMARY = {
+    none: 'No Type',
+    dlc: 'DLC',
+    patch: 'Patch',
+    ear: 'EAR'
+  };
   const HYPE_FILTER_KEY = 'nexgame.hypeFilter';
-  const HYPE_FILTERS = ['all', 'none', 'under', 'high', 'terminal'];
-  let hypeFilterMode = HYPE_FILTERS.includes(localStorage.getItem(HYPE_FILTER_KEY)) ? localStorage.getItem(HYPE_FILTER_KEY) : 'all';
+  const HYPE_FILTERS = ['none', 'under', 'high', 'terminal'];
+  const HYPE_FILTER_SUMMARY = {
+    none: 'No Hype',
+    under: 'Under',
+    high: 'Idealistic',
+    terminal: 'Terminal'
+  };
   const PRICE_FILTER_KEY = 'nexgame.priceFilter';
-  const PRICE_FILTERS = ['all', 'none', 'set', 'estimated'];
-  let priceFilterMode = PRICE_FILTERS.includes(localStorage.getItem(PRICE_FILTER_KEY)) ? localStorage.getItem(PRICE_FILTER_KEY) : 'all';
+  const PRICE_FILTERS = ['none', 'set', 'estimated'];
+  const PRICE_FILTER_SUMMARY = {
+    none: 'No Price',
+    set: 'Has Price',
+    estimated: 'Estimated'
+  };
+  function getStoredFilterModes(key, validValues) {
+    const stored = localStorage.getItem(key);
+    if (!stored || stored === 'all') return [...validValues];
+    if (validValues.includes(stored)) return [stored];
+    try {
+      const parsed = JSON.parse(stored);
+      if (!Array.isArray(parsed)) return [...validValues];
+      const valid = parsed.filter(value => validValues.includes(value));
+      return valid.length ? [...new Set(valid)] : [];
+    } catch {
+      return [...validValues];
+    }
+  }
+  function saveFilterModes(key, modes) {
+    localStorage.setItem(key, JSON.stringify(modes));
+  }
+  function getStoredPriceFilterModes() {
+    if (localStorage.getItem(PRICE_FILTER_KEY) === 'set') return ['set', 'estimated'];
+    return getStoredFilterModes(PRICE_FILTER_KEY, PRICE_FILTERS);
+  }
+  function filterSummary(modes, validValues, allLabel, labels) {
+    if (modes.length === validValues.length) return allLabel;
+    if (!modes.length) return '0 selected';
+    if (modes.length === 1) return labels[modes[0]];
+    return `${modes.length} selected`;
+  }
+  let statusFilterModes = getStoredFilterModes(FILTER_KEY, STATUS_FILTERS);
+  let typeFilterModes = getStoredFilterModes(TYPE_FILTER_KEY, TYPE_FILTERS);
+  let hypeFilterModes = getStoredFilterModes(HYPE_FILTER_KEY, HYPE_FILTERS);
+  let priceFilterModes = getStoredPriceFilterModes();
   const AN_STATUS_FILTER_KEY = 'nexgame.analyticsStatusFilter';
   const AN_HYPE_FILTER_KEY = 'nexgame.analyticsHypeFilter';
   let analyticsStatusFilter = localStorage.getItem(AN_STATUS_FILTER_KEY) || 'all';
   let analyticsHypeFilter = localStorage.getItem(AN_HYPE_FILTER_KEY) || 'all';
   function matchesFilter(g) {
-    if (filterMode === 'none' ? !!g.status : (filterMode !== 'all' && g.status !== filterMode)) return false;
-    if (typeFilterMode === 'none' ? !!g.type : (typeFilterMode !== 'all' && g.type !== typeFilterMode)) return false;
-    if (hypeFilterMode === 'none' ? !!g.hype : (hypeFilterMode !== 'all' && g.hype !== hypeFilterMode)) return false;
+    const statusValue = g.status && STATUS_FILTERS.includes(g.status) ? g.status : 'none';
+    if (!statusFilterModes.includes(statusValue)) return false;
+    const typeValue = g.type && TYPE_FILTERS.includes(g.type) ? g.type : 'none';
+    if (!typeFilterModes.includes(typeValue)) return false;
+    const hypeValue = g.hype && HYPE_FILTERS.includes(g.hype) ? g.hype : 'none';
+    if (!hypeFilterModes.includes(hypeValue)) return false;
     const hasPrice = typeof g.price === 'number';
-    if (priceFilterMode === 'none' && hasPrice) return false;
-    if (priceFilterMode === 'set' && !hasPrice) return false;
-    if (priceFilterMode === 'estimated' && !(hasPrice && g.priceEstimated)) return false;
+    const priceMatches =
+      (priceFilterModes.includes('none') && !hasPrice) ||
+      (priceFilterModes.includes('set') && hasPrice && !g.priceEstimated) ||
+      (priceFilterModes.includes('estimated') && hasPrice && g.priceEstimated);
+    if (!priceMatches) return false;
     return true;
   }
 
@@ -1789,10 +2053,10 @@
       b.classList.toggle('active', b.dataset.view === viewMode));
     groupToggle.classList.toggle('active', groupByMonth);
     sortToggle.classList.toggle('active', sortAlpha);
-    document.getElementById('statusFilter').value = filterMode;
-    document.getElementById('typeFilter').value = typeFilterMode;
-    document.getElementById('hypeFilter').value = hypeFilterMode;
-    document.getElementById('priceFilter').value = priceFilterMode;
+    renderFilterPicker('typeFilter', typeFilterModes, TYPE_FILTERS, 'All Types', TYPE_FILTER_SUMMARY);
+    renderFilterPicker('statusFilter', statusFilterModes, STATUS_FILTERS, 'All Status', STATUS_FILTER_SUMMARY);
+    renderFilterPicker('hypeFilter', hypeFilterModes, HYPE_FILTERS, 'All Hype', HYPE_FILTER_SUMMARY);
+    renderFilterPicker('priceFilter', priceFilterModes, PRICE_FILTERS, 'All Prices', PRICE_FILTER_SUMMARY);
     renderStatsPanel();
 
     if (!games.length) {
@@ -1879,6 +2143,14 @@
     list.innerHTML = html;
     if (navSections.length) navSections.unshift({ id: 'top', label: 'Top', kind: 'top' });
     renderSideNav(navSections);
+  }
+
+  function renderFilterPicker(id, modes, validValues, allLabel, labels) {
+    document.querySelectorAll(`#${id} input[type="checkbox"]`).forEach(input => {
+      input.checked = modes.includes(input.value);
+    });
+    document.getElementById(`${id}Summary`).textContent = filterSummary(modes, validValues, allLabel, labels);
+    document.getElementById(`${id}Count`).textContent = modes.length;
   }
 
   function shortMonthLabel(iso) {
@@ -2534,35 +2806,57 @@
     document.getElementById(btn.dataset.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
-  document.getElementById('statusFilter').addEventListener('change', e => {
-    filterMode = e.target.value;
-    localStorage.setItem(FILTER_KEY, filterMode);
+  function selectedFilterModes(id, validValues) {
+    return [...document.querySelectorAll(`#${id} input[type="checkbox"]:checked`)]
+      .map(input => input.value)
+      .filter(value => validValues.includes(value));
+  }
+  document.getElementById('typeFilter').addEventListener('change', e => {
+    if (!e.target.matches('input[type="checkbox"]')) return;
+    typeFilterModes = selectedFilterModes('typeFilter', TYPE_FILTERS);
+    saveFilterModes(TYPE_FILTER_KEY, typeFilterModes);
     render();
   });
-  document.getElementById('typeFilter').addEventListener('change', e => {
-    typeFilterMode = e.target.value;
-    localStorage.setItem(TYPE_FILTER_KEY, typeFilterMode);
+  document.getElementById('statusFilter').addEventListener('change', e => {
+    if (!e.target.matches('input[type="checkbox"]')) return;
+    statusFilterModes = selectedFilterModes('statusFilter', STATUS_FILTERS);
+    saveFilterModes(FILTER_KEY, statusFilterModes);
     render();
   });
   document.getElementById('hypeFilter').addEventListener('change', e => {
-    hypeFilterMode = e.target.value;
-    localStorage.setItem(HYPE_FILTER_KEY, hypeFilterMode);
+    if (!e.target.matches('input[type="checkbox"]')) return;
+    hypeFilterModes = selectedFilterModes('hypeFilter', HYPE_FILTERS);
+    saveFilterModes(HYPE_FILTER_KEY, hypeFilterModes);
     render();
   });
+  document.addEventListener('click', e => {
+    document.querySelectorAll('.filter-picker[open]').forEach(picker => {
+      if (!picker.contains(e.target)) picker.removeAttribute('open');
+    });
+  });
+  document.querySelectorAll('.filter-picker').forEach(picker => {
+    picker.addEventListener('toggle', () => {
+      if (!picker.open) return;
+      document.querySelectorAll('.filter-picker[open]').forEach(other => {
+        if (other !== picker) other.removeAttribute('open');
+      });
+    });
+  });
   document.getElementById('priceFilter').addEventListener('change', e => {
-    priceFilterMode = e.target.value;
-    localStorage.setItem(PRICE_FILTER_KEY, priceFilterMode);
+    if (!e.target.matches('input[type="checkbox"]')) return;
+    priceFilterModes = selectedFilterModes('priceFilter', PRICE_FILTERS);
+    saveFilterModes(PRICE_FILTER_KEY, priceFilterModes);
     render();
   });
   document.getElementById('resetFiltersBtn').addEventListener('click', () => {
-    filterMode = 'all';
-    typeFilterMode = 'all';
-    hypeFilterMode = 'all';
-    priceFilterMode = 'all';
-    localStorage.setItem(FILTER_KEY, filterMode);
-    localStorage.setItem(TYPE_FILTER_KEY, typeFilterMode);
-    localStorage.setItem(HYPE_FILTER_KEY, hypeFilterMode);
-    localStorage.setItem(PRICE_FILTER_KEY, priceFilterMode);
+    statusFilterModes = [...STATUS_FILTERS];
+    typeFilterModes = [...TYPE_FILTERS];
+    hypeFilterModes = [...HYPE_FILTERS];
+    priceFilterModes = [...PRICE_FILTERS];
+    saveFilterModes(FILTER_KEY, statusFilterModes);
+    saveFilterModes(TYPE_FILTER_KEY, typeFilterModes);
+    saveFilterModes(HYPE_FILTER_KEY, hypeFilterModes);
+    saveFilterModes(PRICE_FILTER_KEY, priceFilterModes);
     searchQuery = '';
     searchInput.value = '';
     searchClear.hidden = true;
@@ -2570,7 +2864,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = 'Alpha 0.11.4';
+  const APP_VERSION = 'Alpha 0.12.0';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
