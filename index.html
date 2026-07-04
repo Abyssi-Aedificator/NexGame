@@ -1,0 +1,3802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NexGame — Release Tracker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1a0033">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NexGame">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: block;
+  }
+
+  :root {
+    /* default theme (Nebula); overridden when another theme is picked */
+    --bg-gradient: linear-gradient(135deg, #1a0033 0%, #3a0ca3 40%, #7209b7 70%, #f72585 100%);
+    --blob1: rgba(114, 9, 183, 0.55);
+    --blob2: rgba(247, 37, 133, 0.45);
+    --accent: linear-gradient(135deg, #ffd6f4, #ff8fd6);
+    --accent-2: #ff8fd6;
+    --accent-soft: #ffd6f4;
+    --on-accent: #2a0845;
+    --modal-bg: rgba(40, 8, 70, 0.92);
+    --results-bg: rgba(45, 10, 78, 0.98);
+    --scrim-a: rgba(15, 2, 30, 0.55);
+    --scrim-b: rgba(15, 2, 30, 0.80);
+    --num-glow: rgba(247, 37, 133, 0.5);
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    color: #f3f6ff;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    overflow-x: hidden;
+    transition: background 0.5s ease;
+  }
+
+  body::before, body::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(70px);
+    z-index: 0;
+    pointer-events: none;
+  }
+  body::before {
+    width: 340px; height: 340px;
+    background: var(--blob1);
+    top: -90px; left: -70px;
+  }
+  body::after {
+    width: 380px; height: 380px;
+    background: var(--blob2);
+    bottom: -120px; right: -90px;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+    transition: max-width .25s ease;
+  }
+  .wrap.wide { max-width: 1280px; }
+
+  header.top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  .header-brand { display: flex; align-items: center; gap: 14px; }
+  .header-controls { display: flex; align-items: center; gap: 14px; }
+  header.top .logo {
+    width: 46px; height: 46px;
+    display: grid; place-items: center;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: var(--accent-soft);
+  }
+  header.top h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  header.top p {
+    font-size: 0.82rem;
+    opacity: 0.75;
+  }
+
+  .icon-btn, .group-toggle {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    padding: 9px;
+    border-radius: 11px;
+    display: grid; place-items: center;
+    transition: color .15s, background .15s;
+  }
+  .icon-btn svg, .group-toggle svg { width: 18px; height: 18px; }
+  .icon-btn:hover, .group-toggle:hover { color: #fff; }
+  .group-toggle.active { color: var(--on-accent); background: var(--accent); border-color: transparent; }
+
+  .settings-open { margin-left: auto; }
+  .group-toggle { margin-left: 10px; }
+
+  .view-toggle {
+    margin-left: 10px;
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 11px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+  .vt-btn {
+    background: none; border: none;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    padding: 7px;
+    border-radius: 8px;
+    display: grid; place-items: center;
+    transition: color .15s, background .15s;
+  }
+  .vt-btn svg { width: 18px; height: 18px; }
+  .vt-btn:hover { color: #fff; }
+  .vt-btn.active { color: var(--on-accent); background: var(--accent); }
+
+  .filter-row { display: flex; gap: 8px; flex-wrap: nowrap; margin-bottom: 18px; }
+  .filter-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 400;
+    transition: color .15s, background .15s, border-color .15s;
+  }
+  .filter-btn:hover { color: #fff; }
+  .filter-btn.active { color: var(--on-accent); background: var(--accent); border-color: transparent; }
+  .filter-select {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.85);
+    cursor: pointer;
+    padding: 8px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    outline: none;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color-scheme: dark;
+    accent-color: var(--accent-2);
+    transition: color .15s, background .15s, border-color .15s;
+  }
+  .filter-select:hover { color: #fff; border-color: rgba(255,255,255,0.32); }
+  .filter-select option {
+    background: var(--results-bg);
+    color: #fff;
+  }
+  .filter-select option:checked { background: var(--accent-2); color: var(--on-accent); }
+  .filter-picker {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 150px;
+  }
+  .filter-picker summary {
+    height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 20px;
+    color: rgba(255,255,255,0.85);
+    cursor: pointer;
+    padding: 0 10px;
+    font-size: 0.78rem;
+    font-weight: 400;
+    white-space: nowrap;
+    list-style: none;
+    transition: color .15s, background .15s, border-color .15s;
+  }
+  .filter-picker summary::-webkit-details-marker { display: none; }
+  .filter-picker summary:hover,
+  .filter-picker[open] summary {
+    color: #fff;
+    border-color: rgba(255,255,255,0.32);
+  }
+  .filter-summary-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .filter-count {
+    flex: none;
+    min-width: 18px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    color: var(--on-accent);
+    background: var(--accent);
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  .filter-caret {
+    flex: none;
+    width: 14px; height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.7;
+    transition: transform .15s;
+  }
+  .filter-picker[open] .filter-caret { transform: rotate(180deg); }
+  .filter-menu {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 210px;
+    padding: 8px;
+    border-radius: 14px;
+    background: var(--results-bg);
+    border: 1px solid rgba(255,255,255,0.16);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  }
+  .filter-option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 9px;
+    border-radius: 10px;
+    color: rgba(255,255,255,0.82);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 400;
+  }
+  .filter-option:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.09);
+  }
+  .filter-option input { position: absolute; opacity: 0; pointer-events: none; }
+  .filter-option .box {
+    flex: none;
+    width: 16px; height: 16px;
+    display: grid;
+    place-items: center;
+    border-radius: 5px;
+    border: 1px solid rgba(255,255,255,0.28);
+    background: rgba(255,255,255,0.08);
+  }
+  .filter-option svg {
+    width: 12px; height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+  }
+  .filter-option input:checked + .box {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: transparent;
+  }
+  .filter-option input:checked + .box svg { opacity: 1; }
+
+  .reset-filters-btn {
+    flex: none;
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 50%;
+    color: rgba(255,255,255,0.75);
+    cursor: pointer;
+    transition: color .15s, background .15s, border-color .15s, transform .15s;
+  }
+  .reset-filters-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .reset-filters-btn:hover { color: #fff; border-color: rgba(255,255,255,0.32); background: rgba(255,255,255,0.16); }
+  .reset-filters-btn:active { transform: rotate(-70deg); }
+
+  .search-box {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 20px;
+    padding: 0 12px;
+    min-width: 80px;
+    flex: 2 1 0;
+    max-width: 420px;
+  }
+  .search-box svg { width: 15px; height: 15px; fill: none; stroke: rgba(255,255,255,0.6); stroke-width: 2.2; stroke-linecap: round; flex: none; }
+  .search-box input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 0.82rem;
+    padding: 8px 0;
+    min-width: 0;
+  }
+  .search-box input::placeholder { color: rgba(255,255,255,0.5); }
+  .search-box button {
+    flex: none;
+    width: 18px; height: 18px;
+    border: none;
+    background: none;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .search-box button:hover { color: #fff; }
+  .search-box button svg { stroke: currentColor; }
+  .search-box button[hidden] { display: none; }
+
+  .add-btn {
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--on-accent);
+    background: var(--accent);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .add-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42); }
+  .add-btn svg { width: 18px; height: 18px; }
+
+  .list { display: flex; flex-direction: column; gap: 16px; }
+
+  .month-sep {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 6px 2px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: rgba(255,255,255,0.85);
+  }
+  .month-sep::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(255,255,255,0.3), rgba(255,255,255,0));
+  }
+  .grid .month-sep { grid-column: 1 / -1; margin-top: 14px; }
+
+  /* ---- grid (cover-art) view ---- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+  .tile {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #2a1840;
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px 18px;
+    color: #fff;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .tile:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(0,0,0,0.45); }
+  .tile.released { opacity: 0.72; }
+  /* dark scrim so text stays readable over any cover */
+  .tile::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 35%, rgba(0,0,0,0.35) 65%, rgba(0,0,0,0.78) 100%);
+    z-index: 0;
+  }
+  .tile > * { position: relative; z-index: 1; }
+  .tile-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .tile-num {
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    z-index: 1;
+    font-size: 3.4rem;
+    font-weight: 800;
+    text-shadow: 0 2px 14px rgba(0,0,0,0.7);
+    pointer-events: none;
+  }
+  .tile-num.small { font-size: 1.5rem; }
+  .tile-sub {
+    align-self: center;
+    font-size: 0.78rem;
+    opacity: 0.92;
+    text-shadow: 0 1px 5px rgba(0,0,0,0.85);
+  }
+  .tile-actions {
+    position: absolute; top: 10px; right: 10px;
+    z-index: 2;
+    display: flex; gap: 2px;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .tile:hover .tile-actions { opacity: 1; }
+  .tile-actions button {
+    background: rgba(0,0,0,0.45); border: none;
+    color: #fff; cursor: pointer;
+    padding: 5px; border-radius: 7px;
+    display: grid; place-items: center;
+  }
+  .tile-actions button:hover { background: rgba(0,0,0,0.7); }
+  .tile-actions svg { width: 15px; height: 15px; }
+
+  .card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 22px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+    transition: transform .15s;
+  }
+  .card:hover { transform: translateY(-2px); }
+  .card.released { opacity: 0.72; }
+  .card.has-bg h2, .card.has-bg .meta, .card.has-bg .countdown {
+    text-shadow: 0 1px 6px rgba(0,0,0,0.65);
+  }
+
+  .countdown {
+    flex-shrink: 0;
+    width: 92px;
+    text-align: center;
+  }
+  .countdown .num {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 2px 10px var(--num-glow);
+  }
+  .countdown .lbl {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    margin-top: 4px;
+  }
+  .countdown.out .num { font-size: 1.05rem; color: var(--accent-2); }
+  .sparkle-lbl { display: flex; justify-content: center; }
+  .sparkle-lbl svg {
+    width: 14px; height: 14px;
+    fill: none; stroke: var(--accent-2);
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .info { flex: 1; min-width: 0; }
+  .title-row { display: flex; align-items: center; gap: 8px; min-width: 0; margin-bottom: 4px; }
+  .info h2 {
+    font-size: 1.18rem;
+    font-weight: 700;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+  .price-badge {
+    flex: none;
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(6px);
+    color: rgba(255,255,255,0.92);
+  }
+  .price-row { display: flex; align-items: center; gap: 10px; }
+  .price-row input[type="number"] { flex: 1; }
+  .price-est-chk { flex: none; white-space: nowrap; }
+  .info .meta {
+    font-size: 0.82rem;
+    opacity: 0.8;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--accent-2);
+    color: var(--accent-2);
+    opacity: 1;
+    white-space: nowrap;
+  }
+  .tile-tags { display: flex; gap: 6px; flex-wrap: nowrap; margin-top: 5px; overflow: hidden; }
+  .tile-tags .tag { background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.4); color: #fff; flex-shrink: 0; }
+  .tile-tags .tag-more { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3); }
+
+  .tag-type { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.08); }
+  .tag-type.tag-dlc { border-color: #4cc9f0; color: #4cc9f0; }
+  .tag-type.tag-patch { border-color: #ffb703; color: #ffb703; }
+  .tag-type.tag-ear { border-color: #06d6a0; color: #06d6a0; }
+
+  .tag-hype-under { border-color: #8d99ae; color: #8d99ae; }
+  .tag-hype-high { border-color: #06d6a0; color: #06d6a0; }
+  .tag-hype-terminal { border-color: #ff3366; color: #ff3366; }
+
+  .actions { flex-shrink: 0; display: flex; gap: 2px; }
+  .del, .edit, .archive {
+    background: none; border: none;
+    color: rgba(255,255,255,0.55);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 9px;
+    transition: color .15s, background .15s;
+  }
+  .del:hover { color: #ffb3c8; background: rgba(255,255,255,0.1); }
+  .edit:hover { color: #b9e6ff; background: rgba(255,255,255,0.1); }
+  .archive:hover { color: #c8b9ff; background: rgba(255,255,255,0.1); }
+  .del svg, .edit svg, .archive svg { width: 18px; height: 18px; }
+
+  .empty {
+    text-align: center;
+    padding: 70px 20px;
+    opacity: 0.8;
+  }
+  .empty svg { width: 54px; height: 54px; margin: 0 auto 16px; opacity: 0.6; }
+  .empty p { font-size: 0.95rem; }
+
+  /* modal */
+  .overlay {
+    position: fixed; inset: 0;
+    z-index: 10;
+    background: rgba(10, 0, 24, 0.55);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .overlay.show { display: flex; }
+  .modal {
+    width: 100%;
+    max-width: 420px;
+    border-radius: 20px;
+    padding: 26px;
+    background: var(--modal-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.22);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .modal h3 { font-size: 1.2rem; margin-bottom: 20px; }
+
+  .set-section { margin-bottom: 22px; }
+  .set-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    opacity: 0.75;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .set-desc { font-size: 0.84rem; opacity: 0.7; margin-bottom: 12px; }
+
+  .theme-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+  .theme-swatch {
+    flex: 1;
+    min-width: 56px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .theme-swatch .sw-chip {
+    height: 44px;
+    border-radius: 11px;
+    border: 2px solid transparent;
+    transition: transform .12s, border-color .15s;
+  }
+  .theme-swatch:hover .sw-chip { transform: translateY(-2px); }
+  .theme-swatch.sel .sw-chip { border-color: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,0.35); }
+  .theme-swatch .sw-name {
+    display: block;
+    font-size: 0.68rem;
+    margin-top: 6px;
+    opacity: 0.8;
+  }
+  .theme-swatch.sel .sw-name { opacity: 1; font-weight: 600; }
+  .set-row { display: flex; gap: 10px; }
+  .set-row button { flex: 1; padding: 11px; border-radius: 11px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; transition: transform .15s; }
+  .set-row button:hover { transform: translateY(-1px); }
+  .set-note { font-size: 0.82rem; margin-top: 10px; min-height: 0; }
+  .set-note.ok { color: #b9ffd0; }
+  .set-note.bad { color: #ffb3c8; }
+
+  /* ---- settings tabs ---- */
+  .settings-modal { max-width: 620px; }
+  .set-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 22px;
+    padding: 4px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .set-tab {
+    flex: 1;
+    padding: 10px 8px;
+    border-radius: 10px;
+    border: none;
+    background: none;
+    color: rgba(255,255,255,0.55);
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-align: center;
+    transition: color .15s, background .15s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .set-tab:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .set-tab.active { color: var(--on-accent); background: var(--accent); }
+  .set-tab svg { width: 15px; height: 15px; flex: none; }
+  .set-panels {
+    height: min(480px, calc(80vh - 140px));
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+  }
+  .set-panels::-webkit-scrollbar { width: 6px; }
+  .set-panels::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 3px; }
+  .set-panel { display: none; }
+  .set-panel.active { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; }
+  .set-panel .set-section:last-child { margin-bottom: 0; }
+  #panel-about .set-section { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  #panel-about .changelog { max-height: none; flex: 1; min-height: 0; overflow-y: auto; }
+  .set-version {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    margin-top: 14px;
+    text-align: center;
+  }
+
+  /* ---------- Dropbox sync ---------- */
+  .dbx-status {
+    font-size: 0.62rem; font-weight: 700; vertical-align: middle;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 2px 9px; border-radius: 20px; margin-left: 6px;
+    background: rgba(255,255,255,0.12); opacity: 0.75;
+  }
+  .dbx-status.connected { background: rgba(62,207,142,0.22); color: #6ee7b7; opacity: 1; }
+  .dbx-key-label { display: block; font-size: 0.8rem; opacity: 0.8; margin-bottom: 6px; }
+  .dbx-link { color: #8ec5ff; text-decoration: none; font-weight: 600; }
+  .dbx-link:hover { text-decoration: underline; }
+  #dbxKey {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.08);
+    color: #fff; font-size: 0.9rem; outline: none;
+    transition: background .2s, border-color .2s;
+  }
+  #dbxKey::placeholder { color: rgba(255,255,255,0.45); }
+  #dbxKey:focus { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.45); }
+  .dbx-account-row { font-size: 0.78rem; opacity: 0.78; margin: 2px 0 12px; }
+  .dbx-account-row span + span::before { content: ' · '; opacity: 0.6; }
+  .dbx-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; margin: 0 0 12px; user-select: none; }
+  .dbx-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .dbx-toggle-track {
+    flex-shrink: 0; width: 38px; height: 22px; border-radius: 22px;
+    background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.24);
+    transition: background .2s; position: relative;
+  }
+  .dbx-toggle-thumb {
+    position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.35); transition: transform .2s;
+  }
+  .dbx-toggle input:checked + .dbx-toggle-track { background: rgba(62,207,142,0.55); border-color: rgba(110,231,183,0.6); }
+  .dbx-toggle input:checked + .dbx-toggle-track .dbx-toggle-thumb { transform: translateX(16px); }
+  .dbx-toggle input:focus-visible + .dbx-toggle-track { box-shadow: 0 0 0 3px rgba(120,200,255,0.4); }
+  .dbx-toggle-label { font-size: 0.82rem; opacity: 0.85; line-height: 1.35; }
+  .dbx-danger { color: #ffb3c8; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: calc(26px + env(safe-area-inset-bottom));
+    transform: translate(-50%, 16px);
+    z-index: 200; pointer-events: none;
+    max-width: min(90vw, 420px);
+    padding: 12px 20px; border-radius: 14px;
+    font-size: 0.88rem; font-weight: 600; color: #fff; text-align: center;
+    background: rgba(30, 20, 60, 0.85);
+    border: 1px solid rgba(255,255,255,0.22);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+    opacity: 0; transition: opacity .25s, transform .25s;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  .changelog {
+    max-height: 230px;
+    overflow-y: auto;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .changelog::-webkit-scrollbar { width: 6px; }
+  .changelog::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 3px; }
+  .changelog::-webkit-scrollbar-track { background: transparent; }
+  .cl-entry + .cl-entry { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.12); }
+  .cl-ver { font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .cl-current {
+    font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 2px 8px; border-radius: 20px;
+    background: var(--accent); color: var(--on-accent); font-weight: 700;
+  }
+  .changelog ul { margin: 0; padding-left: 18px; }
+  .changelog li { font-size: 0.84rem; opacity: 0.88; margin-bottom: 5px; line-height: 1.4; }
+  .field { margin-bottom: 16px; position: relative; }
+  .name-row { display: flex; gap: 8px; }
+  .name-row input { flex: 1; }
+  .lookup-btn {
+    flex-shrink: 0;
+    width: 46px;
+    border-radius: 11px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.1);
+    color: var(--accent-soft);
+    cursor: pointer;
+    display: grid; place-items: center;
+    transition: background .15s, transform .15s;
+  }
+  .lookup-btn:hover { background: rgba(255,255,255,0.18); transform: translateY(-1px); }
+  .lookup-btn svg { width: 19px; height: 19px; }
+  .lookup-btn.busy { pointer-events: none; }
+  .lookup-btn.busy svg { animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .results {
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    margin-top: 6px;
+    z-index: 5;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--results-bg);
+    border: 1px solid rgba(255,255,255,0.22);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.5);
+    max-height: 230px;
+    overflow-y: auto;
+    display: none;
+  }
+  .results.show { display: block; }
+  .results .res {
+    padding: 11px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    transition: background .12s;
+  }
+  .results .res:last-child { border-bottom: none; }
+  .results .res:hover { background: rgba(255,255,255,0.12); }
+  .results .res .rn { font-size: 0.92rem; font-weight: 600; }
+  .results .res .rd { font-size: 0.76rem; opacity: 0.7; margin-top: 2px; }
+  .results .res .rdate { color: #b9ffd0; }
+  .results .note { padding: 13px 14px; font-size: 0.84rem; opacity: 0.75; }
+
+  .import-modal { max-width: 680px; }
+  .archived-modal { max-width: 680px; }
+  .archived-list, .import-list {
+    max-height: 50vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .archived-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .archived-name { flex: 1; font-size: 0.88rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .archived-restore { background: none; border: none; color: #a0d8a0; cursor: pointer; padding: 6px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; transition: all .15s; }
+  .archived-restore:hover { background: rgba(255,255,255,0.1); color: #d0ffb0; }
+  .imp-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    cursor: pointer;
+  }
+  .imp-row input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--accent-2); flex: none; }
+  .imp-name { flex: 1; font-size: 0.88rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .imp-name.imp-dup { text-decoration: line-through; opacity: 0.55; }
+  .imp-status { font-size: 0.78rem; opacity: 0.65; white-space: nowrap; }
+  .imp-date {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.8rem;
+    padding: 4px 6px;
+    color-scheme: dark;
+  }
+  .imp-tba {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.74rem;
+    opacity: 0.8;
+    white-space: nowrap;
+    flex: none;
+  }
+  .imp-tba input[type="checkbox"] { width: 14px; height: 14px; }
+  .imp-item:last-child .imp-row { border-bottom: none; }
+  .imp-research {
+    flex: none;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .imp-research:hover { background: rgba(255,255,255,0.18); }
+  .imp-research svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+  .imp-cand-list {
+    padding: 4px 12px 10px 40px;
+    background: rgba(0,0,0,0.18);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .imp-item:last-child .imp-cand-list { border-bottom: none; }
+  .imp-cand {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  .imp-cand:hover { background: rgba(255,255,255,0.12); }
+  .imp-cand-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .imp-cand-desc { opacity: 0.6; font-weight: 400; }
+  .imp-cand-date { opacity: 0.75; white-space: nowrap; }
+  .imp-cand-empty { font-size: 0.78rem; opacity: 0.6; padding: 7px 8px; }
+  .field label {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    opacity: 0.75;
+    margin-bottom: 7px;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 11px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border .15s, background .15s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent-2); background: rgba(255,255,255,0.16); }
+  .field input::placeholder { color: rgba(255,255,255,0.45); }
+  .field select { color-scheme: dark; accent-color: var(--accent-2); }
+  .field select option {
+    background: var(--results-bg);
+    color: #fff;
+  }
+  .field select option:checked { background: var(--accent-2); color: var(--on-accent); }
+  .field input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; }
+  .field input#gDate:disabled { opacity: 0.4; }
+  .chk-row { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 10px; }
+  .chk-row .chk { margin: 0; }
+  .chk {
+    display: flex !important;
+    align-items: center;
+    gap: 9px;
+    margin: 10px 0 0;
+    font-size: 0.82rem;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    opacity: 0.9 !important;
+    cursor: pointer;
+    user-select: none;
+  }
+  .chk input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .chk .box {
+    flex-shrink: 0;
+    width: 19px;
+    height: 19px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s, border-color .15s;
+  }
+  .chk .box svg {
+    width: 12px;
+    height: 12px;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity .15s, transform .15s;
+    stroke: var(--on-accent);
+    stroke-width: 3;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .chk input:checked ~ .box {
+    background: var(--accent);
+    border-color: transparent;
+  }
+  .chk input:checked ~ .box svg { opacity: 1; transform: scale(1); }
+  .chk input:focus-visible ~ .box { border-color: var(--accent-2); }
+
+  .bg-row { display: flex; align-items: center; gap: 8px; }
+  .swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sw {
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform .12s;
+  }
+  .sw:hover { transform: scale(1.12); }
+  .sw.sel { border-color: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,0.35); }
+  .sw.none {
+    background: rgba(255,255,255,0.12);
+    display: grid; place-items: center;
+    color: rgba(255,255,255,0.7);
+  }
+  .sw.none svg { width: 16px; height: 16px; }
+  .bg-row .custom-swatch {
+    position: relative;
+    margin: 0;
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    cursor: pointer;
+    overflow: hidden;
+    display: grid; place-items: center;
+    background: rgba(255,255,255,0.1);
+    border: 2px dashed rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.75);
+    transition: transform .12s, border-color .15s;
+  }
+  .bg-row .custom-swatch:hover { transform: scale(1.12); border-color: rgba(255,255,255,0.7); }
+  /* once a custom colour is chosen the chip fills with it and behaves like a preset */
+  .bg-row .custom-swatch.has-color { border-style: solid; border-color: transparent; }
+  .custom-swatch.sel { border-color: #fff !important; box-shadow: 0 0 0 2px rgba(0,0,0,0.35); }
+  .custom-swatch input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .custom-swatch svg { width: 16px; height: 16px; }
+  .custom-swatch.has-color svg { display: none; }
+  .img-row { display: flex; gap: 8px; margin-top: 12px; }
+  .img-row input[type=text] {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 0.85rem;
+    outline: none;
+  }
+  .img-row input[type=text]:focus { border-color: var(--accent-2); background: rgba(255,255,255,0.16); }
+  .img-row input::placeholder { color: rgba(255,255,255,0.45); }
+  .img-search-btn {
+    flex-shrink: 0;
+    width: 42px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.1);
+    color: var(--accent-soft);
+    cursor: pointer;
+    display: grid; place-items: center;
+    transition: background .15s;
+  }
+  .img-search-btn:hover { background: rgba(255,255,255,0.18); }
+  .img-search-btn svg { width: 17px; height: 17px; }
+
+  .err {
+    min-height: 0;
+    font-size: 0.82rem;
+    color: #ffb3c8;
+    margin-top: 14px;
+    display: none;
+  }
+  .err.show { display: block; }
+  .field input.invalid { border-color: #ff6b9d; background: rgba(255,107,157,0.12); }
+
+  .modal-actions { display: flex; gap: 12px; margin-top: 14px; }
+  .modal-actions button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 11px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: transform .15s, opacity .15s;
+  }
+  .modal-actions button:hover { transform: translateY(-1px); }
+  .btn-cancel {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+  }
+  .btn-save {
+    color: var(--on-accent);
+    background: var(--accent);
+  }
+  .btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-danger { background: #e0345c; color: #fff; }
+  .confirm-modal { max-width: 360px; }
+
+  .analytics-modal { max-width: 760px; }
+  .an-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .an-filters .filter-select {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.9);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .an-filters .filter-select:hover { background: rgba(255,255,255,0.12); }
+  .an-filters .filter-select:focus { outline: none; border-color: var(--accent-2); box-shadow: 0 0 0 2px rgba(0,0,0,0.2), inset 0 0 0 3px var(--accent-2); }
+  .an-section { margin-bottom: 26px; }
+  .an-section:last-child { margin-bottom: 0; }
+  .an-title {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    opacity: 0.75;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+  .an-insights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  .an-insight {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .an-insight .num { font-size: 1.6rem; font-weight: 800; line-height: 1; }
+  .an-insight .lbl { font-size: 0.72rem; opacity: 0.7; margin-top: 4px; }
+  .an-bars { display: flex; flex-direction: column; gap: 10px; }
+  .an-bar-row { display: flex; align-items: center; gap: 10px; }
+  .an-bar-name { width: 130px; flex: none; font-size: 0.8rem; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .an-bar-track { flex: 1; height: 10px; border-radius: 6px; background: rgba(255,255,255,0.08); overflow: hidden; }
+  .an-bar-fill { height: 100%; border-radius: 6px; background: var(--accent-2); transition: width .3s ease; }
+  .an-bar-count { width: 34px; flex: none; text-align: right; font-size: 0.8rem; font-weight: 700; }
+  .an-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 140px;
+    padding-top: 10px;
+    overflow-x: auto;
+  }
+  .an-chart-col {
+    flex: 1 0 auto;
+    min-width: 26px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .an-chart-bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    background: var(--accent-2);
+    min-height: 2px;
+    position: relative;
+  }
+  .an-chart-bar.is-past { opacity: 0.45; }
+  .an-chart-count {
+    font-size: 0.62rem;
+    font-weight: 700;
+    opacity: 0.85;
+  }
+  .an-chart-label {
+    font-size: 0.6rem;
+    opacity: 0.6;
+    white-space: nowrap;
+    transform: rotate(0deg);
+  }
+  .an-chart-delta { font-size: 0.62rem; font-weight: 700; opacity: 0.8; }
+  .an-chart-delta.is-up { color: #06d6a0; }
+  .an-chart-delta.is-down { color: #ff3366; }
+  .an-empty { font-size: 0.85rem; opacity: 0.6; padding: 10px 0; }
+
+  .update-banner {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background: var(--modal-bg);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.18);
+    font-size: 0.86rem;
+    transform: translateY(-100%);
+    transition: transform .25s ease;
+  }
+  .update-banner.show { transform: translateY(0); }
+
+  .side-nav {
+    position: fixed;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 8px 6px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    transition: left .2s ease;
+  }
+  @media (min-width: 1040px) {
+    .side-nav { display: flex; }
+  }
+  .side-nav.nav-cramped, .side-nav.nav-empty { display: none; }
+  .side-nav button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: 1px solid transparent;
+    color: rgba(255,255,255,0.62);
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: left;
+    transition: background .15s, color .15s, border-color .15s, transform .15s;
+  }
+  .side-nav .sn-label { flex: 1; }
+  .side-nav .sn-sum {
+    flex: none;
+    font-size: 0.66rem;
+    font-weight: 700;
+    opacity: 0.85;
+    color: var(--accent-2);
+    margin-left: 4px;
+    white-space: nowrap;
+    text-align: right;
+  }
+  .side-nav .sn-count {
+    flex: none;
+    font-size: 0.66rem;
+    font-weight: 700;
+    opacity: 0.7;
+    background: rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 1px 6px;
+    margin-left: 4px;
+    min-width: 14px;
+    text-align: center;
+  }
+  .side-nav button svg {
+    width: 14px; height: 14px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.85;
+  }
+  .side-nav button:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border-color: rgba(255,255,255,0.18);
+    transform: translateX(2px);
+  }
+  .side-nav button.sn-now { color: var(--accent-2); }
+  .side-nav button.sn-now:hover { background: color-mix(in srgb, var(--accent-2) 18%, transparent); }
+  .side-nav button.sn-soon { color: var(--accent-2); opacity: 0.85; }
+  .side-nav button.sn-soon:hover { background: color-mix(in srgb, var(--accent-2) 18%, transparent); }
+
+  .stats-panel {
+    position: fixed;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    display: none;
+    flex-direction: column;
+    gap: 9px;
+    width: 200px;
+    max-height: min(640px, calc(100vh - 36px));
+    overflow-y: auto;
+    padding: 13px 14px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    transition: right .2s ease;
+    scrollbar-width: thin;
+  }
+  .stats-panel::-webkit-scrollbar { width: 6px; }
+  .stats-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 3px; }
+  @media (min-width: 1340px) {
+    .stats-panel { display: flex; }
+  }
+  .stats-panel.stats-cramped, .stats-panel.stats-empty { display: none; }
+  .stats-panel .stat-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .stats-panel .stat-hero .num {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .stats-panel .stat-hero .lbl {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    opacity: 0.7;
+  }
+  .stats-panel .stat-group { display: flex; flex-direction: column; gap: 4px; }
+  .stats-panel .stat-group-title {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    opacity: 0.55;
+    font-weight: 700;
+  }
+  .stats-panel .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.72rem;
+  }
+  .stats-panel .stat-row .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex: none;
+    background: var(--accent-2);
+  }
+  .stats-panel .stat-row .stat-name { flex: 1; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stats-panel .stat-row .stat-count { font-weight: 700; opacity: 0.95; }
+  .stats-panel hr { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 0; }
+  .update-banner button {
+    border: none;
+    border-radius: 10px;
+    padding: 7px 14px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--on-accent);
+    background: var(--accent);
+  }
+
+  @media (max-width: 480px) {
+    .wrap { padding: 22px 14px 70px; }
+    header.top { flex-wrap: wrap; gap: 10px; }
+    header.top h1 { font-size: 1.25rem; }
+    header.top p { display: none; }
+    .header-brand { flex: 1 1 100%; }
+    .header-controls { flex: 1 1 100%; justify-content: space-between; gap: 8px; }
+    .add-btn { flex: 1 1 100%; justify-content: center; }
+    .filter-row { flex-wrap: wrap; }
+    .filter-select, .filter-picker { flex: 1 1 calc(50% - 4px); max-width: none; }
+    .filter-menu { width: min(210px, calc(100vw - 28px)); }
+    .search-box { order: 4; flex: 1 1 calc(100% - 46px); }
+    .reset-filters-btn { order: 5; }
+    .settings-modal { max-width: 100%; margin: 0 10px; }
+    .set-tab { font-size: 0.7rem; padding: 8px 4px; }
+    .set-tab svg { width: 13px; height: 13px; }
+    .set-panels { max-height: min(400px, calc(80vh - 140px)); }
+    .countdown { width: 74px; }
+    .countdown .num { font-size: 1.7rem; }
+    .card { padding: 16px; gap: 12px; }
+    .title-row { flex-wrap: wrap; }
+    .info h2 { flex: 1 1 100%; }
+  }
+</style>
+</head>
+<body>
+  <div class="update-banner" id="updateBanner">
+    <span id="updateBannerMsg">A new version of NexGame is ready.</span>
+    <button type="button" id="updateBtn">Update now</button>
+  </div>
+
+  <nav class="side-nav" id="sideNav"></nav>
+  <aside class="stats-panel" id="statsPanel"></aside>
+
+  <div class="wrap" id="wrap">
+    <header class="top">
+      <div class="header-brand">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" width="26" height="26"><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13.5" r="1"/><rect x="2" y="6" width="20" height="12" rx="5"/></svg>
+        </div>
+        <div>
+          <h1>NexGame</h1>
+          <p>Your upcoming game release countdown</p>
+        </div>
+      </div>
+      <div class="header-controls">
+        <button class="icon-btn settings-open" id="settingsOpen" title="Settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <button class="icon-btn settings-open" id="analyticsOpen" title="Analytics">
+          <svg viewBox="0 0 24 24"><path d="M4 19V9M11 19V5M18 19v-7"/><path d="M2 19h20"/></svg>
+        </button>
+        <button class="icon-btn settings-open" id="archivedOpen" title="Archived">
+          <svg viewBox="0 0 24 24"><path d="M3 8h18M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4"/></svg>
+        </button>
+        <button class="group-toggle" id="groupToggle" title="Group by month">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+        </button>
+        <button class="group-toggle" id="sortToggle" title="Sort alphabetically">
+          <svg viewBox="0 0 24 24"><path d="M3 6h7M3 12h5M3 18h3"/><path d="M17 4v16M17 4l-4 4M17 4l4 4"/></svg>
+        </button>
+        <div class="view-toggle" id="viewToggle">
+          <button data-view="list" class="vt-btn" title="List view">
+            <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          </button>
+          <button data-view="grid" class="vt-btn" title="Grid view">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </button>
+        </div>
+      </div>
+      <button class="add-btn" id="openAdd">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Track a game</span>
+      </button>
+    </header>
+
+    <div class="filter-row" id="filterToggle">
+      <details class="filter-picker" id="typeFilter">
+        <summary title="Choose type categories to display">
+          <span class="filter-summary-text" id="typeFilterSummary">All Types</span>
+          <span class="filter-count" id="typeFilterCount">4</span>
+          <svg class="filter-caret" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+        <div class="filter-menu" role="group" aria-label="Choose type categories to display">
+          <label class="filter-option">
+            <input type="checkbox" value="none">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>No Type</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="dlc">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>DLC</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="patch">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Patch</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="ear">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>EAR</span>
+          </label>
+        </div>
+      </details>
+      <details class="filter-picker" id="statusFilter">
+        <summary title="Choose status categories to display">
+          <span class="filter-summary-text" id="statusFilterSummary">All Status</span>
+          <span class="filter-count" id="statusFilterCount">5</span>
+          <svg class="filter-caret" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+        <div class="filter-menu" role="group" aria-label="Choose status categories to display">
+          <label class="filter-option">
+            <input type="checkbox" value="none">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>No Status</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="queued">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Queued</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="prequel">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Prequel</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="link">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Link</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="ready">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Ready</span>
+          </label>
+        </div>
+      </details>
+      <details class="filter-picker" id="hypeFilter">
+        <summary title="Choose hype categories to display">
+          <span class="filter-summary-text" id="hypeFilterSummary">All Hype</span>
+          <span class="filter-count" id="hypeFilterCount">4</span>
+          <svg class="filter-caret" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+        <div class="filter-menu" role="group" aria-label="Choose hype categories to display">
+          <label class="filter-option">
+            <input type="checkbox" value="none">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>No Hype</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="under">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Under the Radar</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="high">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Idealistic Case</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="terminal">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Terminal Hype</span>
+          </label>
+        </div>
+      </details>
+      <details class="filter-picker" id="priceFilter">
+        <summary title="Choose price categories to display">
+          <span class="filter-summary-text" id="priceFilterSummary">All Prices</span>
+          <span class="filter-count" id="priceFilterCount">3</span>
+          <svg class="filter-caret" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+        <div class="filter-menu" role="group" aria-label="Choose price categories to display">
+          <label class="filter-option">
+            <input type="checkbox" value="none">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>No Price</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="set">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Has Price</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="estimated">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Estimated Price</span>
+          </label>
+        </div>
+      </details>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="searchInput" placeholder="Search games…" autocomplete="off">
+        <button type="button" id="searchClear" title="Clear search" hidden>
+          <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <button type="button" class="reset-filters-btn" id="resetFiltersBtn" title="Reset all filters and search">
+        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 2.6-6.3M3 4v5h5"/></svg>
+      </button>
+    </div>
+
+    <div class="list" id="list"></div>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h3 id="modalTitle">Track a game</h3>
+      <div class="field">
+        <label for="gName">Game title</label>
+        <div class="name-row">
+          <input type="text" id="gName" placeholder="e.g. Grand Theft Auto VI" maxlength="80" autocomplete="off">
+          <button class="lookup-btn" id="lookupBtn" title="Find release date online">
+            <svg viewBox="0 0 24 24" id="lookupIcon"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          </button>
+        </div>
+        <div class="results" id="results"></div>
+      </div>
+      <div class="field">
+        <label for="gDate">Release date</label>
+        <input type="date" id="gDate">
+        <label class="chk">
+          <input type="checkbox" id="gTba">
+          <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+          <span>Coming soon (no date yet)</span>
+        </label>
+      </div>
+      <div class="field">
+        <label>Card background</label>
+        <div class="bg-row">
+          <div class="swatches" id="swatches"></div>
+          <label class="custom-swatch" id="customSwatch" title="Custom colour">
+            <input type="color" id="gColor" value="#7209b7">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </label>
+        </div>
+        <div class="img-row">
+          <input type="text" id="gImageUrl" placeholder="…or paste an image URL" autocomplete="off">
+          <button type="button" class="img-search-btn" id="imgSearchBtn" title="Search images on Brave">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Type</label>
+        <div class="chk-row">
+          <label class="chk">
+            <input type="radio" name="gType" id="gTypeDlc" value="dlc">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>DLC</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="gType" id="gTypePatch" value="patch">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Patch</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="gType" id="gTypeEar" value="ear">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>EAR</span>
+          </label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <div class="chk-row">
+          <label class="chk">
+            <input type="radio" name="gStatus" id="gStatusQueued" value="queued">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Queued</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="gStatus" id="gStatusPrequel" value="prequel">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Prequel</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="gStatus" id="gStatusLink" value="link">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Link</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="gStatus" id="gStatusReady" value="ready">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Ready</span>
+          </label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Hype</label>
+        <select id="gHype">
+          <option value="">No hype set</option>
+          <option value="under">Under the Radar</option>
+          <option value="high">Idealistic Case</option>
+          <option value="terminal">Terminal Hype</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="gPrice">Price</label>
+        <div class="price-row">
+          <input type="number" id="gPrice" placeholder="e.g. 59.99" min="0" step="0.01" inputmode="decimal">
+          <label class="chk price-est-chk">
+            <input type="checkbox" id="gPriceEst">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Estimated</span>
+          </label>
+        </div>
+      </div>
+      <div class="err" id="formErr"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="cancelBtn">Cancel</button>
+        <button class="btn-save" id="saveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="settingsOverlay">
+    <div class="modal settings-modal">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <h3 style="margin:0">Settings</h3>
+        <button class="icon-btn" id="settingsClose" title="Close" style="border:none">
+          <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="set-tabs" role="tablist">
+        <button class="set-tab active" data-panel="appearance" role="tab">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+          Appearance
+        </button>
+        <button class="set-tab" data-panel="data" role="tab">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Data
+        </button>
+        <button class="set-tab" data-panel="sync" role="tab">
+          <svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 12h18"/><path d="M7 22l-4-4 4-4"/><path d="M3 12v-2a6 6 0 0 1 10.7-3.8"/><path d="M21 12v2a6 6 0 0 1-10.7 3.8"/></svg>
+          Sync
+        </button>
+        <button class="set-tab" data-panel="about" role="tab">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          About
+        </button>
+      </div>
+
+      <div class="set-panels">
+      <div class="set-panel active" id="panel-appearance" role="tabpanel">
+        <div class="set-section">
+          <div class="set-label">Theme</div>
+          <div class="theme-grid" id="themeGrid"></div>
+        </div>
+      </div>
+
+      <div class="set-panel" id="panel-data" role="tabpanel">
+        <div class="set-section">
+          <div class="set-label">Backup &amp; restore</div>
+          <p class="set-desc">Save all your tracked games to a file, or restore from one.</p>
+          <div class="set-row">
+            <button class="btn-save" id="backupBtn">Backup to file</button>
+            <button class="btn-cancel" id="restoreBtn">Restore from file</button>
+            <input type="file" id="restoreFile" accept="application/json,.json" hidden>
+          </div>
+          <div class="set-note" id="restoreNote"></div>
+        </div>
+
+        <div class="set-section">
+          <div class="set-label">Data tools</div>
+          <p class="set-desc">Bulk-clear a field across every tracked game.</p>
+          <div class="set-row">
+            <button class="btn-cancel" id="resetHypeBtn">Reset all Hype</button>
+            <button class="btn-cancel" id="resetStatusBtn">Reset all Status</button>
+          </div>
+          <div class="set-note" id="resetHypeNote"></div>
+          <div class="set-note" id="resetStatusNote"></div>
+        </div>
+
+        <div class="set-section">
+          <div class="set-label">Import wishlist</div>
+          <p class="set-desc">Import a text file with one game title per line — we'll look up each release date on Wikidata.</p>
+          <div class="set-row">
+            <button class="btn-save" id="importBtn">Import from text file</button>
+            <input type="file" id="importFile" accept=".txt,text/plain" hidden>
+          </div>
+        </div>
+      </div>
+
+      <div class="set-panel" id="panel-sync" role="tabpanel">
+        <div class="set-section">
+          <div class="set-label">Dropbox sync <span id="dbxStatus" class="dbx-status"></span></div>
+          <p class="set-desc">Sync through your own Dropbox account so the same games are available on your PC and Android phone. Your data goes straight from your browser to Dropbox — never through any server of ours.</p>
+          <div id="dbxSetup">
+            <label class="dbx-key-label" for="dbxKey">Dropbox App key <a href="https://www.dropbox.com/developers/apps" target="_blank" rel="noopener" class="dbx-link">(get one free →)</a></label>
+            <input type="text" id="dbxKey" placeholder="e.g. abcd1234efgh567" autocomplete="off" spellcheck="false">
+            <div class="set-row" style="margin-top:12px">
+              <button class="btn-save" id="dbxConnectBtn">Connect to Dropbox</button>
+            </div>
+          </div>
+          <div id="dbxConnected" style="display:none">
+            <p class="dbx-account-row"><span id="dbxAccount"></span><span id="dbxLastSync">never synced</span></p>
+            <label class="dbx-toggle">
+              <input type="checkbox" id="dbxAutoUpload">
+              <span class="dbx-toggle-track"><span class="dbx-toggle-thumb"></span></span>
+              <span class="dbx-toggle-label">Auto-upload changes 10 seconds after you stop editing</span>
+            </label>
+            <label class="dbx-toggle">
+              <input type="checkbox" id="dbxAutoSync">
+              <span class="dbx-toggle-track"><span class="dbx-toggle-thumb"></span></span>
+              <span class="dbx-toggle-label">Auto-sync newer backups when the app opens</span>
+            </label>
+            <div class="set-row">
+              <button class="btn-cancel" id="dbxUploadBtn">Upload</button>
+              <button class="btn-cancel" id="dbxDownloadBtn">Download</button>
+              <button class="btn-cancel dbx-danger" id="dbxDisconnectBtn">Disconnect</button>
+            </div>
+          </div>
+          <div class="set-note" id="dbxNote"></div>
+        </div>
+      </div>
+
+      <div class="set-panel" id="panel-about" role="tabpanel">
+        <div class="set-section">
+          <div class="set-label">Changelog</div>
+            <div class="changelog">
+              <div class="cl-entry">
+                <div class="cl-ver">1.0.0 <span class="cl-current">current</span></div>
+                <ul>
+                  <li>Full release — stable, polished, and ready for everyday use.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="analyticsOverlay">
+    <div class="modal analytics-modal">
+      <h3>Analytics</h3>
+      <div id="analyticsContent"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="analyticsClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="importOverlay">
+    <div class="modal import-modal">
+      <h3>Import wishlist</h3>
+      <p class="set-desc">Looking up each title on Wikidata. Untick anything you don't want, or fix the date, then add.</p>
+      <div class="import-list" id="importList"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="importCancelBtn">Cancel</button>
+        <button class="btn-save" id="importAddBtn">Add selected</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="confirmOverlay">
+    <div class="modal confirm-modal">
+      <h3 id="confirmTitle">Remove game?</h3>
+      <p class="set-desc" id="confirmMsg"></p>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="confirmCancelBtn">Cancel</button>
+        <button class="btn-danger" id="confirmDeleteBtn">Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="dbxSyncOverlay">
+    <div class="modal confirm-modal">
+      <h3>Newer backup on Dropbox</h3>
+      <p class="set-desc">Your Dropbox backup was updated <b id="dbxSyncWhen"></b> — probably from another device. Downloading it will replace what's on this device.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="dbxSyncLater">Not now</button>
+        <button class="btn-save" id="dbxSyncNow">⬇ Sync now</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="archivedOverlay">
+    <div class="modal archived-modal">
+      <h3>Archived games</h3>
+      <div class="archived-list" id="archivedList"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="archivedClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const STORE_KEY = 'nexgame.games.v1';
+  const ARCHIVED_KEY = 'nexgame.archived.v1';
+  let archived = (() => { try { return JSON.parse(localStorage.getItem(ARCHIVED_KEY)) || []; } catch { return []; } })();
+  const list = document.getElementById('list');
+  const viewToggle = document.getElementById('viewToggle');
+  const groupToggle = document.getElementById('groupToggle');
+  const sortToggle = document.getElementById('sortToggle');
+  const filterToggle = document.getElementById('filterToggle');
+  const searchInput = document.getElementById('searchInput');
+  const searchClear = document.getElementById('searchClear');
+  const overlay = document.getElementById('overlay');
+  const gName = document.getElementById('gName');
+  const gDate = document.getElementById('gDate');
+  const gTba = document.getElementById('gTba');
+  const statusRadios = [...document.querySelectorAll('input[name="gStatus"]')];
+  const typeRadios = [...document.querySelectorAll('input[name="gType"]')];
+  const gHype = document.getElementById('gHype');
+  const gPrice = document.getElementById('gPrice');
+  const gPriceEst = document.getElementById('gPriceEst');
+
+  function getType() {
+    const sel = typeRadios.find(r => r.checked);
+    return sel ? sel.value : null;
+  }
+  function setType(value) {
+    typeRadios.forEach(r => { r.checked = r.value === value; });
+  }
+
+  // allow clicking the already-selected status/type radio to clear it (no status / no type)
+  // note: clicking a <label> only forwards a synthetic "click" to its nested
+  // <input> — "mousedown" fires on the label itself, so listen there instead.
+  statusRadios.forEach(r => {
+    r.closest('.chk').addEventListener('mousedown', () => {
+      statusRadios.forEach(x => { x.dataset.wasChecked = x.checked ? 'true' : 'false'; });
+    });
+    r.addEventListener('click', () => {
+      if (r.dataset.wasChecked === 'true') r.checked = false;
+    });
+  });
+  typeRadios.forEach(r => {
+    r.closest('.chk').addEventListener('mousedown', () => {
+      typeRadios.forEach(x => { x.dataset.wasChecked = x.checked ? 'true' : 'false'; });
+    });
+    r.addEventListener('click', () => {
+      if (r.dataset.wasChecked === 'true') r.checked = false;
+    });
+  });
+
+  function getStatus() {
+    const sel = statusRadios.find(r => r.checked);
+    return sel ? sel.value : null;
+  }
+  function setStatus(value) {
+    statusRadios.forEach(r => { r.checked = r.value === value; });
+  }
+  const saveBtn = document.getElementById('saveBtn');
+  const lookupBtn = document.getElementById('lookupBtn');
+  const lookupIcon = document.getElementById('lookupIcon');
+  const results = document.getElementById('results');
+  const swatches = document.getElementById('swatches');
+  const gColor = document.getElementById('gColor');
+  const customSwatch = gColor.closest('.custom-swatch');
+  const gImageUrl = document.getElementById('gImageUrl');
+
+  const PRESET_COLORS = ['#7209b7', '#f72585', '#3a0ca3', '#4361ee', '#06d6a0', '#ff7b00', '#e63946'];
+  let pickedColor = null;   // null = default glass
+  let pickedImage = null;   // image url / data-url for the card background
+  let editingId = null;     // id of the entry being edited, or null when adding
+  const modalTitle = document.getElementById('modalTitle');
+
+  let games = load();
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+    catch { return []; }
+  }
+  function save() {
+    localStorage.setItem(STORE_KEY, JSON.stringify(games));
+    if (typeof scheduleAutoUpload === 'function') scheduleAutoUpload();
+  }
+
+  // local-timezone day difference between today and an ISO yyyy-mm-dd string
+  function daysUntil(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    const target = new Date(y, m - 1, d);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.round((target - today) / 86400000);
+  }
+
+  function fmtDate(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString(undefined,
+      { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  // DD/MM/YYYY for the grid tiles
+  function fmtSlash(iso) {
+    const [y, m, d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function fmtPrice(n) {
+    return '$' + n.toLocaleString(undefined, { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  }
+
+  // "July 2026" — used for the month separators
+  function monthLabel(iso) {
+    const [y, m] = iso.split('-').map(Number);
+    return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  }
+
+  const VIEW_KEY = 'nexgame.view';
+  let viewMode = localStorage.getItem(VIEW_KEY) === 'grid' ? 'grid' : 'list';
+  const GROUP_KEY = 'nexgame.group';
+  let groupByMonth = localStorage.getItem(GROUP_KEY) !== 'off';   // on by default
+  const SORT_KEY = 'nexgame.sort';
+  let sortAlpha = localStorage.getItem(SORT_KEY) === 'alpha';   // off (sort by date) by default
+  const FILTER_KEY = 'nexgame.filter';
+  const STATUS_FILTERS = ['none', 'queued', 'prequel', 'link', 'ready'];
+  const STATUS_FILTER_SUMMARY = {
+    none: 'No Status',
+    queued: 'Queued',
+    prequel: 'Prequel',
+    link: 'Link',
+    ready: 'Ready'
+  };
+  const TYPE_FILTER_KEY = 'nexgame.typeFilter';
+  const TYPE_FILTERS = ['none', 'dlc', 'patch', 'ear'];
+  const TYPE_FILTER_SUMMARY = {
+    none: 'No Type',
+    dlc: 'DLC',
+    patch: 'Patch',
+    ear: 'EAR'
+  };
+  const HYPE_FILTER_KEY = 'nexgame.hypeFilter';
+  const HYPE_FILTERS = ['none', 'under', 'high', 'terminal'];
+  const HYPE_FILTER_SUMMARY = {
+    none: 'No Hype',
+    under: 'Under',
+    high: 'Idealistic',
+    terminal: 'Terminal'
+  };
+  const PRICE_FILTER_KEY = 'nexgame.priceFilter';
+  const PRICE_FILTERS = ['none', 'set', 'estimated'];
+  const PRICE_FILTER_SUMMARY = {
+    none: 'No Price',
+    set: 'Has Price',
+    estimated: 'Estimated'
+  };
+  function getStoredFilterModes(key, validValues) {
+    const stored = localStorage.getItem(key);
+    if (!stored || stored === 'all') return [...validValues];
+    if (validValues.includes(stored)) return [stored];
+    try {
+      const parsed = JSON.parse(stored);
+      if (!Array.isArray(parsed)) return [...validValues];
+      const valid = parsed.filter(value => validValues.includes(value));
+      return valid.length ? [...new Set(valid)] : [];
+    } catch {
+      return [...validValues];
+    }
+  }
+  function saveFilterModes(key, modes) {
+    localStorage.setItem(key, JSON.stringify(modes));
+  }
+  function getStoredPriceFilterModes() {
+    if (localStorage.getItem(PRICE_FILTER_KEY) === 'set') return ['set', 'estimated'];
+    return getStoredFilterModes(PRICE_FILTER_KEY, PRICE_FILTERS);
+  }
+  function filterSummary(modes, validValues, allLabel, labels) {
+    if (modes.length === validValues.length) return allLabel;
+    if (!modes.length) return '0 selected';
+    if (modes.length === 1) return labels[modes[0]];
+    return `${modes.length} selected`;
+  }
+  let statusFilterModes = getStoredFilterModes(FILTER_KEY, STATUS_FILTERS);
+  let typeFilterModes = getStoredFilterModes(TYPE_FILTER_KEY, TYPE_FILTERS);
+  let hypeFilterModes = getStoredFilterModes(HYPE_FILTER_KEY, HYPE_FILTERS);
+  let priceFilterModes = getStoredPriceFilterModes();
+  const AN_STATUS_FILTER_KEY = 'nexgame.analyticsStatusFilter';
+  const AN_HYPE_FILTER_KEY = 'nexgame.analyticsHypeFilter';
+  let analyticsStatusFilter = localStorage.getItem(AN_STATUS_FILTER_KEY) || 'all';
+  let analyticsHypeFilter = localStorage.getItem(AN_HYPE_FILTER_KEY) || 'all';
+  function matchesFilter(g) {
+    const statusValue = g.status && STATUS_FILTERS.includes(g.status) ? g.status : 'none';
+    if (!statusFilterModes.includes(statusValue)) return false;
+    const typeValue = g.type && TYPE_FILTERS.includes(g.type) ? g.type : 'none';
+    if (!typeFilterModes.includes(typeValue)) return false;
+    const hypeValue = g.hype && HYPE_FILTERS.includes(g.hype) ? g.hype : 'none';
+    if (!hypeFilterModes.includes(hypeValue)) return false;
+    const hasPrice = typeof g.price === 'number';
+    const priceMatches =
+      (priceFilterModes.includes('none') && !hasPrice) ||
+      (priceFilterModes.includes('set') && hasPrice && !g.priceEstimated) ||
+      (priceFilterModes.includes('estimated') && hasPrice && g.priceEstimated);
+    if (!priceMatches) return false;
+    return true;
+  }
+
+  let searchQuery = '';
+  function matchesSearch(g) {
+    return !searchQuery || g.name.toLowerCase().includes(searchQuery);
+  }
+
+  function esc(s) {
+    return s.replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  const EDIT_SVG = `<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>`;
+  const DEL_SVG = `<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>`;
+  const ARCHIVE_SVG = `<svg viewBox="0 0 24 24"><path d="M3 8h18M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4"/></svg>`;
+
+  // background inline-style shared by both layouts
+  function bgStyle(g) {
+    if (g.image) {
+      return ` style="background-image: linear-gradient(var(--scrim-a), var(--scrim-b)), url('${esc(g.image)}'); background-size: cover; background-position: center;"`;
+    }
+    if (g.color) {
+      return ` style="background: linear-gradient(135deg, ${g.color}66, ${g.color}1f), rgba(255,255,255,0.10);"`;
+    }
+    return '';
+  }
+
+  function render() {
+    document.getElementById('wrap').classList.toggle('wide', viewMode === 'grid');
+    list.className = viewMode === 'grid' ? 'grid' : 'list';
+    [...viewToggle.children].forEach(b =>
+      b.classList.toggle('active', b.dataset.view === viewMode));
+    groupToggle.classList.toggle('active', groupByMonth);
+    sortToggle.classList.toggle('active', sortAlpha);
+    renderFilterPicker('typeFilter', typeFilterModes, TYPE_FILTERS, 'All Types', TYPE_FILTER_SUMMARY);
+    renderFilterPicker('statusFilter', statusFilterModes, STATUS_FILTERS, 'All Status', STATUS_FILTER_SUMMARY);
+    renderFilterPicker('hypeFilter', hypeFilterModes, HYPE_FILTERS, 'All Hype', HYPE_FILTER_SUMMARY);
+    renderFilterPicker('priceFilter', priceFilterModes, PRICE_FILTERS, 'All Prices', PRICE_FILTER_SUMMARY);
+    renderStatsPanel();
+
+    if (!games.length) {
+      list.className = 'list';
+      document.getElementById('wrap').classList.remove('wide');
+      list.innerHTML = `
+        <div class="empty">
+          <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="5"/><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13.5" r="1"/></svg>
+          <p>No games tracked yet.<br>Hit <strong>Track a game</strong> to start your countdown.</p>
+        </div>`;
+      renderSideNav([]);
+      return;
+    }
+
+    const visible = games.filter(g => matchesFilter(g) && matchesSearch(g));
+    if (!visible.length) {
+      list.className = 'list';
+      document.getElementById('wrap').classList.remove('wide');
+      list.innerHTML = `
+        <div class="empty">
+          <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="5"/><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13.5" r="1"/></svg>
+          <p>No games match this filter.</p>
+        </div>`;
+      renderSideNav([]);
+      return;
+    }
+
+    const byName = (a, b) => a.name.localeCompare(b.name);
+    const dated = visible.filter(g => !g.tba);
+    const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
+    const byReleaseDateDesc = (a, b) => daysUntil(b.date) - daysUntil(a.date);
+    const released = dated.filter(g => daysUntil(g.date) < 0).sort(sortAlpha ? byName : byReleaseDateDesc);
+    const tbaGames = visible.filter(g => g.tba).sort(byName);
+
+    // soonest upcoming first
+    const byDate = (a, b) => daysUntil(a.date) - daysUntil(b.date);
+
+    // chronological bucket order always comes from byDate; alpha sort is applied
+    // either across the whole list (ungrouped) or within each month bucket (grouped)
+    const chronological = upcoming.sort(byDate);
+
+    const itemFn = viewMode === 'grid' ? tileHTML : cardHTML;
+    const navSections = [];
+    let secId = 0;
+    function sepHTML(label, navLabel, kind, count, sum) {
+      const id = 'sec-' + (secId++);
+      navSections.push({ id, label: navLabel, kind, count, sum });
+      return `<div class="month-sep" id="${id}"><span>${esc(label)}</span></div>`;
+    }
+    function priceSum(arr) {
+      const total = arr.reduce((s, g) => s + (typeof g.price === 'number' ? g.price : 0), 0);
+      return total > 0 ? total : null;
+    }
+
+    let html;
+    if (!groupByMonth) {
+      const sorted = sortAlpha ? [...chronological].sort(byName) : chronological;
+      html = sorted.map(itemFn).join('');
+    } else {
+      // bucket by release month, keeping bucket order chronological
+      const buckets = [];
+      let curMonth = null, curArr = null;
+      chronological.forEach(g => {
+        const mk = g.date.slice(0, 7);   // YYYY-MM
+        if (mk !== curMonth) {
+          curMonth = mk;
+          curArr = [];
+          buckets.push(curArr);
+        }
+        curArr.push(g);
+      });
+      if (sortAlpha) buckets.forEach(b => b.sort(byName));
+      html = buckets.map(b =>
+        sepHTML(monthLabel(b[0].date), shortMonthLabel(b[0].date), 'month', b.length, priceSum(b)) +
+        b.map(itemFn).join('')
+      ).join('');
+    }
+    if (released.length) {
+      html += sepHTML('Out now', 'Out now', 'now', released.length) + released.map(itemFn).join('');
+    }
+    if (tbaGames.length) {
+      html += sepHTML('Coming soon', 'Soon', 'soon', tbaGames.length) + tbaGames.map(itemFn).join('');
+    }
+    list.innerHTML = html;
+    if (navSections.length) navSections.unshift({ id: 'top', label: 'Top', kind: 'top' });
+    renderSideNav(navSections);
+  }
+
+  function renderFilterPicker(id, modes, validValues, allLabel, labels) {
+    document.querySelectorAll(`#${id} input[type="checkbox"]`).forEach(input => {
+      input.checked = modes.includes(input.value);
+    });
+    document.getElementById(`${id}Summary`).textContent = filterSummary(modes, validValues, allLabel, labels);
+    document.getElementById(`${id}Count`).textContent = modes.length;
+  }
+
+  function shortMonthLabel(iso) {
+    const [y, m] = iso.split('-').map(Number);
+    return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'short' }) + " '" + String(y).slice(2);
+  }
+
+  const NAV_ICONS = {
+    top: '<svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
+    month: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
+    now: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>',
+    soon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>'
+  };
+
+  function renderSideNav(sections) {
+    const nav = document.getElementById('sideNav');
+    nav.classList.toggle('nav-empty', !sections.length);
+    nav.innerHTML = sections.map(s =>
+      `<button type="button" class="sn-${s.kind}" data-target="${s.id}">${NAV_ICONS[s.kind]}<span class="sn-label">${esc(s.label)}</span>${s.sum != null ? `<span class="sn-sum">${fmtPrice(s.sum)}</span>` : ''}${s.count != null ? `<span class="sn-count">${s.count}</span>` : ''}</button>`
+    ).join('');
+    positionSideNav();
+    requestAnimationFrame(positionSideNav);
+  }
+
+  function positionSideNav() {
+    const nav = document.getElementById('sideNav');
+    const wrapRect = document.getElementById('wrap').getBoundingClientRect();
+    nav.classList.remove('nav-cramped'); // measure at full width — never trust offsetWidth while display:none
+    const navWidth = nav.offsetWidth || 110;
+    const space = wrapRect.left;
+    if (space < navWidth + 34) {
+      nav.classList.add('nav-cramped');
+      return;
+    }
+    nav.style.left = (space - navWidth - 22) + 'px';
+  }
+  window.addEventListener('resize', positionSideNav);
+  // .wrap animates its max-width when switching list/grid; re-measure once that settles
+  document.getElementById('wrap').addEventListener('transitionend', e => {
+    if (e.propertyName === 'max-width') positionSideNav();
+  });
+
+  const STATUS_LABEL = { ready: 'Ready', prequel: 'Prequel', link: 'Link', queued: 'Queued' };
+  const TYPE_LABEL = { dlc: 'DLC', patch: 'Patch', ear: 'EAR' };
+  const HYPE_LABEL = {
+    under: 'Under the Radar',
+    high: 'Idealistic Case',
+    terminal: 'Terminal Hype'
+  };
+  const TYPE_COLOR = { dlc: '#4cc9f0', patch: '#ffb703', ear: '#06d6a0' };
+  const HYPE_COLOR = { under: '#8d99ae', high: '#06d6a0', terminal: '#ff3366' };
+
+  function statRow(name, count, color) {
+    if (!count) return '';
+    return `<div class="stat-row"><span class="dot"${color ? ` style="background:${color}"` : ''}></span><span class="stat-name">${esc(name)}</span><span class="stat-count">${count}</span></div>`;
+  }
+  // wraps a group of stat rows; omits the whole group (title + divider) if every row was empty
+  function statGroup(title, rows) {
+    const html = rows.filter(Boolean).join('');
+    if (!html) return '';
+    return `<hr><div class="stat-group"><div class="stat-group-title">${esc(title)}</div>${html}</div>`;
+  }
+
+  function renderStatsPanel() {
+    const panel = document.getElementById('statsPanel');
+    panel.classList.toggle('stats-empty', !games.length);
+    if (!games.length) { panel.innerHTML = ''; return; }
+
+    const dated = games.filter(g => !g.tba);
+    const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
+    const outNow = dated.filter(g => daysUntil(g.date) < 0);
+    const soon = games.filter(g => g.tba);
+
+    const statusCounts = { ready: 0, prequel: 0, link: 0, queued: 0, none: 0 };
+    const typeCounts = { dlc: 0, patch: 0, ear: 0, none: 0 };
+    const hypeCounts = { under: 0, high: 0, terminal: 0, none: 0 };
+    games.forEach(g => {
+      statusCounts[g.status && STATUS_LABEL[g.status] ? g.status : 'none']++;
+      typeCounts[g.type && TYPE_LABEL[g.type] ? g.type : 'none']++;
+      hypeCounts[g.hype && HYPE_LABEL[g.hype] ? g.hype : 'none']++;
+    });
+
+    panel.innerHTML = `
+      <div class="stat-hero">
+        <div class="num">${games.length}</div>
+        <div class="lbl">Games tracked</div>
+      </div>
+      ${statGroup('Overview', [
+        statRow('Upcoming', upcoming.length),
+        statRow('Out now', outNow.length),
+        statRow('Coming soon', soon.length)
+      ])}
+      ${statGroup('Status', [
+        statRow('Ready', statusCounts.ready),
+        statRow('Prequel', statusCounts.prequel),
+        statRow('Link', statusCounts.link),
+        statRow('Queued', statusCounts.queued)
+      ])}
+      ${statGroup('Type', [
+        statRow('DLC', typeCounts.dlc, TYPE_COLOR.dlc),
+        statRow('Patch', typeCounts.patch, TYPE_COLOR.patch),
+        statRow('EAR', typeCounts.ear, TYPE_COLOR.ear),
+        statRow('Game', typeCounts.none)
+      ])}
+      ${statGroup('Hype', [
+        statRow('Under the Radar', hypeCounts.under, HYPE_COLOR.under),
+        statRow('Idealistic Case', hypeCounts.high, HYPE_COLOR.high),
+        statRow('Terminal Hype', hypeCounts.terminal, HYPE_COLOR.terminal)
+      ])}
+      ${(() => {
+        const unreleased = [...upcoming, ...soon].filter(g => typeof g.price === 'number');
+        const total = unreleased.reduce((s, g) => s + g.price, 0);
+        const estimated = unreleased.filter(g => g.priceEstimated).reduce((s, g) => s + g.price, 0);
+        return statGroup('Upcoming cost', [
+          statRow('Total', total > 0 ? fmtPrice(total) : 0),
+          statRow('Estimated part', estimated > 0 ? '~' + fmtPrice(estimated) : 0)
+        ]);
+      })()}`;
+    positionStatsPanel();
+    requestAnimationFrame(positionStatsPanel);
+  }
+
+  function positionStatsPanel() {
+    const panel = document.getElementById('statsPanel');
+    if (!panel.innerHTML.trim()) return;
+    const wrapRect = document.getElementById('wrap').getBoundingClientRect();
+    const panelWidth = panel.offsetWidth || 220;
+    const space = document.documentElement.clientWidth - wrapRect.right;
+    if (space < panelWidth + 34) {
+      panel.classList.add('stats-cramped');
+      return;
+    }
+    panel.classList.remove('stats-cramped');
+    panel.style.right = (space - panelWidth - 22) + 'px';
+  }
+  window.addEventListener('resize', positionStatsPanel);
+  document.getElementById('wrap').addEventListener('transitionend', e => {
+    if (e.propertyName === 'max-width') positionStatsPanel();
+  });
+
+  // small status badge: ready / prequel / queued
+  function tagList(g) {
+    const label = STATUS_LABEL[g.status];
+    const typeLabel = TYPE_LABEL[g.type];
+    const hypeLabel = HYPE_LABEL[g.hype];
+    const tags = [];
+    if (typeLabel) tags.push(`<span class="tag tag-type tag-${g.type}">${typeLabel}</span>`);
+    if (label) tags.push(`<span class="tag">${label}</span>`);
+    if (hypeLabel) tags.push(`<span class="tag tag-hype tag-hype-${g.hype}">${hypeLabel}</span>`);
+    return tags;
+  }
+  function tagsHTML(g) {
+    return tagList(g).join('');
+  }
+  function priceBadgeHTML(g) {
+    return typeof g.price === 'number' ? `<span class="price-badge">${g.priceEstimated ? '~' : ''}${fmtPrice(g.price)}</span>` : '';
+  }
+  // grid tiles are narrow — cap visible badges and roll the rest into a "+N" chip
+  function tileTagsHTML(g) {
+    const tags = tagList(g);
+    const shown = tags.slice(0, 2);
+    const extra = tags.length - shown.length;
+    return shown.join('') + (extra > 0 ? `<span class="tag tag-more">+${extra}</span>` : '');
+  }
+
+  function cardHTML(g) {
+    const tags = tagsHTML(g);
+    if (g.tba) {
+      const style = bgStyle(g);
+      return `
+        <div class="card${style ? ' has-bg' : ''}"${style}>
+          <div class="countdown out"><div class="num">Coming</div><div class="lbl">soon</div></div>
+          <div class="info">
+            <div class="title-row"><h2>${esc(g.name)}</h2>${priceBadgeHTML(g)}</div>
+            <div class="meta"><span>Release date TBA</span>${tags}</div>
+          </div>
+          <div class="actions">
+            <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
+            <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
+            <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
+          </div>
+        </div>`;
+    }
+    const d = daysUntil(g.date);
+    let cd;
+    if (d > 0) {
+      cd = `<div class="countdown"><div class="num">${d}</div><div class="lbl">${d === 1 ? 'day' : 'days'}</div></div>`;
+    } else if (d === 0) {
+      cd = `<div class="countdown out"><div class="num">Today!</div><div class="lbl sparkle-lbl"><svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2 2M15.7 15.7l2 2M6.3 17.7l2-2M15.7 8.3l2-2"/></svg></div></div>`;
+    } else {
+      cd = `<div class="countdown out"><div class="num">Out now</div><div class="lbl">${-d}d ago</div></div>`;
+    }
+    const style = bgStyle(g);
+    return `
+      <div class="card${d < 0 ? ' released' : ''}${style ? ' has-bg' : ''}"${style}>
+        ${cd}
+        <div class="info">
+          <div class="title-row"><h2>${esc(g.name)}</h2>${d < 0 ? '' : priceBadgeHTML(g)}</div>
+          <div class="meta"><span>${fmtDate(g.date)}</span>${tags}</div>
+        </div>
+        <div class="actions">
+          <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
+          <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
+          <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
+        </div>
+      </div>`;
+  }
+
+  function tileHTML(g) {
+    const tags = tileTagsHTML(g);
+    const tagsRow = tags ? `<div class="tile-tags">${tags}</div>` : '';
+    if (g.tba) {
+      return `
+        <div class="tile"${bgStyle(g)}>
+          <div class="tile-actions">
+            <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
+            <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
+            <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
+          </div>
+          <div>
+            <div class="tile-title">${esc(g.name)}</div>
+            ${tagsRow}
+          </div>
+          <div class="tile-num small">Coming soon</div>
+          <div class="tile-sub">Release date TBA</div>
+        </div>`;
+    }
+    const d = daysUntil(g.date);
+    let num, numCls = '', sub;
+    if (d > 0)        { num = d;          sub = `Days until ${fmtSlash(g.date)}`; }
+    else if (d === 0) { num = 'Today';    numCls = ' small'; sub = `Releases ${fmtSlash(g.date)}`; }
+    else              { num = 'Out now';  numCls = ' small'; sub = `Released ${fmtSlash(g.date)}`; }
+    return `
+      <div class="tile${d < 0 ? ' released' : ''}"${bgStyle(g)}>
+        <div class="tile-actions">
+          <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
+          <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
+          <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
+        </div>
+        <div>
+          <div class="tile-title">${esc(g.name)}</div>
+          ${tagsRow}
+        </div>
+        <div class="tile-num${numCls}">${num}</div>
+        <div class="tile-sub">${sub}</div>
+      </div>`;
+  }
+
+  // build the colour swatch row (a "None"/default option + presets)
+  function buildSwatches() {
+    swatches.innerHTML =
+      `<div class="sw none" data-color="" title="Default glass">
+         <svg viewBox="0 0 24 24"><path d="M4 4l16 16M20 4L4 20"/></svg>
+       </div>` +
+      PRESET_COLORS.map(c =>
+        `<div class="sw" data-color="${c}" style="background:${c}" title="${c}"></div>`).join('');
+  }
+
+  function selectColor(value, fromCustom) {
+    pickedColor = value || null;
+    [...swatches.children].forEach(el =>
+      el.classList.toggle('sel', !fromCustom && (el.dataset.color || '') === (value || '')));
+    if (fromCustom) {
+      customSwatch.classList.add('has-color', 'sel');
+      customSwatch.style.background = value;
+    } else {
+      // a preset/None was chosen — revert the custom chip to its "+" add state
+      customSwatch.classList.remove('has-color', 'sel');
+      customSwatch.style.background = '';
+    }
+  }
+
+  // an image (when set) overrides the colour as the card background
+  function setImage(url) {
+    pickedImage = url || null;
+  }
+
+  swatches.addEventListener('click', e => {
+    const sw = e.target.closest('.sw');
+    if (sw) selectColor(sw.dataset.color, false);
+  });
+  gColor.addEventListener('input', () => selectColor(gColor.value, true));
+
+  gImageUrl.addEventListener('input', () => setImage(gImageUrl.value.trim()));
+
+  gTba.addEventListener('change', () => {
+    gDate.disabled = gTba.checked;
+    if (gTba.checked) gDate.classList.remove('invalid');
+  });
+
+  // open Brave image search for the game title in a new tab
+  document.getElementById('imgSearchBtn').addEventListener('click', () => {
+    const q = gName.value.trim();
+    if (!q) { gName.classList.add('invalid'); gName.focus(); return; }
+    window.open('https://search.brave.com/images?q=' + encodeURIComponent(q), '_blank', 'noopener');
+  });
+
+  function openModal(game) {
+    editingId = game ? game.id : null;
+    modalTitle.textContent = game ? 'Edit game' : 'Track a game';
+    saveBtn.textContent = game ? 'Update' : 'Save';
+
+    gName.value = game ? game.name : '';
+    gDate.value = game && !game.tba ? game.date : '';
+    gTba.checked = !!(game && game.tba);
+    gDate.disabled = gTba.checked;
+    setStatus(game ? game.status : null);
+    setType(game ? game.type : null);
+    gHype.value = game && game.hype ? game.hype : '';
+    gPrice.value = game && typeof game.price === 'number' ? game.price : '';
+    gPriceEst.checked = !!(game && game.priceEstimated);
+    gImageUrl.value = game && game.image ? game.image : '';
+    setImage(game ? game.image : null);
+
+    // restore colour selection
+    if (game && game.color) {
+      if (PRESET_COLORS.includes(game.color)) {
+        selectColor(game.color, false);
+      } else {
+        gColor.value = game.color;
+        selectColor(game.color, true);
+      }
+    } else {
+      selectColor('', false);   // default to glass, "None" selected
+    }
+
+    hideResults();
+    clearErr();
+    overlay.classList.add('show');
+    setTimeout(() => gName.focus(), 50);
+  }
+  function closeModal() { overlay.classList.remove('show'); }
+
+  const formErr = document.getElementById('formErr');
+
+  function clearErr() {
+    formErr.classList.remove('show');
+    gName.classList.remove('invalid');
+    gDate.classList.remove('invalid');
+  }
+
+  function addGame() {
+    const name = gName.value.trim();
+    const tba = gTba.checked;
+    const date = gDate.value;
+    clearErr();
+    if (!name || (!tba && !date)) {
+      gName.classList.toggle('invalid', !name);
+      gDate.classList.toggle('invalid', !tba && !date);
+      formErr.textContent = !name && (!tba && !date)
+        ? 'Please enter a game title and a release date.'
+        : (!name ? 'Please enter a game title.' : 'Please set a release date, or check "Coming soon".');
+      formErr.classList.add('show');
+      (!name ? gName : gDate).focus();
+      return;
+    }
+    const fields = {
+      name,
+      date: tba ? null : date,
+      tba,
+      status: getStatus(),
+      type: getType(),
+      hype: gHype.value || null,
+      price: gPrice.value !== '' ? Math.round(parseFloat(gPrice.value) * 100) / 100 : null,
+      priceEstimated: gPrice.value !== '' && gPriceEst.checked,
+      color: pickedImage ? null : pickedColor,
+      image: pickedImage || null
+    };
+    if (editingId) {
+      const g = games.find(x => x.id === editingId);
+      if (g) Object.assign(g, fields);
+    } else {
+      games.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), ...fields });
+    }
+    save();
+    render();
+    closeModal();
+  }
+
+  // --- Online release-date lookup via Wikidata (no API key needed) ---
+  const WD = 'https://www.wikidata.org/w/api.php';
+
+  function setBusy(on) {
+    lookupBtn.classList.toggle('busy', on);
+    lookupIcon.innerHTML = on
+      ? '<path d="M21 12a9 9 0 1 1-6.2-8.5"/>'
+      : '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>';
+  }
+
+  function hideResults() { results.classList.remove('show'); results.innerHTML = ''; }
+
+  // earliest P577 (publication date) across an entity's claims, as yyyy-mm-dd
+  function earliestRelease(entity) {
+    const claims = entity.claims && entity.claims.P577;
+    if (!claims) return null;
+    let best = null;
+    for (const c of claims) {
+      const t = c.mainsnak?.datavalue?.value?.time; // e.g. +2025-11-19T00:00:00Z
+      if (!t) continue;
+      const m = t.match(/^\+(\d{4})-(\d{2})-(\d{2})/);
+      if (!m) continue;
+      let [, y, mo, d] = m;
+      if (mo === '00') mo = '01';
+      if (d === '00') d = '01';
+      const iso = `${y}-${mo}-${d}`;
+      if (!best || iso < best) best = iso;
+    }
+    return best;
+  }
+
+  // Wikimedia Commons image url from a P18 (image) claim, if present
+  function entityImage(entity) {
+    const file = entity.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
+    if (!file) return null;
+    return 'https://commons.wikimedia.org/wiki/Special:FilePath/' +
+      encodeURIComponent(file) + '?width=600';
+  }
+
+  async function lookup() {
+    const q = gName.value.trim();
+    if (!q) { gName.focus(); return; }
+    setBusy(true);
+    hideResults();
+    try {
+      const sURL = `${WD}?action=wbsearchentities&search=${encodeURIComponent(q)}` +
+        `&language=en&uselang=en&format=json&type=item&limit=10&origin=*`;
+      const sData = await fetch(sURL).then(r => r.json());
+      const hits = sData.search || [];
+      if (!hits.length) { showNote('No matches found on Wikidata.'); return; }
+
+      const ids = hits.map(h => h.id).join('|');
+      const eURL = `${WD}?action=wbgetentities&ids=${ids}` +
+        `&props=claims|descriptions|labels&languages=en&format=json&origin=*`;
+      const eData = await fetch(eURL).then(r => r.json());
+      const ents = eData.entities || {};
+
+      const rows = hits.map(h => {
+        const e = ents[h.id];
+        return {
+          id: h.id,
+          name: (e?.labels?.en?.value) || h.label,
+          desc: (e?.descriptions?.en?.value) || h.description || '',
+          date: e ? earliestRelease(e) : null,
+          image: e ? entityImage(e) : null
+        };
+      }).filter(r => r.date); // only entities that actually have a release date
+
+      if (!rows.length) { showNote('Found matches, but no release date is listed.'); return; }
+      showResults(rows);
+    } catch {
+      showNote('Lookup failed — check your connection.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function showNote(msg) {
+    results.innerHTML = `<div class="note">${esc(msg)}</div>`;
+    results.classList.add('show');
+  }
+
+  function showResults(rows) {
+    results.innerHTML = rows.map((r, i) => `
+      <div class="res" data-i="${i}">
+        <div class="rn">${esc(r.name)}</div>
+        <div class="rd">${r.desc ? esc(r.desc) + ' · ' : ''}<span class="rdate">${fmtDate(r.date)}</span></div>
+      </div>`).join('');
+    results.classList.add('show');
+    results.onclick = e => {
+      const el = e.target.closest('.res');
+      if (!el) return;
+      const r = rows[+el.dataset.i];
+      gName.value = r.name;
+      gDate.value = r.date;
+      if (r.image) {                 // auto-fill artwork when Wikidata has it
+        gImageUrl.value = r.image;
+        setImage(r.image);
+      }
+      hideResults();
+    };
+  }
+
+  lookupBtn.addEventListener('click', lookup);
+  gName.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && overlay.classList.contains('show')) { e.preventDefault(); e.stopPropagation(); lookup(); }
+  });
+  gName.addEventListener('input', hideResults);
+
+  document.getElementById('openAdd').addEventListener('click', () => openModal());
+  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+  saveBtn.addEventListener('click', addGame);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeModal(); closeSettings(); closeConfirm(); closeAnalytics(); closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); }
+    if (e.key === 'Enter' && overlay.classList.contains('show')) addGame();
+    // shortcuts — only when not typing and no modal is open
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+    const modalOpen = document.querySelector('.overlay.show');
+    if (typing || modalOpen || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === '/') { e.preventDefault(); searchInput.focus(); }
+    if (e.key === 'n') { e.preventDefault(); openModal(); }
+  });
+
+  list.addEventListener('click', e => {
+    const editBtn = e.target.closest('.edit');
+    if (editBtn) {
+      const g = games.find(x => x.id === editBtn.dataset.id);
+      if (g) openModal(g);
+      return;
+    }
+    const archiveBtn = e.target.closest('.archive');
+    if (archiveBtn) {
+      const g = games.find(x => x.id === archiveBtn.dataset.id);
+      if (g) archiveGame(g);
+      return;
+    }
+    const delBtn = e.target.closest('.del');
+    if (delBtn) {
+      const g = games.find(x => x.id === delBtn.dataset.id);
+      if (g) openConfirm(g);
+    }
+  });
+
+  const confirmOverlay = document.getElementById('confirmOverlay');
+  const confirmMsg = document.getElementById('confirmMsg');
+  const confirmTitle = document.getElementById('confirmTitle');
+  const confirmActionBtn = document.getElementById('confirmDeleteBtn');
+  let confirmAction = null;
+  // generic confirm dialog: pass what to show and what to run if the user confirms
+  function openConfirmAction({ title, message, actionLabel, danger = true, onConfirm }) {
+    confirmTitle.textContent = title;
+    confirmMsg.textContent = message;
+    confirmActionBtn.textContent = actionLabel;
+    confirmActionBtn.classList.toggle('btn-danger', danger);
+    confirmActionBtn.classList.toggle('btn-save', !danger);
+    confirmAction = onConfirm;
+    confirmOverlay.classList.add('show');
+  }
+  function openConfirm(g) {
+    openConfirmAction({
+      title: 'Remove game?',
+      message: `Remove "${g.name}" from your tracked games? This can't be undone.`,
+      actionLabel: 'Remove',
+      danger: true,
+      onConfirm: () => { games = games.filter(x => x.id !== g.id); save(); render(); }
+    });
+  }
+  function archiveGame(g) {
+    const idx = games.findIndex(x => x.id === g.id);
+    if (idx !== -1) {
+      archived.push(games[idx]);
+      games.splice(idx, 1);
+      saveArchived();
+      save();
+      render();
+    }
+  }
+  function unarchiveGame(g) {
+    const idx = archived.findIndex(x => x.id === g.id);
+    if (idx !== -1) {
+      games.push(archived[idx]);
+      archived.splice(idx, 1);
+      saveArchived();
+      save();
+      render();
+    }
+  }
+  function saveArchived() {
+    localStorage.setItem(ARCHIVED_KEY, JSON.stringify(archived));
+    if (typeof scheduleAutoUpload === 'function') scheduleAutoUpload();
+  }
+  function closeConfirm() {
+    confirmOverlay.classList.remove('show');
+    confirmAction = null;
+  }
+  document.getElementById('confirmCancelBtn').addEventListener('click', closeConfirm);
+  confirmActionBtn.addEventListener('click', () => {
+    if (confirmAction) confirmAction();
+    closeConfirm();
+  });
+  confirmOverlay.addEventListener('click', e => { if (e.target === confirmOverlay) closeConfirm(); });
+
+  document.getElementById('resetHypeBtn').addEventListener('click', () => {
+    const resetHypeNote = document.getElementById('resetHypeNote');
+    const count = games.filter(g => g.hype).length;
+    if (!count) {
+      resetHypeNote.textContent = 'No games have a Hype level set.';
+      resetHypeNote.className = 'set-note';
+      return;
+    }
+    openConfirmAction({
+      title: 'Reset all Hype?',
+      message: `Clear the Hype level from ${count} game${count === 1 ? '' : 's'}? This can't be undone.`,
+      actionLabel: 'Reset Hype',
+      danger: true,
+      onConfirm: () => {
+        games.forEach(g => { g.hype = null; });
+        save();
+        render();
+        resetHypeNote.textContent = `Hype cleared on ${count} game${count === 1 ? '' : 's'}.`;
+        resetHypeNote.className = 'set-note ok';
+      }
+    });
+  });
+
+  document.getElementById('resetStatusBtn').addEventListener('click', () => {
+    const resetStatusNote = document.getElementById('resetStatusNote');
+    const count = games.filter(g => g.status).length;
+    if (!count) {
+      resetStatusNote.textContent = 'No games have a Status set.';
+      resetStatusNote.className = 'set-note';
+      return;
+    }
+    openConfirmAction({
+      title: 'Reset all Status?',
+      message: `Clear the Status from ${count} game${count === 1 ? '' : 's'}? This can't be undone.`,
+      actionLabel: 'Reset Status',
+      danger: true,
+      onConfirm: () => {
+        games.forEach(g => { g.status = null; });
+        save();
+        render();
+        resetStatusNote.textContent = `Status cleared on ${count} game${count === 1 ? '' : 's'}.`;
+        resetStatusNote.className = 'set-note ok';
+      }
+    });
+  });
+
+  viewToggle.addEventListener('click', e => {
+    const btn = e.target.closest('.vt-btn');
+    if (!btn || btn.dataset.view === viewMode) return;
+    viewMode = btn.dataset.view;
+    localStorage.setItem(VIEW_KEY, viewMode);
+    render();
+  });
+
+  groupToggle.addEventListener('click', () => {
+    groupByMonth = !groupByMonth;
+    localStorage.setItem(GROUP_KEY, groupByMonth ? 'on' : 'off');
+    render();
+  });
+
+  sortToggle.addEventListener('click', () => {
+    sortAlpha = !sortAlpha;
+    localStorage.setItem(SORT_KEY, sortAlpha ? 'alpha' : 'date');
+    render();
+  });
+
+  searchInput.addEventListener('input', () => {
+    searchQuery = searchInput.value.trim().toLowerCase();
+    searchClear.hidden = !searchQuery;
+    render();
+  });
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    searchQuery = '';
+    searchClear.hidden = true;
+    render();
+    searchInput.focus();
+  });
+
+  document.getElementById('sideNav').addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    if (btn.dataset.target === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    document.getElementById(btn.dataset.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  function selectedFilterModes(id, validValues) {
+    return [...document.querySelectorAll(`#${id} input[type="checkbox"]:checked`)]
+      .map(input => input.value)
+      .filter(value => validValues.includes(value));
+  }
+  document.getElementById('typeFilter').addEventListener('change', e => {
+    if (!e.target.matches('input[type="checkbox"]')) return;
+    typeFilterModes = selectedFilterModes('typeFilter', TYPE_FILTERS);
+    saveFilterModes(TYPE_FILTER_KEY, typeFilterModes);
+    render();
+  });
+  document.getElementById('statusFilter').addEventListener('change', e => {
+    if (!e.target.matches('input[type="checkbox"]')) return;
+    statusFilterModes = selectedFilterModes('statusFilter', STATUS_FILTERS);
+    saveFilterModes(FILTER_KEY, statusFilterModes);
+    render();
+  });
+  document.getElementById('hypeFilter').addEventListener('change', e => {
+    if (!e.target.matches('input[type="checkbox"]')) return;
+    hypeFilterModes = selectedFilterModes('hypeFilter', HYPE_FILTERS);
+    saveFilterModes(HYPE_FILTER_KEY, hypeFilterModes);
+    render();
+  });
+  document.addEventListener('click', e => {
+    document.querySelectorAll('.filter-picker[open]').forEach(picker => {
+      if (!picker.contains(e.target)) picker.removeAttribute('open');
+    });
+  });
+  document.querySelectorAll('.filter-picker').forEach(picker => {
+    picker.addEventListener('toggle', () => {
+      if (!picker.open) return;
+      document.querySelectorAll('.filter-picker[open]').forEach(other => {
+        if (other !== picker) other.removeAttribute('open');
+      });
+    });
+  });
+  document.getElementById('priceFilter').addEventListener('change', e => {
+    if (!e.target.matches('input[type="checkbox"]')) return;
+    priceFilterModes = selectedFilterModes('priceFilter', PRICE_FILTERS);
+    saveFilterModes(PRICE_FILTER_KEY, priceFilterModes);
+    render();
+  });
+  document.getElementById('resetFiltersBtn').addEventListener('click', () => {
+    statusFilterModes = [...STATUS_FILTERS];
+    typeFilterModes = [...TYPE_FILTERS];
+    hypeFilterModes = [...HYPE_FILTERS];
+    priceFilterModes = [...PRICE_FILTERS];
+    saveFilterModes(FILTER_KEY, statusFilterModes);
+    saveFilterModes(TYPE_FILTER_KEY, typeFilterModes);
+    saveFilterModes(HYPE_FILTER_KEY, hypeFilterModes);
+    saveFilterModes(PRICE_FILTER_KEY, priceFilterModes);
+    searchQuery = '';
+    searchInput.value = '';
+    searchClear.hidden = true;
+    render();
+  });
+
+  // --- Settings: open/close, backup & restore ---
+  const APP_VERSION = '1.0.0';
+  const settingsOverlay = document.getElementById('settingsOverlay');
+  const restoreFile = document.getElementById('restoreFile');
+  const restoreNote = document.getElementById('restoreNote');
+
+  // --- Theme: 5 colour styles ---
+  const THEMES = {
+    nebula: {
+      label: 'Nebula',
+      gradient: 'linear-gradient(135deg, #1a0033 0%, #3a0ca3 40%, #7209b7 70%, #f72585 100%)',
+      blob1: 'rgba(114, 9, 183, 0.55)', blob2: 'rgba(247, 37, 133, 0.45)', meta: '#1a0033',
+      accent: 'linear-gradient(135deg, #ffd6f4, #ff8fd6)', accent2: '#ff8fd6', accentSoft: '#ffd6f4',
+      onAccent: '#2a0845', modalBg: 'rgba(40, 8, 70, 0.92)', resultsBg: 'rgba(45, 10, 78, 0.98)',
+      scrimA: 'rgba(15, 2, 30, 0.55)', scrimB: 'rgba(15, 2, 30, 0.80)', numGlow: 'rgba(247, 37, 133, 0.5)'
+    },
+    ocean: {
+      label: 'Ocean',
+      gradient: 'linear-gradient(135deg, #021024 0%, #052f5f 40%, #036280 70%, #14b8a6 100%)',
+      blob1: 'rgba(3, 98, 128, 0.55)', blob2: 'rgba(20, 184, 166, 0.45)', meta: '#021024',
+      accent: 'linear-gradient(135deg, #a5f3fc, #22d3ee)', accent2: '#22d3ee', accentSoft: '#a5f3fc',
+      onAccent: '#022a30', modalBg: 'rgba(5, 27, 48, 0.93)', resultsBg: 'rgba(7, 34, 58, 0.98)',
+      scrimA: 'rgba(2, 14, 26, 0.55)', scrimB: 'rgba(2, 14, 26, 0.80)', numGlow: 'rgba(34, 211, 238, 0.55)'
+    },
+    sunset: {
+      label: 'Sunset',
+      gradient: 'linear-gradient(135deg, #2a0a18 0%, #7a1f3d 38%, #e85d04 75%, #ffba08 100%)',
+      blob1: 'rgba(232, 93, 4, 0.5)', blob2: 'rgba(255, 186, 8, 0.42)', meta: '#2a0a18',
+      accent: 'linear-gradient(135deg, #ffe0a3, #ff8e3c)', accent2: '#ff8e3c', accentSoft: '#ffe0a3',
+      onAccent: '#3a1405', modalBg: 'rgba(46, 16, 12, 0.93)', resultsBg: 'rgba(58, 22, 16, 0.98)',
+      scrimA: 'rgba(26, 8, 4, 0.55)', scrimB: 'rgba(26, 8, 4, 0.80)', numGlow: 'rgba(255, 142, 60, 0.55)'
+    },
+    forest: {
+      label: 'Forest',
+      gradient: 'linear-gradient(135deg, #04140c 0%, #0b3d2e 42%, #1b7a4b 72%, #7bd389 100%)',
+      blob1: 'rgba(27, 122, 75, 0.55)', blob2: 'rgba(123, 211, 137, 0.4)', meta: '#04140c',
+      accent: 'linear-gradient(135deg, #bff7c8, #34d17a)', accent2: '#34d17a', accentSoft: '#bff7c8',
+      onAccent: '#04160d', modalBg: 'rgba(7, 30, 21, 0.93)', resultsBg: 'rgba(9, 38, 27, 0.98)',
+      scrimA: 'rgba(4, 18, 11, 0.55)', scrimB: 'rgba(4, 18, 11, 0.80)', numGlow: 'rgba(52, 209, 122, 0.55)'
+    },
+    midnight: {
+      label: 'Midnight',
+      gradient: 'linear-gradient(135deg, #0a0a14 0%, #16213e 45%, #1f2a52 75%, #415a90 100%)',
+      blob1: 'rgba(31, 42, 82, 0.6)', blob2: 'rgba(65, 90, 144, 0.45)', meta: '#0a0a14',
+      accent: 'linear-gradient(135deg, #cdd8ff, #7d97e8)', accent2: '#7d97e8', accentSoft: '#cdd8ff',
+      onAccent: '#0a0f20', modalBg: 'rgba(15, 21, 42, 0.94)', resultsBg: 'rgba(21, 29, 56, 0.98)',
+      scrimA: 'rgba(8, 8, 18, 0.55)', scrimB: 'rgba(8, 8, 18, 0.80)', numGlow: 'rgba(125, 151, 232, 0.55)'
+    }
+  };
+  const THEME_KEY = 'nexgame.theme';
+  let themeName = THEMES[localStorage.getItem(THEME_KEY)] ? localStorage.getItem(THEME_KEY) : 'nebula';
+  const themeGrid = document.getElementById('themeGrid');
+
+  function applyTheme(name) {
+    const t = THEMES[name] || THEMES.nebula;
+    const root = document.documentElement.style;
+    root.setProperty('--bg-gradient', t.gradient);
+    root.setProperty('--blob1', t.blob1);
+    root.setProperty('--blob2', t.blob2);
+    root.setProperty('--accent', t.accent);
+    root.setProperty('--accent-2', t.accent2);
+    root.setProperty('--accent-soft', t.accentSoft);
+    root.setProperty('--on-accent', t.onAccent);
+    root.setProperty('--modal-bg', t.modalBg);
+    root.setProperty('--results-bg', t.resultsBg);
+    root.setProperty('--scrim-a', t.scrimA);
+    root.setProperty('--scrim-b', t.scrimB);
+    root.setProperty('--num-glow', t.numGlow);
+    const meta = document.querySelector('meta[name=theme-color]');
+    if (meta) meta.content = t.meta;
+  }
+
+  function buildThemes() {
+    themeGrid.innerHTML = Object.entries(THEMES).map(([k, t]) =>
+      `<div class="theme-swatch${k === themeName ? ' sel' : ''}" data-theme="${k}">
+         <div class="sw-chip" style="background:${t.gradient}"></div>
+         <span class="sw-name">${t.label}</span>
+       </div>`).join('');
+  }
+
+  themeGrid.addEventListener('click', e => {
+    const sw = e.target.closest('.theme-swatch');
+    if (!sw) return;
+    themeName = sw.dataset.theme;
+    localStorage.setItem(THEME_KEY, themeName);
+    applyTheme(themeName);
+    [...themeGrid.children].forEach(el => el.classList.toggle('sel', el.dataset.theme === themeName));
+  });
+
+  applyTheme(themeName);
+  buildThemes();
+
+  // --- Settings tabs ---
+  const settingsTabs = document.querySelectorAll('.set-tab');
+  const settingsPanels = document.querySelectorAll('.set-panel');
+  function switchSettingsTab(name) {
+    settingsTabs.forEach(t => t.classList.toggle('active', t.dataset.panel === name));
+    settingsPanels.forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+  }
+  settingsTabs.forEach(tab => {
+    tab.addEventListener('click', () => switchSettingsTab(tab.dataset.panel));
+  });
+  const analyticsOverlay = document.getElementById('analyticsOverlay');
+  function openAnalytics() {
+    renderAnalytics();
+    analyticsOverlay.classList.add('show');
+  }
+  function closeAnalytics() { analyticsOverlay.classList.remove('show'); }
+  document.getElementById('analyticsOpen').addEventListener('click', openAnalytics);
+  document.getElementById('analyticsClose').addEventListener('click', closeAnalytics);
+  analyticsOverlay.addEventListener('click', e => { if (e.target === analyticsOverlay) closeAnalytics(); });
+
+  const archivedOverlay = document.getElementById('archivedOverlay');
+  const archivedList = document.getElementById('archivedList');
+  function renderArchivedList() {
+    if (!archived.length) {
+      archivedList.innerHTML = '<div style="padding: 20px; text-align: center; opacity: 0.6;">No archived games yet.</div>';
+      return;
+    }
+    archivedList.innerHTML = archived.map(g => {
+      const d = daysUntil(g.date);
+      const date = g.tba ? 'Coming soon' : fmtDate(g.date);
+      return `<div class="archived-item">
+        <div class="archived-name">${esc(g.name)}</div>
+        <span style="font-size: 0.78rem; opacity: 0.7;">${date}</span>
+        <button class="archived-restore" data-id="${g.id}">Restore</button>
+      </div>`;
+    }).join('');
+    document.querySelectorAll('.archived-restore').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const g = archived.find(x => x.id === e.target.dataset.id);
+        if (g) unarchiveGame(g);
+        renderArchivedList();
+      });
+    });
+  }
+  function openArchivedPage() {
+    renderArchivedList();
+    archivedOverlay.classList.add('show');
+  }
+  function closeArchivedPage() { archivedOverlay.classList.remove('show'); }
+  document.getElementById('archivedOpen').addEventListener('click', openArchivedPage);
+  document.getElementById('archivedClose').addEventListener('click', closeArchivedPage);
+  archivedOverlay.addEventListener('click', e => { if (e.target === archivedOverlay) closeArchivedPage(); });
+
+  // renders a fixed, ordered set of buckets (zero counts included) — for distributions, not category breakdowns
+  function anBucketRows(order, labels, counts, colors) {
+    const max = Math.max(1, ...order.map(k => counts[k] || 0));
+    return '<div class="an-bars">' + order.map(k => `
+      <div class="an-bar-row">
+        <div class="an-bar-name">${esc(labels[k])}</div>
+        <div class="an-bar-track"><div class="an-bar-fill" style="width:${((counts[k] || 0) / max * 100).toFixed(1)}%;${colors && colors[k] ? `background:${colors[k]}` : ''}"></div></div>
+        <div class="an-bar-count">${counts[k] || 0}</div>
+      </div>`).join('') + '</div>';
+  }
+
+  const WEEKDAY_LABEL = { 0: 'Sunday', 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday', 6: 'Saturday' };
+  const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+  function quarterKey(iso) {
+    const [y, m] = iso.split('-').map(Number);
+    return `${y}-Q${Math.ceil(m / 3)}`;
+  }
+  function quarterLabel(key) {
+    const [y, q] = key.split('-Q');
+    return `Q${q} '${y.slice(2)}`;
+  }
+  // step a "YYYY-QN" key forward by one quarter
+  function nextQuarterKey(key) {
+    const [y, q] = key.split('-Q').map(Number);
+    return q === 4 ? `${y + 1}-Q1` : `${y}-Q${q + 1}`;
+  }
+
+  function renderAnalytics() {
+    const content = document.getElementById('analyticsContent');
+    if (!games.length) {
+      content.innerHTML = '<div class="an-empty">Track some games to see analytics.</div>';
+      return;
+    }
+
+    const filteredGames = games.filter(g => {
+      if (analyticsStatusFilter !== 'all') {
+        if (analyticsStatusFilter === 'none' ? g.status : (g.status !== analyticsStatusFilter)) return false;
+      }
+      if (analyticsHypeFilter !== 'all') {
+        if (analyticsHypeFilter === 'none' ? g.hype : (g.hype !== analyticsHypeFilter)) return false;
+      }
+      return true;
+    });
+
+    const dated = filteredGames.filter(g => !g.tba);
+    const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
+    const avgLead = upcoming.length
+      ? Math.round(upcoming.reduce((s, g) => s + daysUntil(g.date), 0) / upcoming.length)
+      : null;
+
+    // releases per month, across all dated entries (past + future) — the one chart the stats panel doesn't show
+    const monthCounts = {};
+    dated.forEach(g => {
+      const mk = g.date.slice(0, 7);
+      monthCounts[mk] = (monthCounts[mk] || 0) + 1;
+    });
+    const monthKeys = Object.keys(monthCounts).sort();
+    const curMonthKey = new Date().toISOString().slice(0, 7);
+    const maxMonthCount = monthKeys.length ? Math.max(...monthKeys.map(k => monthCounts[k])) : 0;
+    const busiest = monthKeys.reduce((best, k) => (!best || monthCounts[k] > monthCounts[best]) ? k : best, null);
+
+    const monthChartHTML = monthKeys.length ? '<div class="an-chart">' + monthKeys.map(k => `
+      <div class="an-chart-col">
+        <div class="an-chart-count">${monthCounts[k]}</div>
+        <div class="an-chart-bar${k < curMonthKey ? ' is-past' : ''}" style="height:${Math.max(4, monthCounts[k] / maxMonthCount * 100)}%"></div>
+        <div class="an-chart-label">${esc(shortMonthLabel(k + '-01'))}</div>
+      </div>`).join('') + '</div>' : '<div class="an-empty">No dated games yet.</div>';
+
+    // longest gap with no releases, among upcoming dates (today's "quiet stretch" ahead)
+    let longestGap = null;
+    const upcomingDatesSorted = [...new Set(upcoming.map(g => g.date))].sort();
+    for (let i = 1; i < upcomingDatesSorted.length; i++) {
+      const gap = Math.round((new Date(upcomingDatesSorted[i]) - new Date(upcomingDatesSorted[i - 1])) / 86400000);
+      if (!longestGap || gap > longestGap.days) {
+        longestGap = { days: gap, from: upcomingDatesSorted[i - 1], to: upcomingDatesSorted[i] };
+      }
+    }
+
+    // which weekday games most commonly release on
+    const weekdayCounts = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+    dated.forEach(g => {
+      const [y, m, d] = g.date.split('-').map(Number);
+      weekdayCounts[new Date(y, m - 1, d).getDay()]++;
+    });
+    const topWeekday = WEEKDAY_ORDER.reduce((best, k) => (weekdayCounts[k] > (weekdayCounts[best] || 0) ? k : best), WEEKDAY_ORDER[0]);
+
+    // lead-time distribution for what's still upcoming
+    const leadBuckets = { week: 0, month: 0, quarter: 0, half: 0, far: 0 };
+    upcoming.forEach(g => {
+      const d = daysUntil(g.date);
+      if (d <= 7) leadBuckets.week++;
+      else if (d <= 30) leadBuckets.month++;
+      else if (d <= 90) leadBuckets.quarter++;
+      else if (d <= 180) leadBuckets.half++;
+      else leadBuckets.far++;
+    });
+    const leadLabels = { week: 'Within a week', month: 'Within a month', quarter: '1–3 months', half: '3–6 months', far: '6+ months' };
+
+    // quarterly trend: counts per quarter, only from the current quarter onward, with quarter-over-quarter change
+    const curQ = quarterKey(new Date().toISOString().slice(0, 10));
+    const qCounts = {};
+    dated.forEach(g => {
+      const qk = quarterKey(g.date);
+      if (qk >= curQ) qCounts[qk] = (qCounts[qk] || 0) + 1;
+    });
+    const qKeysPresent = Object.keys(qCounts).sort();
+    const qKeys = [];
+    if (qKeysPresent.length) {
+      let k = curQ < qKeysPresent[0] ? curQ : qKeysPresent[0];
+      const last = qKeysPresent[qKeysPresent.length - 1];
+      while (k <= last) { qKeys.push(k); k = nextQuarterKey(k); }
+    }
+    const maxQCount = qKeys.length ? Math.max(1, ...qKeys.map(k => qCounts[k] || 0)) : 1;
+    const quarterChartHTML = qKeys.length ? '<div class="an-chart">' + qKeys.map((k, i) => {
+      const count = qCounts[k] || 0;
+      const prev = i > 0 ? (qCounts[qKeys[i - 1]] || 0) : null;
+      let delta = '';
+      if (prev != null && prev > 0) {
+        const pct = Math.round((count - prev) / prev * 100);
+        delta = `<div class="an-chart-delta${pct > 0 ? ' is-up' : pct < 0 ? ' is-down' : ''}">${pct > 0 ? '▲' : pct < 0 ? '▼' : '–'}${pct !== 0 ? Math.abs(pct) + '%' : ''}</div>`;
+      }
+      return `
+      <div class="an-chart-col">
+        ${delta}
+        <div class="an-chart-count">${count}</div>
+        <div class="an-chart-bar" style="height:${Math.max(4, count / maxQCount * 100)}%"></div>
+        <div class="an-chart-label">${esc(quarterLabel(k))}</div>
+      </div>`;
+    }).join('') + '</div>' : '<div class="an-empty">No upcoming dated games yet.</div>';
+
+    content.innerHTML = `
+      <div class="an-filters">
+        <select id="anStatusFilter" class="filter-select">
+          <option value="all">All Status</option>
+          <option value="none">No Status</option>
+          <option value="queued">Queued</option>
+          <option value="prequel">Prequel</option>
+          <option value="link">Link</option>
+          <option value="ready">Ready</option>
+        </select>
+        <select id="anHypeFilter" class="filter-select">
+          <option value="all">All Hype</option>
+          <option value="none">No Hype</option>
+          <option value="under">Under the Radar</option>
+          <option value="high">Idealistic Case</option>
+          <option value="terminal">Terminal Hype</option>
+        </select>
+      </div>
+      <div class="an-section">
+        <div class="an-insights">
+          <div class="an-insight"><div class="num">${avgLead != null ? avgLead : '—'}</div><div class="lbl">Avg. days until release</div></div>
+          <div class="an-insight"><div class="num">${busiest ? shortMonthLabel(busiest + '-01') : '—'}</div><div class="lbl">Busiest month${busiest ? ` (${monthCounts[busiest]})` : ''}</div></div>
+          <div class="an-insight"><div class="num">${esc(WEEKDAY_LABEL[topWeekday])}</div><div class="lbl">Most common release day</div></div>
+          <div class="an-insight"><div class="num">${longestGap ? longestGap.days + 'd' : '—'}</div><div class="lbl">Longest gap ahead${longestGap ? ` (${fmtSlash(longestGap.from)} – ${fmtSlash(longestGap.to)})` : ''}</div></div>
+        </div>
+      </div>
+      <div class="an-section">
+        <div class="an-title">Releases by month</div>
+        ${monthChartHTML}
+      </div>
+      <div class="an-section">
+        <div class="an-title">Quarterly trend</div>
+        ${quarterChartHTML}
+      </div>
+      <div class="an-section">
+        <div class="an-title">Lead time of upcoming releases</div>
+        ${anBucketRows(['week', 'month', 'quarter', 'half', 'far'], leadLabels, leadBuckets)}
+      </div>`;
+    // Attach filter listeners after rendering
+    setTimeout(() => {
+      const statusSelect = document.getElementById('anStatusFilter');
+      const hypeSelect = document.getElementById('anHypeFilter');
+      if (statusSelect) {
+        statusSelect.value = analyticsStatusFilter;
+        statusSelect.onchange = (e) => {
+          analyticsStatusFilter = e.target.value;
+          localStorage.setItem(AN_STATUS_FILTER_KEY, analyticsStatusFilter);
+          renderAnalytics();
+        };
+      }
+      if (hypeSelect) {
+        hypeSelect.value = analyticsHypeFilter;
+        hypeSelect.onchange = (e) => {
+          analyticsHypeFilter = e.target.value;
+          localStorage.setItem(AN_HYPE_FILTER_KEY, analyticsHypeFilter);
+          renderAnalytics();
+        };
+      }
+    }, 0);
+  }
+
+  function openSettings() {
+    restoreNote.textContent = '';
+    restoreNote.className = 'set-note';
+    settingsOverlay.classList.add('show');
+  }
+  function closeSettings() { settingsOverlay.classList.remove('show'); }
+
+  document.getElementById('settingsOpen').addEventListener('click', openSettings);
+  document.getElementById('settingsClose').addEventListener('click', closeSettings);
+  settingsOverlay.addEventListener('click', e => { if (e.target === settingsOverlay) closeSettings(); });
+
+  document.getElementById('backupBtn').addEventListener('click', () => {
+    const payload = {
+      app: 'NexGame',
+      version: APP_VERSION,
+      exportedAt: new Date().toISOString(),
+      games,
+      archived
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nexgame-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    const total = games.length + archived.length;
+    restoreNote.textContent = `Backed up ${games.length} active and ${archived.length} archived game${total === 1 ? '' : 's'}.`;
+    restoreNote.className = 'set-note ok';
+  });
+
+  // parse + apply a backup object; shared by file restore and Dropbox sync. Throws on bad data.
+  function applyBackupData(data) {
+    const arr = Array.isArray(data) ? data : data.games;
+    if (!Array.isArray(arr)) throw new Error('no games array');
+    const cleanGame = g => ({
+      id: g.id || Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name: g.name,
+      date: g.tba ? null : g.date,
+      tba: !!g.tba,
+      status: STATUS_LABEL[g.status] ? g.status
+        : (g.prequelPlayed ? 'prequel' : (g.queued ? 'queued' : null)),
+      type: ['dlc', 'patch', 'ear'].includes(g.type) ? g.type : null,
+      hype: HYPE_LABEL[g.hype] ? g.hype : null,
+      price: typeof g.price === 'number' ? g.price : null,
+      priceEstimated: !!g.priceEstimated,
+      color: g.color || null,
+      image: g.image || null
+    });
+    const valid = g => g && typeof g.name === 'string' && (typeof g.date === 'string' || g.tba);
+    const clean = arr.filter(valid).map(cleanGame);
+    if (!clean.length) throw new Error('no valid entries');
+    games = clean;
+    archived = (data.archived || []).filter(valid).map(cleanGame);
+    save();
+    saveArchived();
+    render();
+    return { active: clean.length, archived: archived.length };
+  }
+
+  document.getElementById('restoreBtn').addEventListener('click', () => restoreFile.click());
+  restoreFile.addEventListener('change', () => {
+    const f = restoreFile.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const counts = applyBackupData(JSON.parse(reader.result));
+        const total = counts.active + counts.archived;
+        restoreNote.textContent = `Restored ${counts.active} active and ${counts.archived} archived game${total === 1 ? '' : 's'}.`;
+        restoreNote.className = 'set-note ok';
+      } catch {
+        restoreNote.textContent = 'Could not read that file — is it a NexGame backup?';
+        restoreNote.className = 'set-note bad';
+      }
+    };
+    reader.readAsText(f);
+    restoreFile.value = '';
+  });
+
+  // --- Toast: small transient notice, bottom-centre ---
+  let _toastTimer = null;
+  function toast(msg) {
+    let el = document.getElementById('toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'toast';
+      el.className = 'toast';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  // --- Dropbox sync (client-side OAuth2 PKCE, no backend) ---
+  const DBX_KEY = 'nexgame.dropbox';
+  const DBX_PATH = '/nexgame-backup.json';
+  let dbx = JSON.parse(localStorage.getItem(DBX_KEY) || 'null') ||
+    { appKey: '', accessToken: '', refreshToken: '', expiresAt: 0, account: '', lastSync: '', lastSyncAt: 0, dismissedRemoteAt: 0, autoSync: false, autoUpload: false };
+  const dbxSave = () => localStorage.setItem(DBX_KEY, JSON.stringify(dbx));
+  const dbxRedirectUri = () => location.origin + location.pathname;
+  const dbxSnapshot = () => JSON.stringify({ games, archived });
+
+  // auto-upload: debounced push after 10s of inactivity
+  let _syncTimer = null, _skipAutoUpload = false, _lastUploadedState = '';
+  function scheduleAutoUpload() {
+    if (!dbx.accessToken || !dbx.autoUpload) return;
+    if (_skipAutoUpload) return; // applying a download — don't bounce it back up
+    clearTimeout(_syncTimer);
+    _syncTimer = setTimeout(() => dropboxUpload(true), 10000);
+  }
+
+  function b64url(buf) {
+    return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function randomString(len) {
+    const a = new Uint8Array(len); crypto.getRandomValues(a); return b64url(a).slice(0, len);
+  }
+  async function pkceChallenge(verifier) {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+    return b64url(digest);
+  }
+
+  async function dropboxConnect() {
+    const key = document.getElementById('dbxKey').value.trim();
+    if (!key) { toast('Enter your Dropbox App key first'); return; }
+    if (!isSecureContext) { toast('⚠ Dropbox sync needs HTTPS (or localhost)'); return; }
+    dbx.appKey = key; dbxSave();
+    const verifier = randomString(64);
+    sessionStorage.setItem('nexgame.dbx.verifier', verifier);
+    const challenge = await pkceChallenge(verifier);
+    location.href = 'https://www.dropbox.com/oauth2/authorize?' + new URLSearchParams({
+      client_id: key, response_type: 'code', code_challenge: challenge, code_challenge_method: 'S256',
+      token_access_type: 'offline', redirect_uri: dbxRedirectUri()
+    });
+  }
+
+  async function dropboxHandleRedirect() {
+    const params = new URLSearchParams(location.search);
+    const code = params.get('code');
+    if (!code) return;
+    history.replaceState(null, '', location.pathname + location.hash); // strip ?code= from the URL
+    settingsOverlay.classList.add('show');
+    const verifier = sessionStorage.getItem('nexgame.dbx.verifier');
+    if (!verifier || !dbx.appKey) return;
+    try {
+      const res = await fetch('https://api.dropboxapi.com/oauth2/token', {
+        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ code, grant_type: 'authorization_code', client_id: dbx.appKey, code_verifier: verifier, redirect_uri: dbxRedirectUri() })
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error_description || j.error || 'auth failed');
+      dbx.accessToken = j.access_token; dbx.refreshToken = j.refresh_token || dbx.refreshToken;
+      dbx.expiresAt = Date.now() + (j.expires_in || 14400) * 1000; dbxSave();
+      await dropboxFetchAccount();
+      toast('Dropbox connected');
+      dropboxCheckForUpdates();
+    } catch (err) { toast('⚠ Dropbox connection failed: ' + err.message); }
+    updateDropboxUI();
+  }
+
+  async function dropboxRefreshIfNeeded() {
+    if (dbx.accessToken && Date.now() < dbx.expiresAt - 30000) return true;
+    if (!dbx.refreshToken || !dbx.appKey) return !!dbx.accessToken;
+    const res = await fetch('https://api.dropboxapi.com/oauth2/token', {
+      method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: dbx.refreshToken, client_id: dbx.appKey })
+    });
+    const j = await res.json();
+    if (!res.ok) return false;
+    dbx.accessToken = j.access_token; dbx.expiresAt = Date.now() + (j.expires_in || 14400) * 1000; dbxSave();
+    return true;
+  }
+
+  async function dropboxFetchAccount() {
+    try {
+      const res = await fetch('https://api.dropboxapi.com/2/users/get_current_account', {
+        method: 'POST', headers: { 'Authorization': 'Bearer ' + dbx.accessToken }
+      });
+      if (res.ok) { const j = await res.json(); dbx.account = j.email || (j.name && j.name.display_name) || ''; dbxSave(); }
+    } catch (e) {}
+  }
+
+  function dbxApplyBackupText(text) {
+    const parsed = JSON.parse(text);
+    _skipAutoUpload = true;
+    try {
+      const counts = applyBackupData(parsed);
+      _lastUploadedState = dbxSnapshot(); // we now match Dropbox; don't re-upload it
+      return counts;
+    } finally { _skipAutoUpload = false; }
+  }
+
+  async function dropboxUpload(silent) {
+    if (!await dropboxRefreshIfNeeded()) { if (!silent) toast('⚠ Dropbox session expired — reconnect'); return; }
+    const snapshot = dbxSnapshot();
+    if (silent && snapshot === _lastUploadedState) return; // nothing changed since last push
+    const payload = { app: 'NexGame', version: APP_VERSION, exportedAt: new Date().toISOString(), games, archived };
+    try {
+      const res = await fetch('https://content.dropboxapi.com/2/files/upload', {
+        method: 'POST', headers: {
+          'Authorization': 'Bearer ' + dbx.accessToken, 'Content-Type': 'application/octet-stream',
+          'Dropbox-API-Arg': JSON.stringify({ path: DBX_PATH, mode: 'overwrite', mute: true })
+        }, body: JSON.stringify(payload, null, 2)
+      });
+      if (!res.ok) throw new Error('upload failed (' + res.status + ')');
+      _lastUploadedState = snapshot;
+      dbx.lastSync = new Date().toLocaleString(); dbx.lastSyncAt = Date.now(); dbxSave(); updateDropboxUI();
+      toast(silent ? 'Auto-synced to Dropbox' : 'Uploaded to Dropbox');
+    } catch (err) { toast('⚠ ' + err.message); }
+  }
+
+  async function dropboxDownload(skipConfirm) {
+    if (!await dropboxRefreshIfNeeded()) { toast('⚠ Dropbox session expired — reconnect'); return; }
+    try {
+      const res = await fetch('https://content.dropboxapi.com/2/files/download', {
+        method: 'POST', headers: {
+          'Authorization': 'Bearer ' + dbx.accessToken,
+          'Dropbox-API-Arg': JSON.stringify({ path: DBX_PATH })
+        }
+      });
+      if (res.status === 409) { toast('No backup in Dropbox yet — upload one first'); return; }
+      if (!res.ok) throw new Error('download failed (' + res.status + ')');
+      const text = await res.text();
+      const apply = () => {
+        try {
+          dbxApplyBackupText(text);
+          dbx.lastSync = new Date().toLocaleString(); dbx.lastSyncAt = Date.now(); dbxSave(); updateDropboxUI();
+          toast('Synced from Dropbox');
+        } catch { toast('⚠ Dropbox file isn\'t a NexGame backup'); }
+      };
+      if (skipConfirm) { apply(); return; }
+      openConfirmAction({
+        title: 'Download from Dropbox?',
+        message: 'It will replace all games currently on this device.',
+        actionLabel: 'Download',
+        danger: false,
+        onConfirm: apply
+      });
+    } catch (err) { toast('⚠ ' + err.message); }
+  }
+
+  function dropboxDisconnect() {
+    openConfirmAction({
+      title: 'Disconnect Dropbox?',
+      message: 'You can reconnect any time with your App key.',
+      actionLabel: 'Disconnect',
+      onConfirm: () => {
+        dbx = { appKey: dbx.appKey, accessToken: '', refreshToken: '', expiresAt: 0, account: '', lastSync: '', lastSyncAt: 0, dismissedRemoteAt: 0, autoSync: false, autoUpload: false };
+        dbxSave(); updateDropboxUI(); toast('Dropbox disconnected');
+      }
+    });
+  }
+
+  // Offer to pull in the remote file if it's newer than our last local sync.
+  async function dropboxCheckForUpdates() {
+    if (!dbx.accessToken) return;
+    if (!await dropboxRefreshIfNeeded()) return;
+    try {
+      const res = await fetch('https://api.dropboxapi.com/2/files/get_metadata', {
+        method: 'POST', headers: { 'Authorization': 'Bearer ' + dbx.accessToken, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: DBX_PATH })
+      });
+      if (!res.ok) return; // no remote file yet, or a transient error
+      const j = await res.json();
+      const remoteAt = Date.parse(j.server_modified || '');
+      if (!remoteAt) return;
+      if (remoteAt > (dbx.lastSyncAt || 0) + 5000 && remoteAt !== dbx.dismissedRemoteAt) {
+        if (dbx.autoSync) dropboxDownload(true);  // pull silently without prompting
+        else openDbxSyncPrompt(remoteAt);
+      }
+    } catch (e) { /* offline or blocked — silently skip */ }
+  }
+  let _dbxPendingRemoteAt = 0;
+  const dbxSyncOverlay = document.getElementById('dbxSyncOverlay');
+  function openDbxSyncPrompt(remoteAt) {
+    _dbxPendingRemoteAt = remoteAt;
+    document.getElementById('dbxSyncWhen').textContent = new Date(remoteAt).toLocaleString();
+    dbxSyncOverlay.classList.add('show');
+  }
+  function closeDbxSyncPrompt() {
+    if (_dbxPendingRemoteAt) { dbx.dismissedRemoteAt = _dbxPendingRemoteAt; dbxSave(); _dbxPendingRemoteAt = 0; }
+    dbxSyncOverlay.classList.remove('show');
+  }
+  document.getElementById('dbxSyncLater').addEventListener('click', closeDbxSyncPrompt);
+  document.getElementById('dbxSyncNow').addEventListener('click', () => { dropboxDownload(true); closeDbxSyncPrompt(); });
+  dbxSyncOverlay.addEventListener('click', e => { if (e.target === dbxSyncOverlay) closeDbxSyncPrompt(); });
+
+  function updateDropboxUI() {
+    const setup = document.getElementById('dbxSetup');
+    if (!setup) return;
+    const connected = document.getElementById('dbxConnected');
+    const st = document.getElementById('dbxStatus');
+    document.getElementById('dbxKey').value = dbx.appKey || '';
+    const isConnected = !!dbx.accessToken;
+    setup.style.display = isConnected ? 'none' : 'block';
+    connected.style.display = isConnected ? 'block' : 'none';
+    document.getElementById('dbxAccount').textContent = dbx.account ? 'Connected as ' + dbx.account : 'Connected';
+    document.getElementById('dbxLastSync').textContent = dbx.lastSync ? 'last synced ' + dbx.lastSync : 'never synced';
+    document.getElementById('dbxAutoUpload').checked = !!dbx.autoUpload;
+    document.getElementById('dbxAutoSync').checked = !!dbx.autoSync;
+    st.textContent = isConnected ? 'Connected' : 'Not connected';
+    st.classList.toggle('connected', isConnected);
+  }
+  document.getElementById('dbxConnectBtn').addEventListener('click', dropboxConnect);
+  document.getElementById('dbxUploadBtn').addEventListener('click', () => dropboxUpload(false));
+  document.getElementById('dbxDownloadBtn').addEventListener('click', () => dropboxDownload(false));
+  document.getElementById('dbxDisconnectBtn').addEventListener('click', dropboxDisconnect);
+  document.getElementById('dbxAutoUpload').addEventListener('change', e => {
+    dbx.autoUpload = e.target.checked; dbxSave();
+    toast(e.target.checked ? 'Auto-upload enabled' : 'Auto-upload disabled');
+    if (!e.target.checked) clearTimeout(_syncTimer);
+  });
+  document.getElementById('dbxAutoSync').addEventListener('change', e => {
+    dbx.autoSync = e.target.checked; dbxSave();
+    toast(e.target.checked ? 'Auto-sync on launch enabled' : 'Auto-sync on launch disabled');
+    if (e.target.checked) dropboxCheckForUpdates();
+  });
+  updateDropboxUI();
+  dropboxHandleRedirect();
+  dropboxCheckForUpdates();
+
+  // --- Import wishlist: text file (one title per line) -> Wikidata lookup -> bulk add ---
+  const importBtn = document.getElementById('importBtn');
+  const importFileInput = document.getElementById('importFile');
+  const importOverlay = document.getElementById('importOverlay');
+  const importList = document.getElementById('importList');
+  const importCancelBtn = document.getElementById('importCancelBtn');
+  const importAddBtn = document.getElementById('importAddBtn');
+  let importRows = []; // { name, status: 'pending'|'searching'|'found'|'none', date, image, include }
+
+  importBtn.addEventListener('click', () => importFileInput.click());
+  importFileInput.addEventListener('change', () => {
+    const f = importFileInput.files[0];
+    importFileInput.value = '';
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const names = reader.result.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+      if (!names.length) return;
+      closeSettings();
+      openImport(names);
+    };
+    reader.readAsText(f);
+  });
+
+  function openImport(names) {
+    const existing = new Set(games.map(g => g.name.trim().toLowerCase()));
+    importRows = names.map(name => ({
+      name, status: 'pending', date: null, image: null, include: false,
+      dup: existing.has(name.trim().toLowerCase())
+    }));
+    renderImportList();
+    importOverlay.classList.add('show');
+    runImportLookups();
+  }
+  function closeImport() {
+    importOverlay.classList.remove('show');
+    importRows = [];
+  }
+
+  function renderImportList() {
+    importList.innerHTML = importRows.map((r, i) => {
+      const canInclude = !r.dup && (r.tba || r.status === 'found');
+      let mid;
+      if (r.dup) mid = '<span class="imp-status">Already tracked</span>';
+      else if (r.tba) mid = '';
+      else if (r.status === 'searching') mid = '<span class="imp-status">Searching…</span>';
+      else if (r.status === 'found') mid = `<input type="date" class="imp-date" data-i="${i}" value="${r.date || ''}">`;
+      else if (r.status === 'none') mid = '<span class="imp-status">No match</span>';
+      else mid = '<span class="imp-status">…</span>';
+      const researchBtn = (r.dup || r.status === 'searching' || r.status === 'pending') ? '' : `
+          <button type="button" class="imp-research" data-i="${i}" title="Search again">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          </button>`;
+      const candPanel = r.showCandidates ? `
+        <div class="imp-cand-list">
+          ${r.candidates.length ? r.candidates.map((c, ci) => `
+            <div class="imp-cand" data-i="${i}" data-ci="${ci}">
+              <span class="imp-cand-name">${esc(c.name)}${c.desc ? ` <span class="imp-cand-desc">— ${esc(c.desc)}</span>` : ''}</span>
+              <span class="imp-cand-date">${fmtDate(c.date)}</span>
+            </div>`).join('') : '<div class="imp-cand-empty">No other dated matches found.</div>'}
+        </div>` : '';
+      return `
+        <div class="imp-item">
+          <label class="imp-row">
+            <input type="checkbox" class="imp-check" data-i="${i}" ${r.include ? 'checked' : ''} ${canInclude ? '' : 'disabled'}>
+            <span class="imp-name${r.dup ? ' imp-dup' : ''}">${esc(r.name)}</span>
+            ${mid}
+            ${r.dup ? '' : `<span class="imp-tba">
+              <input type="checkbox" class="imp-tba-chk" data-i="${i}" ${r.tba ? 'checked' : ''}><span>Coming soon</span>
+            </span>`}
+            ${researchBtn}
+          </label>
+          ${candPanel}
+        </div>`;
+    }).join('');
+  }
+
+  importList.addEventListener('change', e => {
+    const chk = e.target.closest('.imp-check');
+    if (chk) { importRows[+chk.dataset.i].include = chk.checked; return; }
+    const d = e.target.closest('.imp-date');
+    if (d) { importRows[+d.dataset.i].date = d.value; return; }
+    const t = e.target.closest('.imp-tba-chk');
+    if (t) {
+      const r = importRows[+t.dataset.i];
+      r.tba = t.checked;
+      if (r.tba) { r.include = true; r.date = null; }
+      else r.include = r.status === 'found';
+      renderImportList();
+    }
+  });
+
+  importList.addEventListener('click', e => {
+    const btn = e.target.closest('.imp-research');
+    if (btn) { e.preventDefault(); researchRow(+btn.dataset.i); return; }
+    const cand = e.target.closest('.imp-cand');
+    if (cand) {
+      const r = importRows[+cand.dataset.i];
+      const c = r.candidates[+cand.dataset.ci];
+      r.date = c.date;
+      r.image = c.image;
+      r.status = 'found';
+      r.tba = false;
+      r.include = true;
+      r.showCandidates = false;
+      renderImportList();
+    }
+  });
+
+  async function researchRow(i) {
+    const r = importRows[i];
+    r.showCandidates = true;
+    r.candidates = r.candidates || [];
+    renderImportList();
+    try {
+      const sURL = `${WD}?action=wbsearchentities&search=${encodeURIComponent(r.name)}` +
+        `&language=en&uselang=en&format=json&type=item&limit=10&origin=*`;
+      const hits = (await fetch(sURL).then(x => x.json())).search || [];
+      let candidates = [];
+      if (hits.length) {
+        const ids = hits.map(h => h.id).join('|');
+        const eURL = `${WD}?action=wbgetentities&ids=${ids}&props=claims|descriptions|labels&languages=en&format=json&origin=*`;
+        const eData = await fetch(eURL).then(x => x.json());
+        const ents = eData.entities || {};
+        candidates = hits.map(h => {
+          const e = ents[h.id];
+          const date = e ? earliestRelease(e) : null;
+          return date ? {
+            name: (e?.labels?.en?.value) || h.label,
+            desc: (e?.descriptions?.en?.value) || h.description || '',
+            date,
+            image: e ? entityImage(e) : null
+          } : null;
+        }).filter(Boolean);
+      }
+      r.candidates = candidates;
+    } catch {
+      r.candidates = [];
+    }
+    renderImportList();
+  }
+
+  async function runImportLookups() {
+    for (const r of importRows) {
+      if (r.dup) continue;
+      r.status = 'searching';
+      renderImportList();
+      try {
+        const sURL = `${WD}?action=wbsearchentities&search=${encodeURIComponent(r.name)}` +
+          `&language=en&uselang=en&format=json&type=item&limit=10&origin=*`;
+        const hits = (await fetch(sURL).then(x => x.json())).search || [];
+        let best = null;
+        if (hits.length) {
+          const ids = hits.map(h => h.id).join('|');
+          const eURL = `${WD}?action=wbgetentities&ids=${ids}&props=claims&languages=en&format=json&origin=*`;
+          const ents = (await fetch(eURL).then(x => x.json())).entities || {};
+          for (const h of hits) {
+            const e = ents[h.id];
+            const date = e ? earliestRelease(e) : null;
+            if (date) { best = { date, image: entityImage(e) }; break; }
+          }
+        }
+        if (best) { r.status = 'found'; r.date = best.date; r.image = best.image; r.include = true; }
+        else { r.status = 'none'; r.tba = true; r.include = true; }
+      } catch {
+        r.status = 'none'; r.tba = true; r.include = true;
+      }
+      renderImportList();
+    }
+  }
+
+  importCancelBtn.addEventListener('click', closeImport);
+  importOverlay.addEventListener('click', e => { if (e.target === importOverlay) closeImport(); });
+
+  importAddBtn.addEventListener('click', () => {
+    const toAdd = importRows.filter(r => r.include && (r.date || r.tba));
+    toAdd.forEach(r => {
+      games.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        name: r.name,
+        date: r.tba ? null : r.date,
+        tba: !!r.tba,
+        status: null,
+        color: null,
+        image: r.image || null
+      });
+    });
+    if (toAdd.length) { save(); render(); }
+    closeImport();
+  });
+
+  buildSwatches();
+  render();
+
+  // register the service worker so the app is installable / works offline
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        // a worker already waiting from a previous visit
+        if (reg.waiting) showUpdateBanner(reg);
+        reg.addEventListener('updatefound', () => {
+          const fresh = reg.installing;
+          if (!fresh) return;
+          fresh.addEventListener('statechange', () => {
+            if (fresh.state === 'installed' && reg.waiting) showUpdateBanner(reg);
+          });
+        });
+      }).catch(() => {});
+
+      // once the new worker takes over, reload once to load the new assets
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (reloaded) return;
+        reloaded = true;
+        location.reload();
+      });
+    });
+  }
+
+  function showUpdateBanner(reg) {
+    const banner = document.getElementById('updateBanner');
+    const msg = document.getElementById('updateBannerMsg');
+    msg.textContent = 'A new version of NexGame is ready.';
+    fetch('index.html?v=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(html => {
+      const m = html.match(/APP_VERSION\s*=\s*'([^']+)'/);
+      if (m && m[1] && m[1] !== APP_VERSION) {
+        msg.textContent = `Update available: ${APP_VERSION} → ${m[1]}`;
+      }
+    }).catch(() => {});
+    banner.classList.add('show');
+    document.getElementById('updateBtn').onclick = () => {
+      reg.waiting.postMessage('SKIP_WAITING');
+      banner.classList.remove('show');
+    };
+  }
+</script>
+</body>
+</html>
