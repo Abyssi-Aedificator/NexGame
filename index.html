@@ -558,7 +558,7 @@
   .tile-tags .tag { background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.4); color: #fff; flex-shrink: 0; }
   .tile-tags .tag-more { background: var(--surface-hover); border-color: var(--border); }
 
-  .tag-type { border-color: var(--border); color: var(--text); background: var(--surface); }
+  .tag-type { border-color: var(--border); color: var(--text); }
   .tag-type.tag-dlc { border-color: #4cc9f0; color: #4cc9f0; }
   .tag-type.tag-patch { border-color: #ffb703; color: #ffb703; }
   .tag-type.tag-ear { border-color: #06d6a0; color: #06d6a0; }
@@ -650,10 +650,8 @@
   .mode-btn:hover { color: var(--text); }
   .mode-btn.active { color: var(--on-accent); background: var(--accent); }
 
-  .theme-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+  .theme-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
   .theme-swatch {
-    flex: 1;
-    min-width: 56px;
     cursor: pointer;
     text-align: center;
   }
@@ -1808,15 +1806,16 @@
           <div class="set-label">Changelog</div>
               <div class="changelog">
                 <div class="cl-entry">
-                  <div class="cl-ver">x.x.x <span class="cl-current">Unreleased</span></div>
+                  <div class="cl-ver">1.1.0 <span class="cl-current">2026-07-04</span></div>
                   <ul>
-                    <li>New light mode with 5 accent colour themes — switch anytime in Settings.</li>
+                    <li>New light mode with 10 accent colour themes — switch anytime in Settings.</li>
                     <li>Action buttons now appear on hover for a cleaner look.</li>
                     <li>Better text contrast in light mode across cards, buttons, and inputs.</li>
                     <li>Fixed header toolbar (icons + Track a game) not aligning with the reset filters button in grid view.</li>
                     <li>Removed the "Sort alphabetically" toggle — lists now always sort by release date.</li>
                     <li>Removed the "Group by month" toggle — games are now always grouped by release month.</li>
                     <li>The stats panel now reflects the active filters and search instead of always showing all tracked games.</li>
+                    <li>Added 5 new accent colour themes to both dark mode (Ember, Amber, Eclipse, Onyx, Aurora) and light mode (Poppy, Honey, Lavender, Mist, Citrus).</li>
                   </ul>
                 </div>
                 <div class="cl-entry">
@@ -2987,6 +2986,66 @@
           surface: 'rgba(255,255,255,0.1)', surfaceHover: 'rgba(255,255,255,0.18)',
           border: 'rgba(255,255,255,0.18)', borderHover: 'rgba(255,255,255,0.32)', colorScheme: 'dark',
           overlay: 'rgba(10, 0, 24, 0.55)'
+        },
+        ember: {
+          label: 'Ember',
+          gradient: 'linear-gradient(135deg, #200404 0%, #7f1d1d 40%, #b91c1c 70%, #f87171 100%)',
+          blob1: 'rgba(185, 28, 28, 0.55)', blob2: 'rgba(248, 113, 113, 0.45)', meta: '#200404',
+          accent: 'linear-gradient(135deg, #fecaca, #f87171)', accent2: '#f87171', accentSoft: '#fecaca',
+          onAccent: '#450a0a', modalBg: 'rgba(50, 10, 10, 0.92)', resultsBg: 'rgba(58, 12, 12, 0.98)',
+          scrimA: 'rgba(20, 3, 3, 0.55)', scrimB: 'rgba(20, 3, 3, 0.80)', numGlow: 'rgba(248, 113, 113, 0.5)',
+          text: '#f3f6ff', textMuted: 'rgba(243, 246, 255, 0.6)',
+          surface: 'rgba(255,255,255,0.1)', surfaceHover: 'rgba(255,255,255,0.18)',
+          border: 'rgba(255,255,255,0.18)', borderHover: 'rgba(255,255,255,0.32)', colorScheme: 'dark',
+          overlay: 'rgba(10, 0, 24, 0.55)'
+        },
+        amber: {
+          label: 'Amber',
+          gradient: 'linear-gradient(135deg, #1f1400 0%, #78350f 40%, #b45309 70%, #fbbf24 100%)',
+          blob1: 'rgba(180, 83, 9, 0.55)', blob2: 'rgba(251, 191, 36, 0.45)', meta: '#1f1400',
+          accent: 'linear-gradient(135deg, #fde68a, #f59e0b)', accent2: '#f59e0b', accentSoft: '#fde68a',
+          onAccent: '#3a2505', modalBg: 'rgba(48, 32, 6, 0.92)', resultsBg: 'rgba(55, 38, 9, 0.98)',
+          scrimA: 'rgba(18, 12, 2, 0.55)', scrimB: 'rgba(18, 12, 2, 0.80)', numGlow: 'rgba(245, 158, 11, 0.5)',
+          text: '#f3f6ff', textMuted: 'rgba(243, 246, 255, 0.6)',
+          surface: 'rgba(255,255,255,0.1)', surfaceHover: 'rgba(255,255,255,0.18)',
+          border: 'rgba(255,255,255,0.18)', borderHover: 'rgba(255,255,255,0.32)', colorScheme: 'dark',
+          overlay: 'rgba(10, 0, 24, 0.55)'
+        },
+        eclipse: {
+          label: 'Eclipse',
+          gradient: 'linear-gradient(135deg, #150025 0%, #4c1d95 40%, #7c3aed 70%, #c084fc 100%)',
+          blob1: 'rgba(124, 58, 237, 0.55)', blob2: 'rgba(192, 132, 252, 0.45)', meta: '#150025',
+          accent: 'linear-gradient(135deg, #e9d5ff, #a855f7)', accent2: '#a855f7', accentSoft: '#e9d5ff',
+          onAccent: '#2e1065', modalBg: 'rgba(34, 8, 56, 0.92)', resultsBg: 'rgba(40, 10, 64, 0.98)',
+          scrimA: 'rgba(12, 2, 22, 0.55)', scrimB: 'rgba(12, 2, 22, 0.80)', numGlow: 'rgba(168, 85, 247, 0.5)',
+          text: '#f3f6ff', textMuted: 'rgba(243, 246, 255, 0.6)',
+          surface: 'rgba(255,255,255,0.1)', surfaceHover: 'rgba(255,255,255,0.18)',
+          border: 'rgba(255,255,255,0.18)', borderHover: 'rgba(255,255,255,0.32)', colorScheme: 'dark',
+          overlay: 'rgba(10, 0, 24, 0.55)'
+        },
+        onyx: {
+          label: 'Onyx',
+          gradient: 'linear-gradient(135deg, #0a0a0c 0%, #27272a 40%, #52525b 70%, #a1a1aa 100%)',
+          blob1: 'rgba(82, 82, 91, 0.55)', blob2: 'rgba(161, 161, 170, 0.4)', meta: '#0a0a0c',
+          accent: 'linear-gradient(135deg, #e4e4e7, #a1a1aa)', accent2: '#a1a1aa', accentSoft: '#e4e4e7',
+          onAccent: '#18181b', modalBg: 'rgba(24, 24, 27, 0.92)', resultsBg: 'rgba(30, 30, 34, 0.98)',
+          scrimA: 'rgba(8, 8, 10, 0.55)', scrimB: 'rgba(8, 8, 10, 0.80)', numGlow: 'rgba(161, 161, 170, 0.5)',
+          text: '#f3f6ff', textMuted: 'rgba(243, 246, 255, 0.6)',
+          surface: 'rgba(255,255,255,0.1)', surfaceHover: 'rgba(255,255,255,0.18)',
+          border: 'rgba(255,255,255,0.18)', borderHover: 'rgba(255,255,255,0.32)', colorScheme: 'dark',
+          overlay: 'rgba(10, 0, 24, 0.55)'
+        },
+        aurora: {
+          label: 'Aurora',
+          gradient: 'linear-gradient(135deg, #0a1400 0%, #365314 40%, #65a30d 70%, #bef264 100%)',
+          blob1: 'rgba(101, 163, 13, 0.55)', blob2: 'rgba(190, 242, 100, 0.4)', meta: '#0a1400',
+          accent: 'linear-gradient(135deg, #ecfccb, #a3e635)', accent2: '#a3e635', accentSoft: '#ecfccb',
+          onAccent: '#1a2e05', modalBg: 'rgba(20, 32, 6, 0.92)', resultsBg: 'rgba(24, 38, 8, 0.98)',
+          scrimA: 'rgba(8, 14, 2, 0.55)', scrimB: 'rgba(8, 14, 2, 0.80)', numGlow: 'rgba(163, 230, 53, 0.5)',
+          text: '#f3f6ff', textMuted: 'rgba(243, 246, 255, 0.6)',
+          surface: 'rgba(255,255,255,0.1)', surfaceHover: 'rgba(255,255,255,0.18)',
+          border: 'rgba(255,255,255,0.18)', borderHover: 'rgba(255,255,255,0.32)', colorScheme: 'dark',
+          overlay: 'rgba(10, 0, 24, 0.55)'
         }
       }
     },
@@ -3051,6 +3110,66 @@
           text: '#2e3050', textMuted: 'rgba(46, 48, 80, 0.7)',
           surface: 'rgba(255,255,255,0.72)', surfaceHover: 'rgba(255,255,255,0.92)',
           border: 'rgba(46, 48, 80, 0.1)', borderHover: 'rgba(46, 48, 80, 0.22)', colorScheme: 'light',
+          overlay: 'rgba(0, 0, 0, 0.35)'
+        },
+        poppy: {
+          label: 'Poppy',
+          gradient: 'linear-gradient(135deg, #fff5f5 0%, #fde2e2 40%, #fbd0d0 70%, #f7bcbc 100%)',
+          blob1: 'rgba(240, 150, 150, 0.35)', blob2: 'rgba(255, 170, 170, 0.2)', meta: '#fdecec',
+          accent: 'linear-gradient(135deg, #f87171, #dc2626)', accent2: '#dc2626', accentSoft: '#f87171',
+          onAccent: '#ffffff', modalBg: 'rgba(255, 247, 247, 0.95)', resultsBg: 'rgba(253, 240, 240, 0.98)',
+          scrimA: 'rgba(0, 0, 0, 0.15)', scrimB: 'rgba(0, 0, 0, 0.28)', numGlow: 'rgba(220, 38, 38, 0.3)',
+          text: '#5c2c2c', textMuted: 'rgba(92, 44, 44, 0.7)',
+          surface: 'rgba(255,255,255,0.72)', surfaceHover: 'rgba(255,255,255,0.92)',
+          border: 'rgba(92, 44, 44, 0.1)', borderHover: 'rgba(92, 44, 44, 0.22)', colorScheme: 'light',
+          overlay: 'rgba(0, 0, 0, 0.35)'
+        },
+        honey: {
+          label: 'Honey',
+          gradient: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 40%, #fde68a 70%, #fcd34d 100%)',
+          blob1: 'rgba(250, 204, 21, 0.3)', blob2: 'rgba(252, 211, 77, 0.25)', meta: '#fef9e7',
+          accent: 'linear-gradient(135deg, #fbbf24, #d97706)', accent2: '#d97706', accentSoft: '#fbbf24',
+          onAccent: '#ffffff', modalBg: 'rgba(255, 252, 240, 0.95)', resultsBg: 'rgba(254, 247, 224, 0.98)',
+          scrimA: 'rgba(0, 0, 0, 0.12)', scrimB: 'rgba(0, 0, 0, 0.25)', numGlow: 'rgba(217, 119, 6, 0.3)',
+          text: '#5c4a1e', textMuted: 'rgba(92, 74, 30, 0.7)',
+          surface: 'rgba(255,255,255,0.72)', surfaceHover: 'rgba(255,255,255,0.92)',
+          border: 'rgba(92, 74, 30, 0.1)', borderHover: 'rgba(92, 74, 30, 0.22)', colorScheme: 'light',
+          overlay: 'rgba(0, 0, 0, 0.35)'
+        },
+        lavender: {
+          label: 'Lavender',
+          gradient: 'linear-gradient(135deg, #f8f5ff 0%, #ede4fb 40%, #e0d2f7 70%, #d4c2f2 100%)',
+          blob1: 'rgba(190, 160, 230, 0.35)', blob2: 'rgba(210, 180, 240, 0.2)', meta: '#f2ecfa',
+          accent: 'linear-gradient(135deg, #c084fc, #9333ea)', accent2: '#9333ea', accentSoft: '#c084fc',
+          onAccent: '#ffffff', modalBg: 'rgba(250, 247, 255, 0.95)', resultsBg: 'rgba(244, 238, 253, 0.98)',
+          scrimA: 'rgba(0, 0, 0, 0.12)', scrimB: 'rgba(0, 0, 0, 0.25)', numGlow: 'rgba(147, 51, 234, 0.3)',
+          text: '#453059', textMuted: 'rgba(69, 48, 89, 0.7)',
+          surface: 'rgba(255,255,255,0.72)', surfaceHover: 'rgba(255,255,255,0.92)',
+          border: 'rgba(69, 48, 89, 0.1)', borderHover: 'rgba(69, 48, 89, 0.22)', colorScheme: 'light',
+          overlay: 'rgba(0, 0, 0, 0.35)'
+        },
+        mist: {
+          label: 'Mist',
+          gradient: 'linear-gradient(135deg, #f8fafc 0%, #eef1f5 40%, #e2e6ec 70%, #d5dbe3 100%)',
+          blob1: 'rgba(160, 175, 195, 0.3)', blob2: 'rgba(190, 200, 215, 0.2)', meta: '#eff2f6',
+          accent: 'linear-gradient(135deg, #94a3b8, #475569)', accent2: '#475569', accentSoft: '#94a3b8',
+          onAccent: '#ffffff', modalBg: 'rgba(249, 250, 252, 0.95)', resultsBg: 'rgba(242, 244, 248, 0.98)',
+          scrimA: 'rgba(0, 0, 0, 0.12)', scrimB: 'rgba(0, 0, 0, 0.25)', numGlow: 'rgba(71, 85, 105, 0.3)',
+          text: '#334155', textMuted: 'rgba(51, 65, 85, 0.7)',
+          surface: 'rgba(255,255,255,0.72)', surfaceHover: 'rgba(255,255,255,0.92)',
+          border: 'rgba(51, 65, 85, 0.1)', borderHover: 'rgba(51, 65, 85, 0.22)', colorScheme: 'light',
+          overlay: 'rgba(0, 0, 0, 0.35)'
+        },
+        citrus: {
+          label: 'Citrus',
+          gradient: 'linear-gradient(135deg, #fafff0 0%, #f0fbd8 40%, #e4f7bd 70%, #d6f0a0 100%)',
+          blob1: 'rgba(190, 220, 100, 0.3)', blob2: 'rgba(210, 235, 130, 0.2)', meta: '#f5fce4',
+          accent: 'linear-gradient(135deg, #a3e635, #65a30d)', accent2: '#65a30d', accentSoft: '#a3e635',
+          onAccent: '#ffffff', modalBg: 'rgba(250, 253, 240, 0.95)', resultsBg: 'rgba(244, 250, 224, 0.98)',
+          scrimA: 'rgba(0, 0, 0, 0.12)', scrimB: 'rgba(0, 0, 0, 0.25)', numGlow: 'rgba(101, 163, 13, 0.3)',
+          text: '#3f4a1e', textMuted: 'rgba(63, 74, 30, 0.7)',
+          surface: 'rgba(255,255,255,0.72)', surfaceHover: 'rgba(255,255,255,0.92)',
+          border: 'rgba(63, 74, 30, 0.1)', borderHover: 'rgba(63, 74, 30, 0.22)', colorScheme: 'light',
           overlay: 'rgba(0, 0, 0, 0.35)'
         }
       }
