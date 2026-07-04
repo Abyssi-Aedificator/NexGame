@@ -1816,6 +1816,7 @@
                     <li>Fixed header toolbar (icons + Track a game) not aligning with the reset filters button in grid view.</li>
                     <li>Removed the "Sort alphabetically" toggle — lists now always sort by release date.</li>
                     <li>Removed the "Group by month" toggle — games are now always grouped by release month.</li>
+                    <li>The stats panel now reflects the active filters and search instead of always showing all tracked games.</li>
                   </ul>
                 </div>
                 <div class="cl-entry">
@@ -2115,7 +2116,8 @@
     renderFilterPicker('statusFilter', statusFilterModes, STATUS_FILTERS, 'All Status', STATUS_FILTER_SUMMARY);
     renderFilterPicker('hypeFilter', hypeFilterModes, HYPE_FILTERS, 'All Hype', HYPE_FILTER_SUMMARY);
     renderFilterPicker('priceFilter', priceFilterModes, PRICE_FILTERS, 'All Prices', PRICE_FILTER_SUMMARY);
-    renderStatsPanel();
+    const visible = games.filter(g => matchesFilter(g) && matchesSearch(g));
+    renderStatsPanel(visible);
 
     if (!games.length) {
       list.className = 'list';
@@ -2129,7 +2131,6 @@
       return;
     }
 
-    const visible = games.filter(g => matchesFilter(g) && matchesSearch(g));
     if (!visible.length) {
       list.className = 'list';
       document.getElementById('wrap').classList.remove('wide');
@@ -2263,20 +2264,20 @@
     return `<hr><div class="stat-group"><div class="stat-group-title">${esc(title)}</div>${html}</div>`;
   }
 
-  function renderStatsPanel() {
+  function renderStatsPanel(visible) {
     const panel = document.getElementById('statsPanel');
     panel.classList.toggle('stats-empty', !games.length);
     if (!games.length) { panel.innerHTML = ''; return; }
 
-    const dated = games.filter(g => !g.tba);
+    const dated = visible.filter(g => !g.tba);
     const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
     const outNow = dated.filter(g => daysUntil(g.date) < 0);
-    const soon = games.filter(g => g.tba);
+    const soon = visible.filter(g => g.tba);
 
     const statusCounts = { ready: 0, prequel: 0, link: 0, queued: 0, none: 0 };
     const typeCounts = { dlc: 0, patch: 0, ear: 0, none: 0 };
     const hypeCounts = { under: 0, high: 0, terminal: 0, none: 0 };
-    games.forEach(g => {
+    visible.forEach(g => {
       statusCounts[g.status && STATUS_LABEL[g.status] ? g.status : 'none']++;
       typeCounts[g.type && TYPE_LABEL[g.type] ? g.type : 'none']++;
       hypeCounts[g.hype && HYPE_LABEL[g.hype] ? g.hype : 'none']++;
@@ -2284,8 +2285,8 @@
 
     panel.innerHTML = `
       <div class="stat-hero">
-        <div class="num">${games.length}</div>
-        <div class="lbl">Games tracked</div>
+        <div class="num">${visible.length}</div>
+        <div class="lbl">${visible.length === games.length ? 'Games tracked' : 'Games shown'}</div>
       </div>
       ${statGroup('Overview', [
         statRow('Upcoming', upcoming.length),
