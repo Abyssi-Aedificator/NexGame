@@ -124,6 +124,9 @@
   }
   .icon-btn svg { width: 18px; height: 18px; }
   .icon-btn:hover { color: var(--text); }
+  #dbxSyncBtn.syncing { color: var(--accent-2); }
+  #dbxSyncBtn.syncing svg { animation: nx-spin 0.9s linear infinite; }
+  @keyframes nx-spin { to { transform: rotate(360deg); } }
 
   .settings-open { margin-left: auto; }
 
@@ -1434,6 +1437,9 @@
         <button class="icon-btn settings-open" id="archivedOpen" title="Archived">
           <svg viewBox="0 0 24 24"><path d="M3 8h18M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4"/></svg>
         </button>
+        <button class="icon-btn" id="dbxSyncBtn" title="Sync with Dropbox">
+          <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
+        </button>
         <div class="view-toggle" id="viewToggle">
           <button data-view="list" class="vt-btn" title="List view">
             <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
@@ -1806,7 +1812,13 @@
           <div class="set-label">Changelog</div>
               <div class="changelog">
                 <div class="cl-entry">
-                  <div class="cl-ver">1.1.0 <span class="cl-current">2026-07-04</span></div>
+                  <div class="cl-ver">x.x.x <span class="cl-current">Unreleased</span></div>
+                  <ul>
+                    <li>Added a Dropbox sync button next to Archived that spins while a sync is in progress.</li>
+                  </ul>
+                </div>
+                <div class="cl-entry">
+                  <div class="cl-ver">1.1.0</div>
                   <ul>
                     <li>New light mode with 10 accent colour themes — switch anytime in Settings.</li>
                     <li>Action buttons now appear on hover for a cleaner look.</li>
@@ -3594,10 +3606,17 @@
   const DBX_KEY = 'nexgame.dropbox';
   const DBX_PATH = '/nexgame-backup.json';
   let dbx = JSON.parse(localStorage.getItem(DBX_KEY) || 'null') ||
-    { appKey: '', accessToken: '', refreshToken: '', expiresAt: 0, account: '', lastSync: '', lastSyncAt: 0, dismissedRemoteAt: 0, autoSync: false, autoUpload: false };
+    { appKey: '', accessToken: '', refreshToken: '', expiresAt: 0, account: '', lastSync: '', lastSyncAt: 0, dismissedRemoteAt: 0, autoSync: false, autoUpload: false, mock: false };
   const dbxSave = () => localStorage.setItem(DBX_KEY, JSON.stringify(dbx));
   const dbxRedirectUri = () => location.origin + location.pathname;
   const dbxSnapshot = () => JSON.stringify({ games, archived });
+  const dbxSyncBtn = document.getElementById('dbxSyncBtn');
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+  let _syncOps = 0;
+  function setSyncSpinning(active) {
+    _syncOps += active ? 1 : -1;
+    dbxSyncBtn.classList.toggle('syncing', _syncOps > 0);
+  }
 
   // auto-upload: debounced push after 10s of inactivity
   let _syncTimer = null, _skipAutoUpload = false, _lastUploadedState = '';
@@ -3622,6 +3641,16 @@
   async function dropboxConnect() {
     const key = document.getElementById('dbxKey').value.trim();
     if (!key) { toast('Enter your Dropbox App key first'); return; }
+    if (key.toLowerCase() === 'mock') {
+      dbx = {
+        appKey: key, accessToken: 'mock-access-token', refreshToken: 'mock-refresh-token',
+        expiresAt: Date.now() + 365 * 24 * 60 * 60 * 1000, account: 'demo@example.com',
+        lastSync: '', lastSyncAt: 0, dismissedRemoteAt: 0, autoSync: false, autoUpload: false, mock: true
+      };
+      dbxSave(); updateDropboxUI();
+      toast('Mock Dropbox connected — demo mode only');
+      return;
+    }
     if (!isSecureContext) { toast('⚠ Dropbox sync needs HTTPS (or localhost)'); return; }
     dbx.appKey = key; dbxSave();
     const verifier = randomString(64);
@@ -3693,7 +3722,17 @@
     if (!await dropboxRefreshIfNeeded()) { if (!silent) toast('⚠ Dropbox session expired — reconnect'); return; }
     const snapshot = dbxSnapshot();
     if (silent && snapshot === _lastUploadedState) return; // nothing changed since last push
+    if (dbx.mock) {
+      setSyncSpinning(true);
+      await delay(700);
+      _lastUploadedState = snapshot;
+      dbx.lastSync = new Date().toLocaleString(); dbx.lastSyncAt = Date.now(); dbxSave(); updateDropboxUI();
+      toast(silent ? 'Auto-synced to Dropbox (mock)' : 'Uploaded to Dropbox (mock)');
+      setSyncSpinning(false);
+      return;
+    }
     const payload = { app: 'NexGame', version: APP_VERSION, exportedAt: new Date().toISOString(), games, archived };
+    setSyncSpinning(true);
     try {
       const res = await fetch('https://content.dropboxapi.com/2/files/upload', {
         method: 'POST', headers: {
@@ -3706,10 +3745,30 @@
       dbx.lastSync = new Date().toLocaleString(); dbx.lastSyncAt = Date.now(); dbxSave(); updateDropboxUI();
       toast(silent ? 'Auto-synced to Dropbox' : 'Uploaded to Dropbox');
     } catch (err) { toast('⚠ ' + err.message); }
+    finally { setSyncSpinning(false); }
   }
 
   async function dropboxDownload(skipConfirm) {
     if (!await dropboxRefreshIfNeeded()) { toast('⚠ Dropbox session expired — reconnect'); return; }
+    if (dbx.mock) {
+      setSyncSpinning(true);
+      await delay(700);
+      setSyncSpinning(false);
+      const apply = () => {
+        dbx.lastSync = new Date().toLocaleString(); dbx.lastSyncAt = Date.now(); dbxSave(); updateDropboxUI();
+        toast('Synced from Dropbox (mock)');
+      };
+      if (skipConfirm) { apply(); return; }
+      openConfirmAction({
+        title: 'Download from Dropbox?',
+        message: 'It will replace all games currently on this device.',
+        actionLabel: 'Download',
+        danger: false,
+        onConfirm: apply
+      });
+      return;
+    }
+    setSyncSpinning(true);
     try {
       const res = await fetch('https://content.dropboxapi.com/2/files/download', {
         method: 'POST', headers: {
@@ -3736,6 +3795,7 @@
         onConfirm: apply
       });
     } catch (err) { toast('⚠ ' + err.message); }
+    finally { setSyncSpinning(false); }
   }
 
   function dropboxDisconnect() {
@@ -3744,7 +3804,7 @@
       message: 'You can reconnect any time with your App key.',
       actionLabel: 'Disconnect',
       onConfirm: () => {
-        dbx = { appKey: dbx.appKey, accessToken: '', refreshToken: '', expiresAt: 0, account: '', lastSync: '', lastSyncAt: 0, dismissedRemoteAt: 0, autoSync: false, autoUpload: false };
+        dbx = { appKey: dbx.appKey, accessToken: '', refreshToken: '', expiresAt: 0, account: '', lastSync: '', lastSyncAt: 0, dismissedRemoteAt: 0, autoSync: false, autoUpload: false, mock: false };
         dbxSave(); updateDropboxUI(); toast('Dropbox disconnected');
       }
     });
@@ -3752,7 +3812,7 @@
 
   // Offer to pull in the remote file if it's newer than our last local sync.
   async function dropboxCheckForUpdates() {
-    if (!dbx.accessToken) return;
+    if (!dbx.accessToken || dbx.mock) return;
     if (!await dropboxRefreshIfNeeded()) return;
     try {
       const res = await fetch('https://api.dropboxapi.com/2/files/get_metadata', {
@@ -3803,6 +3863,15 @@
   document.getElementById('dbxConnectBtn').addEventListener('click', dropboxConnect);
   document.getElementById('dbxUploadBtn').addEventListener('click', () => dropboxUpload(false));
   document.getElementById('dbxDownloadBtn').addEventListener('click', () => dropboxDownload(false));
+  dbxSyncBtn.addEventListener('click', () => {
+    if (!dbx.accessToken) {
+      toast('Connect Dropbox in Settings to sync');
+      openSettings();
+      switchSettingsTab('sync');
+      return;
+    }
+    dropboxUpload(false);
+  });
   document.getElementById('dbxDisconnectBtn').addEventListener('click', dropboxDisconnect);
   document.getElementById('dbxAutoUpload').addEventListener('change', e => {
     dbx.autoUpload = e.target.checked; dbxSave();
