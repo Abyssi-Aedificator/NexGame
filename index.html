@@ -1286,6 +1286,8 @@
   .side-nav button.sn-now:hover { background: color-mix(in srgb, var(--accent-2) 18%, transparent); }
   .side-nav button.sn-soon { color: var(--accent-2); opacity: 0.85; }
   .side-nav button.sn-soon:hover { background: color-mix(in srgb, var(--accent-2) 18%, transparent); }
+  .side-nav button.sn-week { color: var(--accent-2); }
+  .side-nav button.sn-week:hover { background: color-mix(in srgb, var(--accent-2) 18%, transparent); }
 
   .stats-panel {
     position: fixed;
@@ -1782,6 +1784,7 @@
                   <div class="cl-ver">x.x.x <span class="cl-current">Unreleased</span></div>
                   <ul>
                     <li>Released games now show a "Mark as owned" action instead of "Archive" — one click moves them straight to the archived section.</li>
+                    <li>Upcoming games releasing this week or next now show in their own "This Week" / "Next Week" groups at the top of the list.</li>
                   </ul>
                 </div>
                 <div class="cl-entry">
@@ -2165,10 +2168,29 @@
       return total > 0 ? total : null;
     }
 
-    // bucket by release month, keeping bucket order chronological
+    // pull out "this week" / "next week" (Monday-start calendar weeks) as special groups up top
+    const now = new Date();
+    const dow = (now.getDay() + 6) % 7; // 0=Mon .. 6=Sun
+    const daysToWeekEnd = 6 - dow; // days from today through this Sunday
+    const thisWeek = chronological.filter(g => daysUntil(g.date) <= daysToWeekEnd);
+    const nextWeek = chronological.filter(g => {
+      const d = daysUntil(g.date);
+      return d > daysToWeekEnd && d <= daysToWeekEnd + 7;
+    });
+    const rest = chronological.filter(g => daysUntil(g.date) > daysToWeekEnd + 7);
+
+    let html = '';
+    if (thisWeek.length) {
+      html += sepHTML('This Week', 'This week', 'week', thisWeek.length, priceSum(thisWeek)) + thisWeek.map(itemFn).join('');
+    }
+    if (nextWeek.length) {
+      html += sepHTML('Next Week', 'Next week', 'week', nextWeek.length, priceSum(nextWeek)) + nextWeek.map(itemFn).join('');
+    }
+
+    // bucket the remainder by release month, keeping bucket order chronological
     const buckets = [];
     let curMonth = null, curArr = null;
-    chronological.forEach(g => {
+    rest.forEach(g => {
       const mk = g.date.slice(0, 7);   // YYYY-MM
       if (mk !== curMonth) {
         curMonth = mk;
@@ -2177,7 +2199,7 @@
       }
       curArr.push(g);
     });
-    let html = buckets.map(b =>
+    html += buckets.map(b =>
       sepHTML(monthLabel(b[0].date), shortMonthLabel(b[0].date), 'month', b.length, priceSum(b)) +
       b.map(itemFn).join('')
     ).join('');
@@ -2207,6 +2229,7 @@
 
   const NAV_ICONS = {
     top: '<svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
+    week: '<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>',
     month: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
     now: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>',
     soon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>'
