@@ -112,6 +112,20 @@
     opacity: 0.75;
   }
 
+  .dev-banner {
+    display: none;
+    background: #d32f2f;
+    color: #fff;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 0;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    width: 100%;
+  }
+  .dev-banner.show { display: block; }
+
   .icon-btn {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -128,10 +142,7 @@
   #dbxSyncBtn.syncing svg { animation: nx-spin 0.9s linear infinite; }
   @keyframes nx-spin { to { transform: rotate(360deg); } }
 
-  .settings-open { margin-left: auto; }
-
   .view-toggle {
-    margin-left: 10px;
     display: flex;
     gap: 2px;
     padding: 3px;
@@ -151,6 +162,51 @@
   .vt-btn svg { width: 18px; height: 18px; }
   .vt-btn:hover { color: var(--text); }
   .vt-btn.active { color: var(--on-accent); background: var(--accent); }
+
+  .more-menu { position: relative; }
+  .more-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 9px 11px;
+    border-radius: 11px;
+    display: grid; place-items: center;
+    transition: color .15s, background .15s;
+  }
+  .more-btn svg { width: 18px; height: 18px; }
+  .more-btn:hover { color: var(--text); }
+  .more-btn.open { color: var(--on-accent); background: var(--accent); border-color: transparent; }
+  .more-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 180px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.15);
+    z-index: 100;
+  }
+  .more-dropdown.open { display: block; }
+  .more-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background: none; border: none;
+    color: var(--text);
+    cursor: pointer;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    transition: background .15s;
+  }
+  .more-item svg { width: 18px; height: 18px; color: var(--text-muted); flex: none; }
+  .more-item:hover { background: var(--accent-soft); }
+  .more-item:hover svg { color: var(--text); }
 
   .filter-row { display: flex; gap: 8px; flex-wrap: nowrap; margin-bottom: 18px; }
   .filter-btn {
@@ -355,7 +411,6 @@
   .search-box button[hidden] { display: none; }
 
   .add-btn {
-    margin-left: 10px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1027,6 +1082,8 @@
     font-size: 0.82rem;
     opacity: 0.8;
   }
+  .steam-id-label a { color: inherit; text-decoration: none; cursor: pointer; }
+  .steam-id-label a:hover { text-decoration: underline; }
   .steam-refresh {
     position: relative;
     font-size: 0.8rem;
@@ -1615,7 +1672,6 @@
     header.top p { display: none; }
     .header-brand { flex: 1 1 100%; }
     .header-controls { flex: 1 1 100%; justify-content: space-between; gap: 8px; }
-    .add-btn { flex: 1 1 100%; justify-content: center; }
     .filter-row { flex-wrap: wrap; }
     .filter-select, .filter-picker { flex: 1 1 calc(50% - 4px); max-width: none; }
     .filter-menu { width: min(210px, calc(100vw - 28px)); }
@@ -1637,6 +1693,7 @@
   <nav class="side-nav" id="sideNav"></nav>
   <aside class="stats-panel" id="statsPanel"></aside>
 
+  <div class="dev-banner">Dev Build</div>
   <div class="wrap" id="wrap">
     <header class="top">
       <div class="header-brand">
@@ -1649,18 +1706,6 @@
         </div>
       </div>
       <div class="header-controls">
-        <button class="icon-btn settings-open" id="settingsOpen" title="Settings">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
-        <button class="icon-btn settings-open" id="analyticsOpen" title="Analytics">
-          <svg viewBox="0 0 24 24"><path d="M4 19V9M11 19V5M18 19v-7"/><path d="M2 19h20"/></svg>
-        </button>
-        <button class="icon-btn settings-open" id="archivedOpen" title="Archived">
-          <svg viewBox="0 0 24 24"><path d="M3 8h18M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4"/></svg>
-        </button>
-        <button class="icon-btn" id="dbxSyncBtn" title="Sync with Dropbox">
-          <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
-        </button>
         <div class="view-toggle" id="viewToggle">
           <button data-view="list" class="vt-btn" title="List view">
             <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
@@ -1672,11 +1717,33 @@
             <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M8 13h3v3H8zM13 13h3v3h-3z"/></svg>
           </button>
         </div>
+        <button class="add-btn" id="openAdd">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Track a game</span>
+        </button>
+        <button class="icon-btn" id="dbxSyncBtn" title="Sync with Dropbox">
+          <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
+        </button>
+        <div class="more-menu" id="moreMenu">
+          <button class="more-btn" id="moreBtn" title="More">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </button>
+          <div class="more-dropdown" id="moreDropdown">
+            <button class="more-item" id="analyticsOpen">
+              <svg viewBox="0 0 24 24"><path d="M4 19V9M11 19V5M18 19v-7"/><path d="M2 19h20"/></svg>
+              <span>Analytics</span>
+            </button>
+            <button class="more-item" id="archivedOpen">
+              <svg viewBox="0 0 24 24"><path d="M3 8h18M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4"/></svg>
+              <span>Archived</span>
+            </button>
+            <button class="more-item" id="settingsOpen">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <span>Settings</span>
+            </button>
+          </div>
+        </div>
       </div>
-      <button class="add-btn" id="openAdd">
-        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        <span>Track a game</span>
-      </button>
     </header>
 
     <div class="filter-row" id="filterToggle">
@@ -1907,7 +1974,7 @@
           </button>
         </div>
         <div class="steam-id-row" id="steamIdRow" style="display:none">
-          <span class="steam-id-label">Steam App ID: <span id="steamIdDisplay"></span></span>
+          <span class="steam-id-label">Steam App ID: <a id="steamIdDisplay" href="#" target="_blank" rel="noopener"></a></span>
           <button class="steam-refresh" id="steamRefreshBtn">
             <svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="60" stroke-linecap="round"/></svg>
             <span class="lbl">Refresh</span>
@@ -2052,7 +2119,8 @@
                 <div class="cl-entry">
                   <div class="cl-ver">1.4.0 <span class="cl-date">2026-07-08</span></div>
                   <ul>
-                    <li>Steam Price Lookup — click the clock button next to the price field to search Steam via CheapShark (CORS-compatible). Shows matching games with USD prices; pick one to fetch the official Canadian Steam price (when proxies allow) or USD retail price as fallback. Stores Steam App ID for one-click Refresh. Remove the ID with the ✕ button.</li>
+                    <li>Steam Price Lookup — click the clock icon next to the Price field to search for your game on Steam. Your game gets linked to its Steam App ID so you can refresh the price anytime, or tap the ID to open the store page. Remove the link with the ✕ button.</li>
+                    <li>Consolidated header — secondary actions (Analytics, Archived, Settings) are now grouped under a ⋮ menu so the toolbar stays clean as more features get added.</li>
                     <li>Fixed version notification not appearing — app version constant now matches the changelog.</li>
                   </ul>
                 </div>
@@ -2947,6 +3015,7 @@
     const refreshBtn = document.getElementById('steamRefreshBtn');
     if (_steamAppId) {
       steamDisplay.textContent = _steamAppId;
+      steamDisplay.href = `https://store.steampowered.com/app/${_steamAppId}/`;
       steamRow.style.display = '';
       lookupBtn.style.display = 'none';
     } else {
@@ -3027,10 +3096,9 @@
         resultsEl.classList.add('show');
         return;
       }
-      resultsEl.innerHTML = data.map(item => {
-        const usd = item.cheapest ? parseFloat(item.cheapest) : null;
-        return `<div class="res" data-id="${item.steamAppID}" data-csid="${item.gameID}">${esc(item.external)}${usd ? ' <b>USD$' + usd.toFixed(2) + '</b>' : ''}</div>`;
-      }).join('');
+      resultsEl.innerHTML = data.map(item =>
+        `<div class="res" data-id="${item.steamAppID}" data-csid="${item.gameID}">${esc(item.external)}</div>`
+      ).join('');
       resultsEl.classList.add('show');
       resultsEl.querySelectorAll('.res').forEach(el => {
         el.addEventListener('click', async () => {
@@ -3049,30 +3117,22 @@
   async function selectSteamResult(steamAppId, csId) {
     const refreshBtn = document.getElementById('steamRefreshBtn');
     refreshBtn.disabled = true;
+    _steamAppId = parseInt(steamAppId, 10);
+    const sd = document.getElementById('steamIdDisplay');
+    sd.textContent = _steamAppId;
+    sd.href = `https://store.steampowered.com/app/${_steamAppId}/`;
+    document.getElementById('steamIdRow').style.display = '';
+    document.getElementById('priceLookupBtn').style.display = 'none';
     try {
       const cad = await fetchCADPrice(steamAppId);
       if (cad) {
         gPrice.value = cad.cad.toFixed(2);
         gPriceEst.checked = false;
       } else {
-        const res = await fetch(`${CS_API}/games?id=${csId}`);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        const retail = data.deals && data.deals[0] && parseFloat(data.deals[0].retailPrice);
-        const sale = data.deals && data.deals[0] && parseFloat(data.deals[0].price);
-        const usd = (retail && retail > 0) ? retail : (sale || null);
-        if (usd !== null) {
-          gPrice.value = usd.toFixed(2);
-          gPriceEst.checked = sale !== null && sale < retail;
-        } else {
-          gPrice.value = '';
-          gPriceEst.checked = true;
-        }
+        const resultsEl = document.getElementById('steamResults');
+        resultsEl.innerHTML = '<div class="res" style="cursor:default;opacity:0.6">Could not fetch Canadian Steam price.</div>';
+        resultsEl.classList.add('show');
       }
-      _steamAppId = parseInt(steamAppId);
-      document.getElementById('steamIdDisplay').textContent = _steamAppId;
-      document.getElementById('steamIdRow').style.display = '';
-      document.getElementById('priceLookupBtn').style.display = 'none';
     } catch (e) {
       const resultsEl = document.getElementById('steamResults');
       resultsEl.innerHTML = `<div class="res" style="cursor:default;opacity:0.6">Price fetch error (${e.message}).</div>`;
@@ -3083,8 +3143,6 @@
   }
 
   async function refreshSteamPrice() {
-    const name = gName.value.trim();
-    if (!name) return;
     const refreshBtn = document.getElementById('steamRefreshBtn');
     refreshBtn.disabled = true;
     try {
@@ -3094,22 +3152,9 @@
         gPriceEst.checked = false;
         toast('Price updated');
       } else {
-        const res = await fetch(`${CS_API}/games?title=${encodeURIComponent(name)}&limit=10`);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        const match = Array.isArray(data) && data.find(g => parseInt(g.steamAppID) === _steamAppId);
-        if (!match) throw new Error('Game no longer found');
-        const detailRes = await fetch(`${CS_API}/games?id=${match.gameID}`);
-        if (!detailRes.ok) throw new Error('HTTP ' + detailRes.status);
-        const detail = await detailRes.json();
-        const retail = detail.deals && detail.deals[0] && parseFloat(detail.deals[0].retailPrice);
-        const sale = detail.deals && detail.deals[0] && parseFloat(detail.deals[0].price);
-        const usd = (retail && retail > 0) ? retail : (sale || null);
-        if (usd !== null) {
-          gPrice.value = usd.toFixed(2);
-          gPriceEst.checked = sale !== null && sale < retail;
-          toast('Price updated (USD)');
-        }
+        const resultsEl = document.getElementById('steamResults');
+        resultsEl.innerHTML = '<div class="res" style="cursor:default;opacity:0.6">Could not refresh Canadian Steam price.</div>';
+        resultsEl.classList.add('show');
       }
     } catch (e) {
       const resultsEl = document.getElementById('steamResults');
@@ -3567,6 +3612,7 @@
 
   // --- Settings: open/close, backup & restore ---
   const APP_VERSION = '1.4.0';
+  const DEV_BUILD = true;
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
@@ -4242,6 +4288,24 @@
   document.getElementById('settingsClose').addEventListener('click', closeSettings);
   settingsOverlay.addEventListener('click', e => { if (e.target === settingsOverlay) closeSettings(); });
 
+  // More menu dropdown
+  const moreBtn = document.getElementById('moreBtn');
+  const moreDropdown = document.getElementById('moreDropdown');
+  moreBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    moreBtn.classList.toggle('open');
+    moreDropdown.classList.toggle('open');
+  });
+  document.addEventListener('click', () => {
+    moreBtn.classList.remove('open');
+    moreDropdown.classList.remove('open');
+  });
+  moreDropdown.addEventListener('click', e => {
+    e.stopPropagation();
+    moreBtn.classList.remove('open');
+    moreDropdown.classList.remove('open');
+  });
+
   document.getElementById('backupBtn').addEventListener('click', () => {
     const payload = {
       app: 'NexGame',
@@ -4818,6 +4882,7 @@
     versionOverlay.classList.add('show');
   }
   localStorage.setItem(VERSION_KEY, APP_VERSION);
+  if (DEV_BUILD) document.querySelector('.dev-banner').classList.add('show');
   versionOk.onclick = () => versionOverlay.classList.remove('show');
   versionChangelog.onclick = () => {
     versionOverlay.classList.remove('show');
