@@ -417,6 +417,7 @@
     transition: transform .15s, box-shadow .15s;
   }
   .tile:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(0,0,0,0.45); }
+  .card.kb-focus, .tile.kb-focus { outline: 3px solid #ffb703; outline-offset: 2px; }
   .tile.released { opacity: 0.72; }
   /* dark scrim so text stays readable over any cover */
   .tile::before {
@@ -757,6 +758,71 @@
     opacity: 0.8;
   }
   .theme-swatch.sel .sw-name { opacity: 1; font-weight: 600; }
+
+  .chip-colours {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .chip-colour-group {
+    flex: 1;
+    min-width: 150px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px 10px;
+  }
+  .chip-colour-group .ccl-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    opacity: 0.5;
+    margin-bottom: 8px;
+  }
+  .chip-colour-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .chip-colour-row:last-child { margin-bottom: 0; }
+  .chip-colour-row .ccl-name {
+    flex: 1;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+  .chip-colour-row input[type="color"] {
+    width: 28px; height: 28px;
+    padding: 0;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    background: none;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .chip-colour-row input[type="color"]:hover {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .chip-colour-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  .chip-colour-row input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+  .chip-colour-row .cc-reset {
+    width: 24px; height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-hover);
+    border: none;
+    border-radius: 50%;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.7rem;
+    transition: background .15s, color .15s;
+    line-height: 0;
+  }
+  .chip-colour-row .cc-reset:hover { background: var(--border); color: var(--text); }
   .set-row { display: flex; gap: 10px; }
   .set-row button { flex: 1; padding: 11px; border-radius: 11px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; transition: transform .15s; }
   .set-row button:hover { transform: translateY(-1px); }
@@ -1227,6 +1293,7 @@
     margin-bottom: 12px;
     font-weight: 700;
   }
+
   .an-insights {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -1792,6 +1859,11 @@
           <div class="set-label">Theme</div>
           <div class="theme-grid" id="themeGrid"></div>
         </div>
+        <div class="set-section">
+          <div class="set-label">Status &amp; Hype colours</div>
+          <p class="set-desc">Card accent colours for each status and hype level.</p>
+          <div class="chip-colours" id="chipColours"></div>
+        </div>
       </div>
 
       <div class="set-panel" id="panel-data" role="tabpanel">
@@ -1870,6 +1942,8 @@
                     <li>Calendar view — browse releases on a month grid with prev/next navigation.</li>
                     <li>Game notes — add private notes to any game; expand to read on cards.</li>
                     <li>Auto-switch mode — "System" option follows your OS light/dark preference.</li>
+                    <li>Custom card colours — pick a colour accent for each status and hype level.</li>
+                    <li>Keyboard navigation — Arrow keys to move focus, Enter to edit, Delete to remove.</li>
                   </ul>
                 </div>
                 <div class="cl-entry">
@@ -2064,6 +2138,7 @@
     localStorage.setItem(STORE_KEY, JSON.stringify(games));
     if (typeof scheduleAutoUpload === 'function') scheduleAutoUpload();
   }
+
 
   // local-timezone day difference between today and an ISO yyyy-mm-dd string
   function daysUntil(iso) {
@@ -2557,8 +2632,15 @@
   function tagsHTML(g) {
     return tagList(g).join('');
   }
+  function chipBorderStyle(g) {
+    const c = chipColors[g.status] || chipColors[g.hype];
+    return c ? ` style="border-left: 3px solid ${c}"` : '';
+  }
+
   function priceBadgeHTML(g) {
-    return typeof g.price === 'number' ? `<span class="price-badge">${g.priceEstimated ? '~' : ''}${fmtPrice(g.price)}</span>` : '';
+    let s = '';
+    if (typeof g.price === 'number') s += `<span class="price-badge">${g.priceEstimated ? '~' : ''}${fmtPrice(g.price)}</span>`;
+    return s;
   }
   // grid tiles are narrow — cap visible badges and roll the rest into a "+N" chip
   function tileTagsHTML(g) {
@@ -2575,7 +2657,7 @@
     const noteIcon = g.notes ? `<span class="card-note-badge" title="Has notes">${NOTE_SVG}</span>` : '';
     const noteContent = g.notes ? `<div class="card-note" id="note-${g.id}">${esc(g.notes)}</div>` : '';
     return `
-      <div class="card${style ? ' has-bg' : ''}"${style}>
+      <div class="card${style ? ' has-bg' : ''}"${style}${chipBorderStyle(g)}>
         <div class="countdown out"><div class="num">Coming</div><div class="lbl">soon</div></div>
         <div class="info">
           <div class="title-row"><h2>${esc(g.name)}</h2>${priceBadgeHTML(g)}</div>
@@ -2602,7 +2684,7 @@
     const noteIcon = g.notes ? `<span class="card-note-badge" title="Has notes">${NOTE_SVG}</span>` : '';
     const noteContent = g.notes ? `<div class="card-note" id="note-${g.id}">${esc(g.notes)}</div>` : '';
     return `
-      <div class="card${d < 0 ? ' released' : ''}${style ? ' has-bg' : ''}"${style}>
+      <div class="card${d < 0 ? ' released' : ''}${style ? ' has-bg' : ''}"${style}${chipBorderStyle(g)}>
         ${cd}
         <div class="info">
           <div class="title-row"><h2>${esc(g.name)}</h2>${d < 0 ? '' : priceBadgeHTML(g)}</div>
@@ -2624,7 +2706,7 @@
     const noteIcon = g.notes ? `<button class="tile-note-btn" data-id="${g.id}" title="Show notes">${NOTE_SVG}</button>` : '';
     if (g.tba) {
       return `
-        <div class="tile"${bgStyle(g)}>
+        <div class="tile"${bgStyle(g)}${chipBorderStyle(g)}>
           <div class="tile-actions">
             <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
             <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
@@ -2645,7 +2727,7 @@
     else if (d === 0) { num = 'Today';    numCls = ' small'; sub = `Releases ${fmtSlash(g.date)}`; }
     else              { num = 'Out now';  numCls = ' small'; sub = `Released ${fmtSlash(g.date)}`; }
     return `
-      <div class="tile${d < 0 ? ' released' : ''}"${bgStyle(g)}>
+      <div class="tile${d < 0 ? ' released' : ''}"${bgStyle(g)}${chipBorderStyle(g)}>
         <div class="tile-actions">
           <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
           <button class="archive" data-id="${g.id}" title="${d < 0 ? 'Mark as owned' : 'Archive'}">${d < 0 ? OWNED_SVG : ARCHIVE_SVG}</button>
@@ -3130,6 +3212,42 @@
     saveFilterModes(PRICE_FILTER_KEY, priceFilterModes);
     render();
   });
+  // --- Keyboard card navigation ---
+  let focusedCardIdx = -1;
+  function focusCard(idx) {
+    const cards = list.querySelectorAll('.card, .tile');
+    if (idx < 0) idx = 0;
+    if (idx >= cards.length) idx = cards.length - 1;
+    if (idx < 0 || idx >= cards.length) { focusedCardIdx = -1; return; }
+    focusedCardIdx = idx;
+    cards.forEach((c, i) => c.classList.toggle('kb-focus', i === idx));
+    cards[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  // reset focused card on render
+  const origRender = render;
+  render = function() { origRender(); focusedCardIdx = -1; };
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { focusedCardIdx = -1; document.querySelectorAll('.card, .tile').forEach(c => c.classList.remove('kb-focus')); return; }
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+    const modalOpen = document.querySelector('.overlay.show');
+    if (typing || modalOpen || e.ctrlKey || e.metaKey || e.altKey) return;
+    const cards = list.querySelectorAll('.card, .tile');
+    if (!cards.length) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); focusCard(focusedCardIdx + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); focusCard(focusedCardIdx - 1); }
+    else if (e.key === 'Enter' && focusedCardIdx >= 0) {
+      const card = cards[focusedCardIdx];
+      const editBtn = card.querySelector('.edit');
+      if (editBtn) { const g = games.find(x => x.id === editBtn.dataset.id); if (g) openModal(g); }
+    }
+    else if ((e.key === 'Delete' || e.key === 'Backspace') && focusedCardIdx >= 0) {
+      const card = cards[focusedCardIdx];
+      const delBtn = card.querySelector('.del');
+      if (delBtn) { const g = games.find(x => x.id === delBtn.dataset.id); if (g) openConfirm(g); }
+    }
+  });
+
   document.getElementById('resetFiltersBtn').addEventListener('click', () => {
     statusFilterModes = [...STATUS_FILTERS];
     typeFilterModes = [...TYPE_FILTERS];
@@ -3463,6 +3581,64 @@
        </div>`).join('');
   }
 
+  const CHIP_COLOUR_KEY = 'nexgame.chipColours';
+  const DEFAULT_CHIP_COLORS = {
+    queued: '#8d99ae', prequel: '#ffb703', ready: '#06d6a0',
+    under: '#8d99ae', high: '#06d6a0', terminal: '#ff3366'
+  };
+  let chipColors = (() => {
+    try { return { ...DEFAULT_CHIP_COLORS, ...JSON.parse(localStorage.getItem(CHIP_COLOUR_KEY)) }; }
+    catch { return { ...DEFAULT_CHIP_COLORS }; }
+  })();
+
+  function buildChipColours() {
+    const el = document.getElementById('chipColours');
+    if (!el) return;
+    const groups = [
+      { label: 'Status', keys: ['queued', 'prequel', 'ready'], names: ['Queued', 'Prequel', 'Ready'] },
+      { label: 'Hype', keys: ['under', 'high', 'terminal'], names: ['Under the Radar', 'Idealistic Case', 'Terminal Hype'] }
+    ];
+    el.innerHTML = groups.map(g => `
+      <div class="chip-colour-group">
+        <div class="ccl-label">${g.label}</div>
+        ${g.keys.map((k, i) => `
+          <div class="chip-colour-row">
+            <span class="ccl-name">${g.names[i]}</span>
+            <input type="color" data-key="${k}" value="${chipColors[k] || DEFAULT_CHIP_COLORS[k]}">
+            <button class="cc-reset" data-key="${k}" title="Reset colour">↺</button>
+          </div>`).join('')}
+      </div>`).join('');
+    el.querySelectorAll('input[type="color"]').forEach(input => {
+      input.addEventListener('input', () => {
+        chipColors[input.dataset.key] = input.value;
+        saveChipColours();
+        applyChipColours();
+      });
+    });
+    el.querySelectorAll('.cc-reset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const k = btn.dataset.key;
+        chipColors[k] = DEFAULT_CHIP_COLORS[k];
+        const input = el.querySelector(`input[data-key="${k}"]`);
+        if (input) input.value = chipColors[k];
+        saveChipColours();
+        applyChipColours();
+      });
+    });
+    applyChipColours();
+  }
+
+  function saveChipColours() {
+    localStorage.setItem(CHIP_COLOUR_KEY, JSON.stringify(chipColors));
+  }
+
+  function applyChipColours() {
+    const root = document.documentElement.style;
+    ['queued', 'prequel', 'ready'].forEach(k => root.setProperty(`--chip-status-${k}`, chipColors[k] || DEFAULT_CHIP_COLORS[k]));
+    ['under', 'high', 'terminal'].forEach(k => root.setProperty(`--chip-hype-${k}`, chipColors[k] || DEFAULT_CHIP_COLORS[k]));
+    render();
+  }
+
   function setMode(name) {
     modeName = name;
     updateEffectiveMode();
@@ -3503,6 +3679,7 @@
   });
 
   setMode(modeName);
+  buildChipColours();
 
   // --- Settings tabs ---
   const settingsTabs = document.querySelectorAll('.set-tab');
@@ -3607,6 +3784,7 @@
     const avgLead = upcoming.length
       ? Math.round(upcoming.reduce((s, g) => s + daysUntil(g.date), 0) / upcoming.length)
       : null;
+    const totalStore = filteredGames.filter(g => !g.tba).reduce((s, g) => s + (typeof g.price === 'number' ? g.price : 0), 0);
 
     // releases per month, across all dated entries (past + future) — the one chart the stats panel doesn't show
     const monthCounts = {};
@@ -3751,6 +3929,7 @@
   function openSettings() {
     restoreNote.textContent = '';
     restoreNote.className = 'set-note';
+    buildChipColours();
     settingsOverlay.classList.add('show');
   }
   function closeSettings() { settingsOverlay.classList.remove('show'); }
