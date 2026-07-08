@@ -1000,6 +1000,86 @@
   .lookup-btn.busy svg { animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  .price-lookup {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+  }
+  .price-lookup:hover { opacity: 1; }
+  .price-lookup.busy svg { animation: spin 0.8s linear infinite; pointer-events: none; }
+
+  .steam-id-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    font-size: 0.82rem;
+    opacity: 0.8;
+  }
+  .steam-refresh {
+    position: relative;
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .steam-refresh:hover { opacity: 0.85; }
+  .steam-refresh:disabled { opacity: 0.4; cursor: default; }
+  .steam-refresh .spinner { display: none; width: 14px; height: 14px; position: absolute; }
+  .steam-refresh:disabled .spinner { display: inline; animation: spin 0.7s linear infinite; }
+  .steam-refresh:disabled .lbl { visibility: hidden; }
+  .steam-remove {
+    margin-left: auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: opacity 0.15s, background 0.15s;
+  }
+  .steam-remove:hover { opacity: 1; background: var(--danger, #c0392b); color: #fff; }
+
+  .steam-results {
+    margin-top: 8px;
+    background: var(--results-bg, var(--card));
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    display: none;
+  }
+  .steam-results.show { display: block; }
+  .steam-results .res {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+  }
+  .steam-results .res:last-child { border-bottom: 0; }
+  .steam-results .res:hover { background: var(--surface); }
+  .steam-results .res small { opacity: 0.6; }
+
   .results {
     position: absolute;
     top: 100%; left: 0; right: 0;
@@ -1822,7 +1902,19 @@
             <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
             <span>Estimated</span>
           </label>
+          <button class="price-lookup" id="priceLookupBtn" title="Look up price on Steam">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-13h-2v6l5.25 3.15L17 12.23l-4-2.37V7z"/></svg>
+          </button>
         </div>
+        <div class="steam-id-row" id="steamIdRow" style="display:none">
+          <span class="steam-id-label">Steam App ID: <span id="steamIdDisplay"></span></span>
+          <button class="steam-refresh" id="steamRefreshBtn">
+            <svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="60" stroke-linecap="round"/></svg>
+            <span class="lbl">Refresh</span>
+          </button>
+          <button class="steam-remove" id="steamRemoveBtn" title="Remove Steam App ID">✕</button>
+        </div>
+        <div class="steam-results" id="steamResults"></div>
       </div>
       <div class="field">
         <label for="gNotes">Notes</label>
@@ -1958,8 +2050,9 @@
           <div class="set-label">Changelog</div>
               <div class="changelog">
                 <div class="cl-entry">
-                  <div class="cl-ver">1.3.1 <span class="cl-date">2026-07-07</span></div>
+                  <div class="cl-ver">1.4.0 <span class="cl-date">2026-07-08</span></div>
                   <ul>
+                    <li>Steam Price Lookup — click the clock button next to the price field to search Steam via CheapShark (CORS-compatible). Shows matching games with USD prices; pick one to fetch the official Canadian Steam price (when proxies allow) or USD retail price as fallback. Stores Steam App ID for one-click Refresh. Remove the ID with the ✕ button.</li>
                     <li>Fixed version notification not appearing — app version constant now matches the changelog.</li>
                   </ul>
                 </div>
@@ -2156,6 +2249,7 @@
   let pickedColor = null;   // null = default glass
   let pickedImage = null;   // image url / data-url for the card background
   let editingId = null;     // id of the entry being edited, or null when adding
+  let _steamAppId = null;   // steam app id for the game currently being edited
   const modalTitle = document.getElementById('modalTitle');
 
   let games = load();
@@ -2846,6 +2940,23 @@
     gHype.value = game && game.hype ? game.hype : '';
     gPrice.value = game && typeof game.price === 'number' ? game.price : '';
     gPriceEst.checked = !!(game && game.priceEstimated);
+    _steamAppId = (game && game.steamAppId) || null;
+    const steamRow = document.getElementById('steamIdRow');
+    const steamDisplay = document.getElementById('steamIdDisplay');
+    const lookupBtn = document.getElementById('priceLookupBtn');
+    const refreshBtn = document.getElementById('steamRefreshBtn');
+    if (_steamAppId) {
+      steamDisplay.textContent = _steamAppId;
+      steamRow.style.display = '';
+      lookupBtn.style.display = 'none';
+    } else {
+      steamRow.style.display = 'none';
+      lookupBtn.style.display = '';
+    }
+    refreshBtn.disabled = false;
+    lookupBtn.classList.remove('busy');
+    document.getElementById('steamResults').innerHTML = '';
+    document.getElementById('steamResults').classList.remove('show');
     gImageUrl.value = game && game.image ? game.image : '';
     setImage(game ? game.image : null);
     gNotes.value = game && game.notes ? game.notes : '';
@@ -2868,6 +2979,156 @@
     setTimeout(() => gName.focus(), 50);
   }
   function closeModal() { overlay.classList.remove('show'); }
+
+  // — Steam price lookup —
+  const CS_API = 'https://www.cheapshark.com/api/1.0';
+  const PROXIES = [
+    '',   // direct (works if CORS isn't enforced)
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?url='
+  ];
+
+  async function fetchCADPrice(steamAppId, attempt = 0) {
+    if (attempt >= PROXIES.length) return null;
+    const base = `https://store.steampowered.com/api/appdetails?appids=${steamAppId}&cc=ca&l=en&filters=price_overview`;
+    const url = PROXIES[attempt] ? PROXIES[attempt] + encodeURIComponent(base) : base;
+    try {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const txt = await r.text();
+      let d;
+      try { d = JSON.parse(txt); } catch { throw new Error('Not JSON'); }
+      if (d && typeof d.contents === 'string' && d.status) {
+        try { d = JSON.parse(d.contents); } catch { return null; }
+      }
+      const price = d[String(steamAppId)]?.data?.price_overview;
+      if (price) return { cad: price.final / 100, currency: 'CAD' };
+      return null;
+    } catch {
+      return fetchCADPrice(steamAppId, attempt + 1);
+    }
+  }
+
+  async function lookupSteamPrice() {
+    const name = gName.value.trim();
+    if (!name) return;
+    const btn = document.getElementById('priceLookupBtn');
+    const resultsEl = document.getElementById('steamResults');
+    if (btn.classList.contains('busy')) return;
+    btn.classList.add('busy');
+    resultsEl.innerHTML = '';
+    resultsEl.classList.remove('show');
+    try {
+      const res = await fetch(`${CS_API}/games?title=${encodeURIComponent(name)}&limit=10`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        resultsEl.innerHTML = '<div class="res" style="cursor:default;opacity:0.6">No results found on Steam.</div>';
+        resultsEl.classList.add('show');
+        return;
+      }
+      resultsEl.innerHTML = data.map(item => {
+        const usd = item.cheapest ? parseFloat(item.cheapest) : null;
+        return `<div class="res" data-id="${item.steamAppID}" data-csid="${item.gameID}">${esc(item.external)}${usd ? ' <b>USD$' + usd.toFixed(2) + '</b>' : ''}</div>`;
+      }).join('');
+      resultsEl.classList.add('show');
+      resultsEl.querySelectorAll('.res').forEach(el => {
+        el.addEventListener('click', async () => {
+          resultsEl.classList.remove('show');
+          await selectSteamResult(el.dataset.id, el.dataset.csid);
+        });
+      });
+    } catch (e) {
+      resultsEl.innerHTML = `<div class="res" style="cursor:default;opacity:0.6">Steam search error (${e.message}).</div>`;
+      resultsEl.classList.add('show');
+    } finally {
+      btn.classList.remove('busy');
+    }
+  }
+
+  async function selectSteamResult(steamAppId, csId) {
+    const refreshBtn = document.getElementById('steamRefreshBtn');
+    refreshBtn.disabled = true;
+    try {
+      const cad = await fetchCADPrice(steamAppId);
+      if (cad) {
+        gPrice.value = cad.cad.toFixed(2);
+        gPriceEst.checked = false;
+      } else {
+        const res = await fetch(`${CS_API}/games?id=${csId}`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const retail = data.deals && data.deals[0] && parseFloat(data.deals[0].retailPrice);
+        const sale = data.deals && data.deals[0] && parseFloat(data.deals[0].price);
+        const usd = (retail && retail > 0) ? retail : (sale || null);
+        if (usd !== null) {
+          gPrice.value = usd.toFixed(2);
+          gPriceEst.checked = sale !== null && sale < retail;
+        } else {
+          gPrice.value = '';
+          gPriceEst.checked = true;
+        }
+      }
+      _steamAppId = parseInt(steamAppId);
+      document.getElementById('steamIdDisplay').textContent = _steamAppId;
+      document.getElementById('steamIdRow').style.display = '';
+      document.getElementById('priceLookupBtn').style.display = 'none';
+    } catch (e) {
+      const resultsEl = document.getElementById('steamResults');
+      resultsEl.innerHTML = `<div class="res" style="cursor:default;opacity:0.6">Price fetch error (${e.message}).</div>`;
+      resultsEl.classList.add('show');
+    } finally {
+      refreshBtn.disabled = false;
+    }
+  }
+
+  async function refreshSteamPrice() {
+    const name = gName.value.trim();
+    if (!name) return;
+    const refreshBtn = document.getElementById('steamRefreshBtn');
+    refreshBtn.disabled = true;
+    try {
+      const cad = await fetchCADPrice(_steamAppId);
+      if (cad) {
+        gPrice.value = cad.cad.toFixed(2);
+        gPriceEst.checked = false;
+        toast('Price updated');
+      } else {
+        const res = await fetch(`${CS_API}/games?title=${encodeURIComponent(name)}&limit=10`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const match = Array.isArray(data) && data.find(g => parseInt(g.steamAppID) === _steamAppId);
+        if (!match) throw new Error('Game no longer found');
+        const detailRes = await fetch(`${CS_API}/games?id=${match.gameID}`);
+        if (!detailRes.ok) throw new Error('HTTP ' + detailRes.status);
+        const detail = await detailRes.json();
+        const retail = detail.deals && detail.deals[0] && parseFloat(detail.deals[0].retailPrice);
+        const sale = detail.deals && detail.deals[0] && parseFloat(detail.deals[0].price);
+        const usd = (retail && retail > 0) ? retail : (sale || null);
+        if (usd !== null) {
+          gPrice.value = usd.toFixed(2);
+          gPriceEst.checked = sale !== null && sale < retail;
+          toast('Price updated (USD)');
+        }
+      }
+    } catch (e) {
+      const resultsEl = document.getElementById('steamResults');
+      resultsEl.innerHTML = `<div class="res" style="cursor:default;opacity:0.6">Refresh error (${e.message}).</div>`;
+      resultsEl.classList.add('show');
+    } finally {
+      refreshBtn.disabled = false;
+    }
+  }
+
+  document.getElementById('priceLookupBtn').addEventListener('click', lookupSteamPrice);
+  document.getElementById('steamRefreshBtn').addEventListener('click', () => {
+    if (_steamAppId) refreshSteamPrice();
+  });
+  document.getElementById('steamRemoveBtn').addEventListener('click', () => {
+    _steamAppId = null;
+    document.getElementById('steamIdRow').style.display = 'none';
+    document.getElementById('priceLookupBtn').style.display = '';
+  });
 
   const formErr = document.getElementById('formErr');
 
@@ -2901,6 +3162,7 @@
       hype: gHype.value || null,
       price: gPrice.value !== '' ? Math.round(parseFloat(gPrice.value) * 100) / 100 : null,
       priceEstimated: gPrice.value !== '' && gPriceEst.checked,
+      steamAppId: _steamAppId,
       color: pickedImage ? null : pickedColor,
       image: pickedImage || null,
       notes: gNotes.value.trim() || null
@@ -3304,7 +3566,7 @@
   });
 
   // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = '1.3.1';
+  const APP_VERSION = '1.4.0';
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
@@ -4015,6 +4277,7 @@
       hype: HYPE_LABEL[g.hype] ? g.hype : null,
       price: typeof g.price === 'number' ? g.price : null,
       priceEstimated: !!g.priceEstimated,
+      steamAppId: typeof g.steamAppId === 'number' ? g.steamAppId : null,
       color: g.color || null,
       image: g.image || null,
       notes: typeof g.notes === 'string' ? g.notes || null : null
