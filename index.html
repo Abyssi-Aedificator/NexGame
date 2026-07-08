@@ -417,6 +417,7 @@
     transition: transform .15s, box-shadow .15s;
   }
   .tile:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(0,0,0,0.45); }
+  .card.kb-focus, .tile.kb-focus { outline: 3px solid #ffb703; outline-offset: 2px; }
   .tile.released { opacity: 0.72; }
   /* dark scrim so text stays readable over any cover */
   .tile::before {
@@ -464,6 +465,60 @@
   }
   .tile-actions button:hover { background: rgba(0,0,0,0.7); }
   .tile-actions svg { width: 15px; height: 15px; }
+  .tile-note-btn { background: rgba(0,0,0,0.35); border: none; color: #fff; cursor: pointer; padding: 5px; border-radius: 7px; display: grid; place-items: center; }
+  .tile-note-btn:hover { background: rgba(0,0,0,0.7); }
+  .tile-note-btn svg { width: 14px; height: 14px; }
+
+  .cal-nav {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 18px;
+  }
+  .cal-nav .cal-title {
+    flex: 1; font-size: 1.1rem; font-weight: 700;
+  }
+  .cal-nav-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-muted); cursor: pointer;
+    padding: 6px 10px; border-radius: 8px;
+    font-size: 0.85rem;
+    transition: color .15s, background .15s;
+  }
+  .cal-nav-btn:hover { color: var(--text); background: var(--surface-hover); }
+  .cal-nav-btn.today { color: var(--accent-soft); font-weight: 600; }
+  .calendar {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .cal-day-header {
+    text-align: center; font-size: 0.68rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    opacity: 0.6; padding: 6px 4px;
+  }
+  .cal-cell {
+    min-height: 80px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px;
+    transition: background .15s;
+  }
+  .cal-cell.today { border-color: var(--accent-2); }
+  .cal-cell.other-month { opacity: 0.35; }
+  .cal-day-num {
+    font-size: 0.72rem; font-weight: 700;
+    opacity: 0.7; margin-bottom: 4px;
+  }
+  .cal-cell.today .cal-day-num { color: var(--accent-soft); opacity: 1; }
+  .cal-game {
+    font-size: 0.7rem; font-weight: 600;
+    padding: 2px 5px; margin-bottom: 2px;
+    border-radius: 5px;
+    cursor: pointer;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    transition: background .15s;
+  }
+  .cal-game:hover { background: var(--surface-hover); }
+  .cal-game.released { opacity: 0.6; }
 
   .card {
     position: relative;
@@ -535,6 +590,36 @@
   }
   .price-row { display: flex; align-items: center; gap: 10px; }
   .price-row input[type="number"] { flex: 1; }
+  .notes-row textarea {
+    width: 100%; min-height: 54px; max-height: 120px;
+    padding: 10px 12px; border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface); color: var(--text);
+    font-size: 0.82rem; font-family: inherit;
+    outline: none; resize: vertical;
+    transition: border-color .15s;
+  }
+  .notes-row textarea:focus { border-color: var(--accent-2); background: var(--surface-hover); }
+  .notes-row textarea::placeholder { color: var(--text-muted); }
+  .card-note-badge {
+    display: inline-flex; align-items: center;
+    padding: 1px 5px; border-radius: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity .15s, background .15s;
+  }
+  .card-note-badge:hover { opacity: 1; background: var(--surface-hover); }
+  .card-note-badge svg { width: 11px; height: 11px; }
+  .card-note {
+    font-size: 0.78rem; opacity: 0.75;
+    margin-top: 6px; padding: 6px 8px;
+    background: var(--surface); border-radius: 8px;
+    line-height: 1.4;
+    display: none;
+  }
+  .card-note.show { display: block; }
   .price-est-chk { flex: none; white-space: nowrap; }
   .info .meta {
     font-size: 0.82rem;
@@ -598,7 +683,8 @@
     position: fixed; inset: 0;
     z-index: 10;
     background: var(--overlay);
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: none;
     align-items: center;
     justify-content: center;
@@ -617,160 +703,240 @@
   }
   .modal h3 { font-size: 1.2rem; margin-bottom: 20px; }
 
-  .set-section { margin-bottom: 22px; }
+  .set-section { margin-bottom: 24px; }
   .set-label {
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 0.6px;
-    opacity: 0.75;
-    margin-bottom: 8px;
+    letter-spacing: 0.7px;
+    opacity: 0.55;
+    margin-bottom: 10px;
     font-weight: 700;
   }
-  .set-desc { font-size: 0.84rem; opacity: 0.7; margin-bottom: 12px; }
+  .set-desc { font-size: 0.84rem; opacity: 0.7; margin-bottom: 14px; line-height: 1.5; }
 
   .mode-toggle {
     display: flex;
     gap: 2px;
     padding: 3px;
-    border-radius: 11px;
+    border-radius: 100px;
     background: var(--surface);
     border: 1px solid var(--border);
-    margin-bottom: 14px;
+    margin-bottom: 18px;
   }
   .mode-btn {
     flex: 1;
-    padding: 8px 14px;
-    border-radius: 9px;
+    padding: 9px 16px;
+    border-radius: 100px;
     border: none;
     background: none;
     color: var(--text-muted);
     cursor: pointer;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 600;
     text-align: center;
-    transition: color .15s, background .15s;
+    transition: color .18s, background .18s, box-shadow .18s;
   }
   .mode-btn:hover { color: var(--text); }
-  .mode-btn.active { color: var(--on-accent); background: var(--accent); }
+  .mode-btn.active { color: var(--on-accent); background: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 
   .theme-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-  .theme-swatch {
-    cursor: pointer;
-    text-align: center;
-  }
+  .theme-swatch { cursor: pointer; text-align: center; }
   .theme-swatch .sw-chip {
-    height: 44px;
-    border-radius: 11px;
+    height: 46px;
+    border-radius: 12px;
     border: 2px solid transparent;
-    transition: transform .12s, border-color .15s;
+    transition: transform .15s, border-color .18s, box-shadow .18s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
   }
-  .theme-swatch:hover .sw-chip { transform: translateY(-2px); }
-  .theme-swatch.sel .sw-chip { border-color: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,0.35); }
+  .theme-swatch:hover .sw-chip { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.18); }
+  .theme-swatch.sel .sw-chip { border-color: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,0.25), 0 4px 12px rgba(0,0,0,0.2); }
   .theme-swatch .sw-name {
     display: block;
-    font-size: 0.68rem;
-    margin-top: 6px;
-    opacity: 0.8;
+    font-size: 0.66rem;
+    margin-top: 7px;
+    opacity: 0.78;
+    font-weight: 500;
   }
-  .theme-swatch.sel .sw-name { opacity: 1; font-weight: 600; }
+  .theme-swatch.sel .sw-name { opacity: 1; font-weight: 700; }
+
+  .chip-colours {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 2px;
+  }
+  .chip-colour-group {
+    flex: 1;
+    min-width: 140px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 14px 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .chip-colour-group .ccl-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.45;
+    margin-bottom: 10px;
+  }
+  .chip-colour-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .chip-colour-row:last-child { margin-bottom: 0; }
+  .chip-colour-row .ccl-name {
+    flex: 1;
+    font-size: 0.84rem;
+    font-weight: 500;
+  }
+  .chip-colour-row input[type="color"] {
+    width: 30px; height: 30px;
+    padding: 0;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    background: none;
+    transition: transform .18s, box-shadow .18s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  .chip-colour-row input[type="color"]:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  .chip-colour-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  .chip-colour-row input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+  .chip-colour-row .cc-reset {
+    width: 26px; height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-hover);
+    border: none;
+    border-radius: 50%;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.72rem;
+    transition: background .18s, color .18s, transform .18s;
+    line-height: 0;
+  }
+  .chip-colour-row .cc-reset:hover { background: var(--border); color: var(--text); transform: rotate(-30deg); }
   .set-row { display: flex; gap: 10px; }
-  .set-row button { flex: 1; padding: 11px; border-radius: 11px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; transition: transform .15s; }
-  .set-row button:hover { transform: translateY(-1px); }
+  .set-row button {
+    flex: 1; padding: 12px 14px; border-radius: 100px; font-size: 0.88rem;
+    font-weight: 600; cursor: pointer; border: none; transition: transform .15s, box-shadow .15s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .set-row button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
   .set-note { font-size: 0.82rem; margin-top: 10px; min-height: 0; }
   .set-note.ok { color: #b9ffd0; }
   .set-note.bad { color: #ffb3c8; }
 
+  /* ---- settings header ---- */
+  .set-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .set-header h3 { margin: 0; font-size: 1.15rem; font-weight: 700; }
+  .set-close { border: none; opacity: 0.6; transition: opacity .15s; }
+  .set-close:hover { opacity: 1; }
+
   /* ---- settings tabs ---- */
-  .settings-modal { max-width: 620px; }
+  .settings-modal { max-width: 680px; }
   .set-tabs {
     display: flex;
-    gap: 4px;
-    margin-bottom: 22px;
-    padding: 4px;
-    border-radius: 14px;
-    background: var(--surface);
-    border: 1px solid var(--border);
+    gap: 0;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
   }
   .set-tab {
     flex: 1;
-    padding: 10px 8px;
-    border-radius: 10px;
+    padding: 12px 10px;
     border: none;
     background: none;
     color: var(--text-muted);
     cursor: pointer;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 600;
     text-align: center;
-    transition: color .15s, background .15s;
+    transition: color .18s;
     white-space: nowrap;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 7px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
   }
-  .set-tab:hover { color: var(--text); background: var(--surface); }
-  .set-tab.active { color: var(--on-accent); background: var(--accent); }
-  .set-tab svg { width: 15px; height: 15px; flex: none; }
+  .set-tab:hover { color: var(--text); }
+  .set-tab.active { color: var(--accent-soft); border-bottom-color: var(--accent-soft); }
+  .set-tab svg { width: 16px; height: 16px; flex: none; opacity: 0.8; }
+  .set-tab.active svg { opacity: 1; }
   .set-panels {
-    height: min(480px, calc(80vh - 140px));
-    min-height: 320px;
+    height: min(560px, calc(80vh - 140px));
+    min-height: 380px;
     display: flex;
     flex-direction: column;
   }
   .set-panels::-webkit-scrollbar { width: 6px; }
   .set-panels::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   .set-panel { display: none; }
-  .set-panel.active { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; }
+  .set-panel.active { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; padding-right: 4px; }
   .set-panel .set-section:last-child { margin-bottom: 0; }
   #panel-about .set-section { display: flex; flex-direction: column; flex: 1; min-height: 0; }
   #panel-about .changelog { max-height: none; flex: 1; min-height: 0; overflow-y: auto; }
   .set-version {
     font-size: 0.8rem;
     opacity: 0.6;
-    margin-top: 14px;
+    margin-top: 18px;
     text-align: center;
   }
 
   /* ---------- Dropbox sync ---------- */
   .dbx-status {
-    font-size: 0.62rem; font-weight: 700; vertical-align: middle;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    padding: 2px 9px; border-radius: 20px; margin-left: 6px;
-    background: var(--surface); opacity: 0.75;
+    font-size: 0.6rem; font-weight: 700; vertical-align: middle;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    padding: 3px 10px; border-radius: 100px; margin-left: 8px;
+    background: var(--surface); opacity: 0.7;
   }
-  .dbx-status.connected { background: rgba(62,207,142,0.22); color: #6ee7b7; opacity: 1; }
-  .dbx-key-label { display: block; font-size: 0.8rem; opacity: 0.8; margin-bottom: 6px; }
+  .dbx-status.connected { background: rgba(62,207,142,0.18); color: #6ee7b7; opacity: 1; }
+  .dbx-key-label { display: block; font-size: 0.8rem; opacity: 0.8; margin-bottom: 7px; }
   .dbx-link { color: #8ec5ff; text-decoration: none; font-weight: 600; }
   .dbx-link:hover { text-decoration: underline; }
   #dbxKey {
     width: 100%;
-    padding: 11px 14px;
-    border-radius: 12px;
+    padding: 12px 16px;
+    border-radius: 100px;
     border: 1px solid var(--border);
     background: var(--surface);
     color: var(--text); font-size: 0.9rem; outline: none;
-    transition: background .2s, border-color .2s;
+    transition: background .2s, border-color .2s, box-shadow .2s;
   }
   #dbxKey::placeholder { color: var(--text-muted); }
-  #dbxKey:focus { background: var(--surface-hover); border-color: var(--border-hover); }
-  .dbx-account-row { font-size: 0.78rem; opacity: 0.78; margin: 2px 0 12px; }
+  #dbxKey:focus { background: var(--surface-hover); border-color: var(--border-hover); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .dbx-account-row { font-size: 0.78rem; opacity: 0.78; margin: 2px 0 14px; }
   .dbx-account-row span + span::before { content: ' · '; opacity: 0.6; }
-  .dbx-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; margin: 0 0 12px; user-select: none; }
+  .dbx-toggle { display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0 0 14px; user-select: none; }
   .dbx-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
   .dbx-toggle-track {
-    flex-shrink: 0; width: 38px; height: 22px; border-radius: 22px;
+    flex-shrink: 0; width: 40px; height: 24px; border-radius: 24px;
     background: var(--surface); border: 1px solid var(--border);
-    transition: background .2s; position: relative;
+    transition: background .2s, border-color .2s; position: relative;
   }
   .dbx-toggle-thumb {
-    position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%;
-    background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.35); transition: transform .2s;
+    position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.3); transition: transform .2s;
   }
-  .dbx-toggle input:checked + .dbx-toggle-track { background: rgba(62,207,142,0.55); border-color: rgba(110,231,183,0.6); }
+  .dbx-toggle input:checked + .dbx-toggle-track { background: rgba(62,207,142,0.5); border-color: rgba(110,231,183,0.5); }
   .dbx-toggle input:checked + .dbx-toggle-track .dbx-toggle-thumb { transform: translateX(16px); }
   .dbx-toggle input:focus-visible + .dbx-toggle-track { box-shadow: 0 0 0 3px rgba(120,200,255,0.4); }
-  .dbx-toggle-label { font-size: 0.82rem; opacity: 0.85; line-height: 1.35; }
+  .dbx-toggle-label { font-size: 0.82rem; opacity: 0.85; line-height: 1.4; }
   .dbx-danger { color: #ffb3c8; }
 
   .toast {
@@ -806,6 +972,11 @@
     font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.5px;
     padding: 2px 8px; border-radius: 20px;
     background: var(--accent); color: var(--on-accent); font-weight: 700;
+  }
+  .cl-date {
+    font-size: 0.66rem; letter-spacing: 0.3px;
+    padding: 2px 8px; border-radius: 20px;
+    background: var(--surface); color: var(--text-muted); font-weight: 600;
   }
   .changelog ul { margin: 0; padding-left: 18px; }
   .changelog li { font-size: 0.84rem; opacity: 0.88; margin-bottom: 5px; line-height: 1.4; }
@@ -1143,6 +1314,7 @@
     margin-bottom: 12px;
     font-weight: 700;
   }
+
   .an-insights {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -1372,7 +1544,7 @@
     .settings-modal { max-width: 100%; margin: 0 10px; }
     .set-tab { font-size: 0.7rem; padding: 8px 4px; }
     .set-tab svg { width: 13px; height: 13px; }
-    .set-panels { max-height: min(400px, calc(80vh - 140px)); }
+    .set-panels { max-height: min(500px, calc(80vh - 120px)); }
     .countdown { width: 74px; }
     .countdown .num { font-size: 1.7rem; }
     .card { padding: 16px; gap: 12px; }
@@ -1415,6 +1587,9 @@
           </button>
           <button data-view="grid" class="vt-btn" title="Grid view">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </button>
+          <button data-view="calendar" class="vt-btn" title="Calendar view">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M8 13h3v3H8zM13 13h3v3h-3z"/></svg>
           </button>
         </div>
       </div>
@@ -1649,6 +1824,12 @@
           </label>
         </div>
       </div>
+      <div class="field">
+        <label for="gNotes">Notes</label>
+        <div class="notes-row">
+          <textarea id="gNotes" placeholder="e.g. waiting for reviews, buy on sale…" maxlength="500"></textarea>
+        </div>
+      </div>
       <div class="err" id="formErr"></div>
       <div class="modal-actions">
         <button class="btn-cancel" id="cancelBtn">Cancel</button>
@@ -1659,9 +1840,9 @@
 
   <div class="overlay" id="settingsOverlay">
     <div class="modal settings-modal">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-        <h3 style="margin:0">Settings</h3>
-        <button class="icon-btn" id="settingsClose" title="Close" style="border:none">
+      <div class="set-header">
+        <h3>Settings</h3>
+        <button class="icon-btn set-close" id="settingsClose" title="Close">
           <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
       </div>
@@ -1691,12 +1872,18 @@
           <div class="set-label">Mode</div>
           <div class="mode-toggle">
             <button class="mode-btn active" data-mode="dark">Dark</button>
+            <button class="mode-btn" data-mode="system">System</button>
             <button class="mode-btn" data-mode="light">Light</button>
           </div>
         </div>
         <div class="set-section">
           <div class="set-label">Theme</div>
           <div class="theme-grid" id="themeGrid"></div>
+        </div>
+        <div class="set-section">
+          <div class="set-label">Status &amp; Hype colours</div>
+          <p class="set-desc">Card accent colours for each status and hype level.</p>
+          <div class="chip-colours" id="chipColours"></div>
         </div>
       </div>
 
@@ -1771,7 +1958,20 @@
           <div class="set-label">Changelog</div>
               <div class="changelog">
                 <div class="cl-entry">
-                  <div class="cl-ver">1.2.1 <span class="cl-current">2026-07-05</span></div>
+                  <div class="cl-ver">1.3.0 <span class="cl-date">2026-07-07</span></div>
+                  <ul>
+                    <li>Calendar view — browse releases on a month grid with prev/next navigation.</li>
+                    <li>Game notes — add private notes to any game; expand to read on cards.</li>
+                    <li>Auto-switch mode — "System" option follows your OS light/dark preference.</li>
+                    <li>Custom card colours — pick a colour accent for each status and hype level.</li>
+                    <li>Keyboard navigation — Arrow keys to move focus, Enter to edit, Delete to remove.</li>
+                    <li>Redesigned settings page — modern pill controls, underline tabs, refined layout.</li>
+                    <li>Status colour on left, hype colour on right — both visible at the same time.</li>
+                    <li>Unique default chip colours — each status and hype level has a distinct colour.</li>
+                  </ul>
+                </div>
+                <div class="cl-entry">
+                  <div class="cl-ver">1.2.1</div>
                   <ul>
                     <li>Removed the "Link" status option.</li>
                   </ul>
@@ -1804,7 +2004,7 @@
                   </ul>
                 </div>
                 <div class="cl-entry">
-                  <div class="cl-ver">1.0.0 <span class="cl-current">2026-07-03</span></div>
+                  <div class="cl-ver">1.0.0</div>
                   <ul>
                     <li>Full release — stable, polished, and ready for everyday use.</li>
                   </ul>
@@ -1900,6 +2100,7 @@
   const gHype = document.getElementById('gHype');
   const gPrice = document.getElementById('gPrice');
   const gPriceEst = document.getElementById('gPriceEst');
+  const gNotes = document.getElementById('gNotes');
 
   function getType() {
     const sel = typeRadios.find(r => r.checked);
@@ -1961,6 +2162,7 @@
     localStorage.setItem(STORE_KEY, JSON.stringify(games));
     if (typeof scheduleAutoUpload === 'function') scheduleAutoUpload();
   }
+
 
   // local-timezone day difference between today and an ISO yyyy-mm-dd string
   function daysUntil(iso) {
@@ -2090,6 +2292,7 @@
   const DEL_SVG = `<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>`;
   const ARCHIVE_SVG = `<svg viewBox="0 0 24 24"><path d="M3 8h18M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4"/></svg>`;
   const OWNED_SVG = `<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>`;
+  const NOTE_SVG = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8"/></svg>`;
 
   // background inline-style shared by both layouts
   function bgStyle(g) {
@@ -2102,9 +2305,11 @@
     return '';
   }
 
+  let calMonth, calYear;
+
   function render() {
-    document.getElementById('wrap').classList.toggle('wide', viewMode === 'grid');
-    list.className = viewMode === 'grid' ? 'grid' : 'list';
+    document.getElementById('wrap').classList.toggle('wide', viewMode === 'grid' || viewMode === 'calendar');
+    list.className = viewMode === 'grid' ? 'grid' : viewMode === 'calendar' ? 'list cal-view' : 'list';
     [...viewToggle.children].forEach(b =>
       b.classList.toggle('active', b.dataset.view === viewMode));
     renderFilterPicker('typeFilter', typeFilterModes, TYPE_FILTERS, 'All Types', TYPE_FILTER_SUMMARY);
@@ -2113,6 +2318,8 @@
     renderFilterPicker('priceFilter', priceFilterModes, PRICE_FILTERS, 'All Prices', PRICE_FILTER_SUMMARY);
     const visible = games.filter(g => matchesFilter(g) && matchesSearch(g));
     renderStatsPanel(visible);
+
+    if (viewMode === 'calendar') { return renderCalendar(visible); }
 
     if (!games.length) {
       list.className = 'list';
@@ -2207,6 +2414,86 @@
     list.innerHTML = html;
     if (navSections.length) navSections.unshift({ id: 'top', label: 'Top', kind: 'top' });
     renderSideNav(navSections);
+  }
+
+  function renderCalendar(visible) {
+    const now = new Date();
+    if (!calMonth) calMonth = now.getMonth();
+    if (!calYear) calYear = now.getFullYear();
+    const year = calYear, month = calMonth;
+    const first = new Date(year, month, 1);
+    const last = new Date(year, month + 1, 0);
+    const startDow = (first.getDay() + 6) % 7; // 0=Mon..6=Sun
+    const daysInMonth = last.getDate();
+    const daysInPrev = new Date(year, month, 0).getDate();
+    const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    // Build a map of date -> games, respecting filters
+    const map = {};
+    visible.forEach(g => {
+      if (g.tba) return;
+      if (!map[g.date]) map[g.date] = [];
+      map[g.date].push(g);
+    });
+
+    const monthName = first.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    const cells = [];
+    // header row
+    DAYS.forEach(d => cells.push(`<div class="cal-day-header">${d}</div>`));
+    // empty cells before first day
+    for (let i = 0; i < startDow; i++) {
+      const d = daysInPrev - startDow + 1 + i;
+      cells.push(`<div class="cal-cell other-month"><div class="cal-day-num">${d}</div></div>`);
+    }
+    // days of the month
+    const todayStr = now.toISOString().slice(0, 10);
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const isToday = dateStr === todayStr;
+      const games = map[dateStr] || [];
+      let gameHTML = '';
+      games.forEach(g => {
+        const rel = daysUntil(g.date) < 0 ? ' released' : '';
+        gameHTML += `<div class="cal-game${rel}" data-id="${g.id}">${esc(g.name)}</div>`;
+      });
+      cells.push(`<div class="cal-cell${isToday ? ' today' : ''}"><div class="cal-day-num">${d}</div>${gameHTML}</div>`);
+    }
+    // fill remaining cells
+    const totalCells = startDow + daysInMonth;
+    const trailing = (7 - (totalCells % 7)) % 7;
+    for (let d = 1; d <= trailing; d++) {
+      cells.push(`<div class="cal-cell other-month"><div class="cal-day-num">${d}</div></div>`);
+    }
+
+    const navHTML = `
+      <div class="cal-nav">
+        <button class="cal-nav-btn" data-cal="prev">&larr; Prev</button>
+        <span class="cal-title">${esc(monthName)}</span>
+        <button class="cal-nav-btn" data-cal="next">Next &rarr;</button>
+        <button class="cal-nav-btn today" data-cal="today">Today</button>
+      </div>`;
+
+    list.innerHTML = navHTML + '<div class="calendar">' + cells.join('') + '</div>';
+
+    // click on a calendar game -> edit
+    list.querySelectorAll('.cal-game').forEach(el => {
+      el.addEventListener('click', e => {
+        const g = games.find(x => x.id === el.dataset.id);
+        if (g) openModal(g);
+      });
+    });
+    // nav buttons
+    list.querySelectorAll('[data-cal]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const action = btn.dataset.cal;
+        if (action === 'today') { calMonth = now.getMonth(); calYear = now.getFullYear(); }
+        else if (action === 'prev') { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } }
+        else if (action === 'next') { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } }
+        render();
+      });
+    });
+    renderSideNav([]);
   }
 
   function renderFilterPicker(id, modes, validValues, allLabel, labels) {
@@ -2369,8 +2656,25 @@
   function tagsHTML(g) {
     return tagList(g).join('');
   }
+  function chipBorderStyle(g) {
+    const left = g.status && chipColors[g.status] ? `border-left: 3px solid ${chipColors[g.status]}` : '';
+    let right = g.hype && chipColors[g.hype] ? `border-right: 3px solid ${chipColors[g.hype]}` : '';
+    if (left && right && chipColors[g.status] === chipColors[g.hype]) right = '';
+    return [left, right].filter(Boolean).join('; ');
+  }
+  function mergedStyle(g) {
+    const bg = bgStyle(g);
+    const chip = chipBorderStyle(g);
+    const parts = [];
+    if (bg) parts.push(bg.slice(8, -1));
+    if (chip) parts.push(chip);
+    return parts.length ? ` style="${parts.join('; ')}"` : '';
+  }
+
   function priceBadgeHTML(g) {
-    return typeof g.price === 'number' ? `<span class="price-badge">${g.priceEstimated ? '~' : ''}${fmtPrice(g.price)}</span>` : '';
+    let s = '';
+    if (typeof g.price === 'number') s += `<span class="price-badge">${g.priceEstimated ? '~' : ''}${fmtPrice(g.price)}</span>`;
+    return s;
   }
   // grid tiles are narrow — cap visible badges and roll the rest into a "+N" chip
   function tileTagsHTML(g) {
@@ -2384,19 +2688,22 @@
     const tags = tagsHTML(g);
     if (g.tba) {
       const style = bgStyle(g);
-      return `
-        <div class="card${style ? ' has-bg' : ''}"${style}>
-          <div class="countdown out"><div class="num">Coming</div><div class="lbl">soon</div></div>
-          <div class="info">
-            <div class="title-row"><h2>${esc(g.name)}</h2>${priceBadgeHTML(g)}</div>
-            <div class="meta"><span>Release date TBA</span>${tags}</div>
-          </div>
-          <div class="actions">
-            <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
-            <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
-            <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
-          </div>
-        </div>`;
+    const noteIcon = g.notes ? `<span class="card-note-badge" title="Has notes">${NOTE_SVG}</span>` : '';
+    const noteContent = g.notes ? `<div class="card-note" id="note-${g.id}">${esc(g.notes)}</div>` : '';
+    return `
+      <div class="card${style ? ' has-bg' : ''}"${mergedStyle(g)}>
+        <div class="countdown out"><div class="num">Coming</div><div class="lbl">soon</div></div>
+        <div class="info">
+          <div class="title-row"><h2>${esc(g.name)}</h2>${priceBadgeHTML(g)}</div>
+          <div class="meta"><span>Release date TBA</span>${tags}${noteIcon}</div>
+          ${noteContent}
+        </div>
+        <div class="actions">
+          <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
+          <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
+          <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
+        </div>
+      </div>`;
     }
     const d = daysUntil(g.date);
     let cd;
@@ -2408,12 +2715,16 @@
       cd = `<div class="countdown out"><div class="num">Out now</div><div class="lbl">${-d}d ago</div></div>`;
     }
     const style = bgStyle(g);
+    const noteIcon = g.notes ? `<span class="card-note-badge" title="Has notes">${NOTE_SVG}</span>` : '';
+    const noteContent = g.notes ? `<div class="card-note" id="note-${g.id}">${esc(g.notes)}</div>` : '';
     return `
-      <div class="card${d < 0 ? ' released' : ''}${style ? ' has-bg' : ''}"${style}>
+      <div class="card${d < 0 ? ' released' : ''}${style ? ' has-bg' : ''}"${mergedStyle(g)}>
         ${cd}
         <div class="info">
           <div class="title-row"><h2>${esc(g.name)}</h2>${d < 0 ? '' : priceBadgeHTML(g)}</div>
           <div class="meta"><span>${fmtDate(g.date)}</span>${tags}</div>
+          ${noteIcon}
+          ${noteContent}
         </div>
         <div class="actions">
           <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
@@ -2426,12 +2737,14 @@
   function tileHTML(g) {
     const tags = tileTagsHTML(g);
     const tagsRow = tags ? `<div class="tile-tags">${tags}</div>` : '';
+    const noteIcon = g.notes ? `<button class="tile-note-btn" data-id="${g.id}" title="Show notes">${NOTE_SVG}</button>` : '';
     if (g.tba) {
       return `
-        <div class="tile"${bgStyle(g)}>
+        <div class="tile"${mergedStyle(g)}>
           <div class="tile-actions">
             <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
             <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
+            ${noteIcon}
             <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
           </div>
           <div>
@@ -2448,10 +2761,11 @@
     else if (d === 0) { num = 'Today';    numCls = ' small'; sub = `Releases ${fmtSlash(g.date)}`; }
     else              { num = 'Out now';  numCls = ' small'; sub = `Released ${fmtSlash(g.date)}`; }
     return `
-      <div class="tile${d < 0 ? ' released' : ''}"${bgStyle(g)}>
+      <div class="tile${d < 0 ? ' released' : ''}"${mergedStyle(g)}>
         <div class="tile-actions">
           <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
           <button class="archive" data-id="${g.id}" title="${d < 0 ? 'Mark as owned' : 'Archive'}">${d < 0 ? OWNED_SVG : ARCHIVE_SVG}</button>
+          ${noteIcon}
           <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
         </div>
         <div>
@@ -2528,6 +2842,7 @@
     gPriceEst.checked = !!(game && game.priceEstimated);
     gImageUrl.value = game && game.image ? game.image : '';
     setImage(game ? game.image : null);
+    gNotes.value = game && game.notes ? game.notes : '';
 
     // restore colour selection
     if (game && game.color) {
@@ -2581,7 +2896,8 @@
       price: gPrice.value !== '' ? Math.round(parseFloat(gPrice.value) * 100) / 100 : null,
       priceEstimated: gPrice.value !== '' && gPriceEst.checked,
       color: pickedImage ? null : pickedColor,
-      image: pickedImage || null
+      image: pickedImage || null,
+      notes: gNotes.value.trim() || null
     };
     if (editingId) {
       const g = games.find(x => x.id === editingId);
@@ -2719,6 +3035,19 @@
   });
 
   list.addEventListener('click', e => {
+    const noteToggle = e.target.closest('.card-note-badge');
+    if (noteToggle) {
+      const card = noteToggle.closest('.card');
+      const note = card && card.querySelector('.card-note');
+      if (note) note.classList.toggle('show');
+      return;
+    }
+    const tileNoteBtn = e.target.closest('.tile-note-btn');
+    if (tileNoteBtn) {
+      const g = games.find(x => x.id === tileNoteBtn.dataset.id);
+      if (g && g.notes) toast(g.notes);
+      return;
+    }
     const editBtn = e.target.closest('.edit');
     if (editBtn) {
       const g = games.find(x => x.id === editBtn.dataset.id);
@@ -2847,6 +3176,7 @@
     const btn = e.target.closest('.vt-btn');
     if (!btn || btn.dataset.view === viewMode) return;
     viewMode = btn.dataset.view;
+    calMonth = null; calYear = null; // reset calendar when switching to it
     localStorage.setItem(VIEW_KEY, viewMode);
     render();
   });
@@ -2916,6 +3246,42 @@
     saveFilterModes(PRICE_FILTER_KEY, priceFilterModes);
     render();
   });
+  // --- Keyboard card navigation ---
+  let focusedCardIdx = -1;
+  function focusCard(idx) {
+    const cards = list.querySelectorAll('.card, .tile');
+    if (idx < 0) idx = 0;
+    if (idx >= cards.length) idx = cards.length - 1;
+    if (idx < 0 || idx >= cards.length) { focusedCardIdx = -1; return; }
+    focusedCardIdx = idx;
+    cards.forEach((c, i) => c.classList.toggle('kb-focus', i === idx));
+    cards[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  // reset focused card on render
+  const origRender = render;
+  render = function() { origRender(); focusedCardIdx = -1; };
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { focusedCardIdx = -1; document.querySelectorAll('.card, .tile').forEach(c => c.classList.remove('kb-focus')); return; }
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+    const modalOpen = document.querySelector('.overlay.show');
+    if (typing || modalOpen || e.ctrlKey || e.metaKey || e.altKey) return;
+    const cards = list.querySelectorAll('.card, .tile');
+    if (!cards.length) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); focusCard(focusedCardIdx + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); focusCard(focusedCardIdx - 1); }
+    else if (e.key === 'Enter' && focusedCardIdx >= 0) {
+      const card = cards[focusedCardIdx];
+      const editBtn = card.querySelector('.edit');
+      if (editBtn) { const g = games.find(x => x.id === editBtn.dataset.id); if (g) openModal(g); }
+    }
+    else if ((e.key === 'Delete' || e.key === 'Backspace') && focusedCardIdx >= 0) {
+      const card = cards[focusedCardIdx];
+      const delBtn = card.querySelector('.del');
+      if (delBtn) { const g = games.find(x => x.id === delBtn.dataset.id); if (g) openConfirm(g); }
+    }
+  });
+
   document.getElementById('resetFiltersBtn').addEventListener('click', () => {
     statusFilterModes = [...STATUS_FILTERS];
     typeFilterModes = [...TYPE_FILTERS];
@@ -3192,16 +3558,22 @@
   };
   const MODE_KEY = 'nexgame.mode';
   const THEME_KEY = 'nexgame.theme';
-  let modeName = localStorage.getItem(MODE_KEY) === 'light' ? 'light' : 'dark';
+  const THEME_OVERRIDE_KEY = 'nexgame.themeOverride';
+  let storedMode = localStorage.getItem(MODE_KEY);
+  if (storedMode !== 'light' && storedMode !== 'system') storedMode = 'dark';
+  let effectiveMode = storedMode === 'system'
+    ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : storedMode;
+  let modeName = storedMode; // the user's chosen mode (dark/light/system)
   let themeName = localStorage.getItem(THEME_KEY);
-  if (!themeName || !MODES[modeName].themes[themeName]) {
-    themeName = modeName === 'dark' ? 'nebula' : 'daybreak';
+  if (!themeName || !MODES[effectiveMode].themes[themeName]) {
+    themeName = effectiveMode === 'dark' ? 'nebula' : 'daybreak';
   }
   const themeGrid = document.getElementById('themeGrid');
   const modeBtns = document.querySelectorAll('.mode-btn');
 
   function applyTheme(name) {
-    const t = MODES[modeName].themes[name];
+    const t = MODES[effectiveMode].themes[name];
     if (!t) return;
     const root = document.documentElement.style;
     root.setProperty('--bg-gradient', t.gradient);
@@ -3228,8 +3600,16 @@
     if (meta) meta.content = t.meta;
   }
 
+  function updateEffectiveMode() {
+    if (modeName === 'system') {
+      effectiveMode = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } else {
+      effectiveMode = modeName;
+    }
+  }
+
   function buildThemes() {
-    const themes = MODES[modeName].themes;
+    const themes = MODES[effectiveMode].themes;
     themeGrid.innerHTML = Object.entries(themes).map(([k, t]) =>
       `<div class="theme-swatch${k === themeName ? ' sel' : ''}" data-theme="${k}">
          <div class="sw-chip" style="background:${t.gradient}"></div>
@@ -3237,17 +3617,89 @@
        </div>`).join('');
   }
 
+  const CHIP_COLOUR_KEY = 'nexgame.chipColours';
+  const DEFAULT_CHIP_COLORS = {
+    queued: '#e63946', prequel: '#457bff', ready: '#2ecf6d',
+    under: '#a855f7', high: '#f59e0b', terminal: '#06b6d4'
+  };
+  let chipColors = (() => {
+    try { return { ...DEFAULT_CHIP_COLORS, ...JSON.parse(localStorage.getItem(CHIP_COLOUR_KEY)) }; }
+    catch { return { ...DEFAULT_CHIP_COLORS }; }
+  })();
+
+  function buildChipColours() {
+    const el = document.getElementById('chipColours');
+    if (!el) return;
+    const groups = [
+      { label: 'Status', keys: ['queued', 'prequel', 'ready'], names: ['Queued', 'Prequel', 'Ready'] },
+      { label: 'Hype', keys: ['under', 'high', 'terminal'], names: ['Under the Radar', 'Idealistic Case', 'Terminal Hype'] }
+    ];
+    el.innerHTML = groups.map(g => `
+      <div class="chip-colour-group">
+        <div class="ccl-label">${g.label}</div>
+        ${g.keys.map((k, i) => `
+          <div class="chip-colour-row">
+            <span class="ccl-name">${g.names[i]}</span>
+            <input type="color" data-key="${k}" value="${chipColors[k] || DEFAULT_CHIP_COLORS[k]}">
+            <button class="cc-reset" data-key="${k}" title="Reset colour">↺</button>
+          </div>`).join('')}
+      </div>`).join('');
+    el.querySelectorAll('input[type="color"]').forEach(input => {
+      input.addEventListener('input', () => {
+        chipColors[input.dataset.key] = input.value;
+        saveChipColours();
+        applyChipColours();
+      });
+    });
+    el.querySelectorAll('.cc-reset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const k = btn.dataset.key;
+        chipColors[k] = DEFAULT_CHIP_COLORS[k];
+        const input = el.querySelector(`input[data-key="${k}"]`);
+        if (input) input.value = chipColors[k];
+        saveChipColours();
+        applyChipColours();
+      });
+    });
+    applyChipColours();
+  }
+
+  function saveChipColours() {
+    localStorage.setItem(CHIP_COLOUR_KEY, JSON.stringify(chipColors));
+  }
+
+  function applyChipColours() {
+    const root = document.documentElement.style;
+    ['queued', 'prequel', 'ready'].forEach(k => root.setProperty(`--chip-status-${k}`, chipColors[k] || DEFAULT_CHIP_COLORS[k]));
+    ['under', 'high', 'terminal'].forEach(k => root.setProperty(`--chip-hype-${k}`, chipColors[k] || DEFAULT_CHIP_COLORS[k]));
+    render();
+  }
+
   function setMode(name) {
     modeName = name;
+    updateEffectiveMode();
     localStorage.setItem(MODE_KEY, modeName);
     modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === modeName));
-    if (!MODES[modeName].themes[themeName]) {
-      themeName = modeName === 'dark' ? 'nebula' : 'daybreak';
+    if (!MODES[effectiveMode].themes[themeName]) {
+      themeName = effectiveMode === 'dark' ? 'nebula' : 'daybreak';
     }
     localStorage.setItem(THEME_KEY, themeName);
     applyTheme(themeName);
     buildThemes();
   }
+
+  // follow system preference changes
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (modeName === 'system') {
+      updateEffectiveMode();
+      if (!MODES[effectiveMode].themes[themeName]) {
+        themeName = effectiveMode === 'dark' ? 'nebula' : 'daybreak';
+      }
+      localStorage.setItem(THEME_KEY, themeName);
+      applyTheme(themeName);
+      buildThemes();
+    }
+  });
 
   themeGrid.addEventListener('click', e => {
     const sw = e.target.closest('.theme-swatch');
@@ -3263,6 +3715,7 @@
   });
 
   setMode(modeName);
+  buildChipColours();
 
   // --- Settings tabs ---
   const settingsTabs = document.querySelectorAll('.set-tab');
@@ -3367,6 +3820,7 @@
     const avgLead = upcoming.length
       ? Math.round(upcoming.reduce((s, g) => s + daysUntil(g.date), 0) / upcoming.length)
       : null;
+    const totalStore = filteredGames.filter(g => !g.tba).reduce((s, g) => s + (typeof g.price === 'number' ? g.price : 0), 0);
 
     // releases per month, across all dated entries (past + future) — the one chart the stats panel doesn't show
     const monthCounts = {};
@@ -3511,6 +3965,7 @@
   function openSettings() {
     restoreNote.textContent = '';
     restoreNote.className = 'set-note';
+    buildChipColours();
     settingsOverlay.classList.add('show');
   }
   function closeSettings() { settingsOverlay.classList.remove('show'); }
@@ -3555,7 +4010,8 @@
       price: typeof g.price === 'number' ? g.price : null,
       priceEstimated: !!g.priceEstimated,
       color: g.color || null,
-      image: g.image || null
+      image: g.image || null,
+      notes: typeof g.notes === 'string' ? g.notes || null : null
     });
     const valid = g => g && typeof g.name === 'string' && (typeof g.date === 'string' || g.tba);
     const clean = arr.filter(valid).map(cleanGame);
