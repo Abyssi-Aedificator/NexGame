@@ -1961,6 +1961,8 @@
                     <li>Custom card colours — pick a colour accent for each status and hype level.</li>
                     <li>Keyboard navigation — Arrow keys to move focus, Enter to edit, Delete to remove.</li>
                     <li>Redesigned settings page — modern pill controls, underline tabs, refined layout.</li>
+                    <li>Status colour on left, hype colour on right — both visible at the same time.</li>
+                    <li>Unique default chip colours — each status and hype level has a distinct colour.</li>
                   </ul>
                 </div>
                 <div class="cl-entry">
@@ -2650,8 +2652,18 @@
     return tagList(g).join('');
   }
   function chipBorderStyle(g) {
-    const c = chipColors[g.status] || chipColors[g.hype];
-    return c ? ` style="border-left: 3px solid ${c}"` : '';
+    const left = g.status && chipColors[g.status] ? `border-left: 3px solid ${chipColors[g.status]}` : '';
+    let right = g.hype && chipColors[g.hype] ? `border-right: 3px solid ${chipColors[g.hype]}` : '';
+    if (left && right && chipColors[g.status] === chipColors[g.hype]) right = '';
+    return [left, right].filter(Boolean).join('; ');
+  }
+  function mergedStyle(g) {
+    const bg = bgStyle(g);
+    const chip = chipBorderStyle(g);
+    const parts = [];
+    if (bg) parts.push(bg.slice(8, -1));
+    if (chip) parts.push(chip);
+    return parts.length ? ` style="${parts.join('; ')}"` : '';
   }
 
   function priceBadgeHTML(g) {
@@ -2674,7 +2686,7 @@
     const noteIcon = g.notes ? `<span class="card-note-badge" title="Has notes">${NOTE_SVG}</span>` : '';
     const noteContent = g.notes ? `<div class="card-note" id="note-${g.id}">${esc(g.notes)}</div>` : '';
     return `
-      <div class="card${style ? ' has-bg' : ''}"${style}${chipBorderStyle(g)}>
+      <div class="card${style ? ' has-bg' : ''}"${mergedStyle(g)}>
         <div class="countdown out"><div class="num">Coming</div><div class="lbl">soon</div></div>
         <div class="info">
           <div class="title-row"><h2>${esc(g.name)}</h2>${priceBadgeHTML(g)}</div>
@@ -2701,7 +2713,7 @@
     const noteIcon = g.notes ? `<span class="card-note-badge" title="Has notes">${NOTE_SVG}</span>` : '';
     const noteContent = g.notes ? `<div class="card-note" id="note-${g.id}">${esc(g.notes)}</div>` : '';
     return `
-      <div class="card${d < 0 ? ' released' : ''}${style ? ' has-bg' : ''}"${style}${chipBorderStyle(g)}>
+      <div class="card${d < 0 ? ' released' : ''}${style ? ' has-bg' : ''}"${mergedStyle(g)}>
         ${cd}
         <div class="info">
           <div class="title-row"><h2>${esc(g.name)}</h2>${d < 0 ? '' : priceBadgeHTML(g)}</div>
@@ -2723,7 +2735,7 @@
     const noteIcon = g.notes ? `<button class="tile-note-btn" data-id="${g.id}" title="Show notes">${NOTE_SVG}</button>` : '';
     if (g.tba) {
       return `
-        <div class="tile"${bgStyle(g)}${chipBorderStyle(g)}>
+        <div class="tile"${mergedStyle(g)}>
           <div class="tile-actions">
             <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
             <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
@@ -2744,7 +2756,7 @@
     else if (d === 0) { num = 'Today';    numCls = ' small'; sub = `Releases ${fmtSlash(g.date)}`; }
     else              { num = 'Out now';  numCls = ' small'; sub = `Released ${fmtSlash(g.date)}`; }
     return `
-      <div class="tile${d < 0 ? ' released' : ''}"${bgStyle(g)}${chipBorderStyle(g)}>
+      <div class="tile${d < 0 ? ' released' : ''}"${mergedStyle(g)}>
         <div class="tile-actions">
           <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
           <button class="archive" data-id="${g.id}" title="${d < 0 ? 'Mark as owned' : 'Archive'}">${d < 0 ? OWNED_SVG : ARCHIVE_SVG}</button>
@@ -3586,6 +3598,8 @@
   function updateEffectiveMode() {
     if (modeName === 'system') {
       effectiveMode = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } else {
+      effectiveMode = modeName;
     }
   }
 
@@ -3600,8 +3614,8 @@
 
   const CHIP_COLOUR_KEY = 'nexgame.chipColours';
   const DEFAULT_CHIP_COLORS = {
-    queued: '#8d99ae', prequel: '#ffb703', ready: '#06d6a0',
-    under: '#8d99ae', high: '#06d6a0', terminal: '#ff3366'
+    queued: '#e63946', prequel: '#457bff', ready: '#2ecf6d',
+    under: '#a855f7', high: '#f59e0b', terminal: '#06b6d4'
   };
   let chipColors = (() => {
     try { return { ...DEFAULT_CHIP_COLORS, ...JSON.parse(localStorage.getItem(CHIP_COLOUR_KEY)) }; }
