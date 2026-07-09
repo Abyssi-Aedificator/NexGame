@@ -112,6 +112,20 @@
     opacity: 0.75;
   }
 
+  .dev-banner {
+    display: none;
+    background: #d32f2f;
+    color: #fff;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 0;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    width: 100%;
+  }
+  .dev-banner.show { display: block; }
+
   .icon-btn {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -128,10 +142,7 @@
   #dbxSyncBtn.syncing svg { animation: nx-spin 0.9s linear infinite; }
   @keyframes nx-spin { to { transform: rotate(360deg); } }
 
-  .settings-open { margin-left: auto; }
-
   .view-toggle {
-    margin-left: 10px;
     display: flex;
     gap: 2px;
     padding: 3px;
@@ -151,6 +162,51 @@
   .vt-btn svg { width: 18px; height: 18px; }
   .vt-btn:hover { color: var(--text); }
   .vt-btn.active { color: var(--on-accent); background: var(--accent); }
+
+  .more-menu { position: relative; }
+  .more-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 9px 11px;
+    border-radius: 11px;
+    display: grid; place-items: center;
+    transition: color .15s, background .15s;
+  }
+  .more-btn svg { width: 18px; height: 18px; }
+  .more-btn:hover { color: var(--text); }
+  .more-btn.open { color: var(--on-accent); background: var(--accent); border-color: transparent; }
+  .more-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 180px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.15);
+    z-index: 100;
+  }
+  .more-dropdown.open { display: block; }
+  .more-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background: none; border: none;
+    color: var(--text);
+    cursor: pointer;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    transition: background .15s;
+  }
+  .more-item svg { width: 18px; height: 18px; color: var(--text-muted); flex: none; }
+  .more-item:hover { background: var(--accent-soft); }
+  .more-item:hover svg { color: var(--text); }
 
   .filter-row { display: flex; gap: 8px; flex-wrap: nowrap; margin-bottom: 18px; }
   .filter-btn {
@@ -355,7 +411,6 @@
   .search-box button[hidden] { display: none; }
 
   .add-btn {
-    margin-left: 10px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1000,6 +1055,88 @@
   .lookup-btn.busy svg { animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  .price-lookup {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+  }
+  .price-lookup:hover { opacity: 1; }
+  .price-lookup.busy svg { animation: spin 0.8s linear infinite; pointer-events: none; }
+
+  .steam-id-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    font-size: 0.82rem;
+    opacity: 0.8;
+  }
+  .steam-id-label a { color: inherit; text-decoration: none; cursor: pointer; }
+  .steam-id-label a:hover { text-decoration: underline; }
+  .steam-refresh {
+    position: relative;
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .steam-refresh:hover { opacity: 0.85; }
+  .steam-refresh:disabled { opacity: 0.4; cursor: default; }
+  .steam-refresh .spinner { display: none; width: 14px; height: 14px; position: absolute; }
+  .steam-refresh:disabled .spinner { display: inline; animation: spin 0.7s linear infinite; }
+  .steam-refresh:disabled .lbl { visibility: hidden; }
+  .steam-remove {
+    margin-left: auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: opacity 0.15s, background 0.15s;
+  }
+  .steam-remove:hover { opacity: 1; background: var(--danger, #c0392b); color: #fff; }
+
+  .steam-results {
+    margin-top: 8px;
+    background: var(--results-bg, var(--card));
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    display: none;
+  }
+  .steam-results.show { display: block; }
+  .steam-results .res {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+  }
+  .steam-results .res:last-child { border-bottom: 0; }
+  .steam-results .res:hover { background: var(--surface); }
+  .steam-results .res small { opacity: 0.6; }
+
   .results {
     position: absolute;
     top: 100%; left: 0; right: 0;
@@ -1110,6 +1247,47 @@
   .imp-cand-desc { opacity: 0.6; font-weight: 400; }
   .imp-cand-date { opacity: 0.75; white-space: nowrap; }
   .imp-cand-empty { font-size: 0.78rem; opacity: 0.6; padding: 7px 8px; }
+  .sb-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sb-row:last-child { border-bottom: none; }
+  .sb-name { flex: 1; font-size: 0.88rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sb-match {
+    flex: none;
+    max-width: 240px;
+    font-size: 0.8rem;
+    opacity: 0.8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .sb-match strong { opacity: 1; font-weight: 700; }
+  .sb-status { font-size: 0.78rem; white-space: nowrap; }
+  .sb-select {
+    flex: none;
+    max-width: 200px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.78rem;
+    padding: 4px 6px;
+  }
+  .sb-skip { flex: none; font-size: 0.78rem; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .sb-skip input { width: 14px; height: 14px; accent-color: var(--accent-2); }
+  .sb-searching { display: inline-flex; align-items: center; gap: 4px; font-size: 0.78rem; }
+  .sb-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-muted); animation: sb-bounce 0.9s infinite alternate; }
+  .sb-dot:nth-child(2) { animation-delay: 0.15s; }
+  .sb-dot:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes sb-bounce { to { transform: translateY(-4px); opacity: 0.4; } }
+  .sb-input { flex: none; width: 160px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.78rem; padding: 4px 7px; }
+  .sb-rere { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .sb-rere:hover { background: var(--surface-hover); }
+  .sb-rere svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
   .field label {
     display: block;
     font-size: 0.78rem;
@@ -1535,7 +1713,6 @@
     header.top p { display: none; }
     .header-brand { flex: 1 1 100%; }
     .header-controls { flex: 1 1 100%; justify-content: space-between; gap: 8px; }
-    .add-btn { flex: 1 1 100%; justify-content: center; }
     .filter-row { flex-wrap: wrap; }
     .filter-select, .filter-picker { flex: 1 1 calc(50% - 4px); max-width: none; }
     .filter-menu { width: min(210px, calc(100vw - 28px)); }
@@ -1557,6 +1734,7 @@
   <nav class="side-nav" id="sideNav"></nav>
   <aside class="stats-panel" id="statsPanel"></aside>
 
+  <div class="dev-banner">Dev Build</div>
   <div class="wrap" id="wrap">
     <header class="top">
       <div class="header-brand">
@@ -1569,18 +1747,6 @@
         </div>
       </div>
       <div class="header-controls">
-        <button class="icon-btn settings-open" id="settingsOpen" title="Settings">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
-        <button class="icon-btn settings-open" id="analyticsOpen" title="Analytics">
-          <svg viewBox="0 0 24 24"><path d="M4 19V9M11 19V5M18 19v-7"/><path d="M2 19h20"/></svg>
-        </button>
-        <button class="icon-btn settings-open" id="archivedOpen" title="Archived">
-          <svg viewBox="0 0 24 24"><path d="M3 8h18M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4"/></svg>
-        </button>
-        <button class="icon-btn" id="dbxSyncBtn" title="Sync with Dropbox">
-          <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
-        </button>
         <div class="view-toggle" id="viewToggle">
           <button data-view="list" class="vt-btn" title="List view">
             <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
@@ -1592,11 +1758,33 @@
             <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M8 13h3v3H8zM13 13h3v3h-3z"/></svg>
           </button>
         </div>
+        <button class="add-btn" id="openAdd">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Track a game</span>
+        </button>
+        <button class="icon-btn" id="dbxSyncBtn" title="Sync with Dropbox">
+          <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
+        </button>
+        <div class="more-menu" id="moreMenu">
+          <button class="more-btn" id="moreBtn" title="More">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </button>
+          <div class="more-dropdown" id="moreDropdown">
+            <button class="more-item" id="analyticsOpen">
+              <svg viewBox="0 0 24 24"><path d="M4 19V9M11 19V5M18 19v-7"/><path d="M2 19h20"/></svg>
+              <span>Analytics</span>
+            </button>
+            <button class="more-item" id="archivedOpen">
+              <svg viewBox="0 0 24 24"><path d="M3 8h18M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4"/></svg>
+              <span>Archived</span>
+            </button>
+            <button class="more-item" id="settingsOpen">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <span>Settings</span>
+            </button>
+          </div>
+        </div>
       </div>
-      <button class="add-btn" id="openAdd">
-        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        <span>Track a game</span>
-      </button>
     </header>
 
     <div class="filter-row" id="filterToggle">
@@ -1822,7 +2010,19 @@
             <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
             <span>Estimated</span>
           </label>
+          <button class="price-lookup" id="priceLookupBtn" title="Look up price on Steam">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-13h-2v6l5.25 3.15L17 12.23l-4-2.37V7z"/></svg>
+          </button>
         </div>
+        <div class="steam-id-row" id="steamIdRow" style="display:none">
+          <span class="steam-id-label">Steam App ID: <a id="steamIdDisplay" href="#" target="_blank" rel="noopener"></a></span>
+          <button class="steam-refresh" id="steamRefreshBtn">
+            <svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="60" stroke-linecap="round"/></svg>
+            <span class="lbl">Refresh</span>
+          </button>
+          <button class="steam-remove" id="steamRemoveBtn" title="Remove Steam App ID">✕</button>
+        </div>
+        <div class="steam-results" id="steamResults"></div>
       </div>
       <div class="field">
         <label for="gNotes">Notes</label>
@@ -1918,6 +2118,13 @@
             <input type="file" id="importFile" accept=".txt,text/plain" hidden>
           </div>
         </div>
+        <div class="set-section">
+          <div class="set-label">Steam IDs</div>
+          <p class="set-desc">Search for Steam App IDs for all untracked games at once. Pick the right match and save.</p>
+          <div class="set-row">
+            <button class="btn-save" id="steamBulkBtn">Bulk update Steam IDs</button>
+          </div>
+        </div>
       </div>
 
       <div class="set-panel" id="panel-sync" role="tabpanel">
@@ -1957,6 +2164,15 @@
         <div class="set-section">
           <div class="set-label">Changelog</div>
               <div class="changelog">
+                <div class="cl-entry">
+                  <div class="cl-ver">1.4.0 <span class="cl-date">2026-07-08</span></div>
+                  <ul>
+                    <li>Bulk Steam ID update — Settings page now has a "Bulk update Steam IDs" button that searches Steam for all games missing an App ID. Review matches, skip games, and save in one go.</li>
+                    <li>Steam Price Lookup — click the clock icon next to the Price field to search for your game on Steam. Your game gets linked to its Steam App ID so you can refresh the price anytime, or tap the ID to open the store page. Remove the link with the ✕ button.</li>
+                    <li>Consolidated header — secondary actions (Analytics, Archived, Settings) are now grouped under a ⋮ menu so the toolbar stays clean as more features get added.</li>
+                    <li>Fixed version notification not appearing — app version constant now matches the changelog.</li>
+                  </ul>
+                </div>
                 <div class="cl-entry">
                   <div class="cl-ver">1.3.0 <span class="cl-date">2026-07-07</span></div>
                   <ul>
@@ -2035,6 +2251,19 @@
       <div class="modal-actions">
         <button class="btn-cancel" id="importCancelBtn">Cancel</button>
         <button class="btn-save" id="importAddBtn">Add selected</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="steamBulkOverlay">
+    <div class="modal import-modal">
+      <h3>Bulk update Steam IDs</h3>
+      <p class="set-desc">Searching each game on Steam. Pick the right match for each game, then save.</p>
+      <div class="import-list" id="steamBulkList"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="steamBulkCancelBtn">Cancel</button>
+        <button class="btn-save" id="steamBulkStartBtn">Start search</button>
+        <button class="btn-save" id="steamBulkSaveBtn">Save selected</button>
       </div>
     </div>
   </div>
@@ -2150,48 +2379,68 @@
   let pickedColor = null;   // null = default glass
   let pickedImage = null;   // image url / data-url for the card background
   let editingId = null;     // id of the entry being edited, or null when adding
+  let _steamAppId = null;   // steam app id for the game currently being edited
   const modalTitle = document.getElementById('modalTitle');
+
+  // ---- safer data loader ----
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      // validate each entry has at least a name and some date info
+      return parsed.filter(g => g && typeof g.name === 'string' && (typeof g.date === 'string' || g.tba === true));
+    } catch {
+      return [];
+    }
+  }
 
   let games = load();
 
-  function load() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
-    catch { return []; }
-  }
   function save() {
     localStorage.setItem(STORE_KEY, JSON.stringify(games));
     if (typeof scheduleAutoUpload === 'function') scheduleAutoUpload();
   }
 
-
-  // local-timezone day difference between today and an ISO yyyy-mm-dd string
+  // ---- core date helpers ----
   function daysUntil(iso) {
-    const [y, m, d] = iso.split('-').map(Number);
+    if (!iso || typeof iso !== 'string') return Infinity;
+    const parts = iso.split('-').map(Number);
+    if (parts.length !== 3) return Infinity;
+    const [y, m, d] = parts;
     const target = new Date(y, m - 1, d);
+    if (isNaN(target.getTime())) return Infinity;
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     return Math.round((target - today) / 86400000);
   }
 
   function fmtDate(iso) {
+    if (!iso || typeof iso !== 'string') return '';
     const [y, m, d] = iso.split('-').map(Number);
+    if (!y || !m || !d) return iso;
     return new Date(y, m - 1, d).toLocaleDateString(undefined,
       { year: 'numeric', month: 'short', day: 'numeric' });
   }
 
   // DD/MM/YYYY for the grid tiles
   function fmtSlash(iso) {
+    if (!iso || typeof iso !== 'string') return '';
     const [y, m, d] = iso.split('-');
     return `${d}/${m}/${y}`;
   }
 
   function fmtPrice(n) {
+    if (typeof n !== 'number' || isNaN(n)) return '';
     return '$' + n.toLocaleString(undefined, { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
   }
 
   // "July 2026" — used for the month separators
   function monthLabel(iso) {
+    if (!iso || typeof iso !== 'string') return '';
     const [y, m] = iso.split('-').map(Number);
+    if (!y || !m) return iso;
     return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
   }
 
@@ -2262,6 +2511,7 @@
   const AN_HYPE_FILTER_KEY = 'nexgame.analyticsHypeFilter';
   let analyticsStatusFilter = localStorage.getItem(AN_STATUS_FILTER_KEY) || 'all';
   let analyticsHypeFilter = localStorage.getItem(AN_HYPE_FILTER_KEY) || 'all';
+
   function matchesFilter(g) {
     const statusValue = g.status && STATUS_FILTERS.includes(g.status) ? g.status : 'none';
     if (!statusFilterModes.includes(statusValue)) return false;
@@ -2284,8 +2534,9 @@
   }
 
   function esc(s) {
-    return s.replace(/[&<>"']/g, c =>
-      ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+    if (!s) return '';
+    return String(s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c] || c));
   }
 
   const EDIT_SVG = `<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>`;
@@ -2296,10 +2547,10 @@
 
   // background inline-style shared by both layouts
   function bgStyle(g) {
-    if (g.image) {
-      return ` style="background-image: linear-gradient(var(--scrim-a), var(--scrim-b)), url('${esc(g.image)}'); background-size: cover; background-position: center;"`;
+    if (g.image && typeof g.image === 'string' && g.image.trim()) {
+      return ` style="background-image: linear-gradient(var(--scrim-a), var(--scrim-b)), url('${esc(g.image.trim())}'); background-size: cover; background-position: center;"`;
     }
-    if (g.color) {
+    if (g.color && typeof g.color === 'string' && g.color.trim()) {
       return ` style="background: linear-gradient(135deg, ${g.color}66, ${g.color}1f), rgba(255,255,255,0.10);"`;
     }
     return '';
@@ -2307,113 +2558,126 @@
 
   let calMonth, calYear;
 
+  // ---- main render ----
   function render() {
-    document.getElementById('wrap').classList.toggle('wide', viewMode === 'grid' || viewMode === 'calendar');
-    list.className = viewMode === 'grid' ? 'grid' : viewMode === 'calendar' ? 'list cal-view' : 'list';
-    [...viewToggle.children].forEach(b =>
-      b.classList.toggle('active', b.dataset.view === viewMode));
-    renderFilterPicker('typeFilter', typeFilterModes, TYPE_FILTERS, 'All Types', TYPE_FILTER_SUMMARY);
-    renderFilterPicker('statusFilter', statusFilterModes, STATUS_FILTERS, 'All Status', STATUS_FILTER_SUMMARY);
-    renderFilterPicker('hypeFilter', hypeFilterModes, HYPE_FILTERS, 'All Hype', HYPE_FILTER_SUMMARY);
-    renderFilterPicker('priceFilter', priceFilterModes, PRICE_FILTERS, 'All Prices', PRICE_FILTER_SUMMARY);
-    const visible = games.filter(g => matchesFilter(g) && matchesSearch(g));
-    renderStatsPanel(visible);
+    try {
+      // guard against corrupt games
+      if (!Array.isArray(games)) games = [];
+      const wrap = document.getElementById('wrap');
+      if (wrap) wrap.classList.toggle('wide', viewMode === 'grid' || viewMode === 'calendar');
+      list.className = viewMode === 'grid' ? 'grid' : viewMode === 'calendar' ? 'list cal-view' : 'list';
+      [...viewToggle.children].forEach(b =>
+        b.classList.toggle('active', b.dataset.view === viewMode));
+      renderFilterPicker('typeFilter', typeFilterModes, TYPE_FILTERS, 'All Types', TYPE_FILTER_SUMMARY);
+      renderFilterPicker('statusFilter', statusFilterModes, STATUS_FILTERS, 'All Status', STATUS_FILTER_SUMMARY);
+      renderFilterPicker('hypeFilter', hypeFilterModes, HYPE_FILTERS, 'All Hype', HYPE_FILTER_SUMMARY);
+      renderFilterPicker('priceFilter', priceFilterModes, PRICE_FILTERS, 'All Prices', PRICE_FILTER_SUMMARY);
+      const visible = games.filter(g => matchesFilter(g) && matchesSearch(g));
+      renderStatsPanel(visible);
 
-    if (viewMode === 'calendar') { return renderCalendar(visible); }
+      if (viewMode === 'calendar') { renderCalendar(visible); return; }
 
-    if (!games.length) {
-      list.className = 'list';
-      document.getElementById('wrap').classList.remove('wide');
-      list.innerHTML = `
-        <div class="empty">
-          <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="5"/><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13.5" r="1"/></svg>
-          <p>No games tracked yet.<br>Hit <strong>Track a game</strong> to start your countdown.</p>
-        </div>`;
-      renderSideNav([]);
-      return;
-    }
+      if (!games.length) {
+        list.className = 'list';
+        const wrapEl = document.getElementById('wrap');
+        if (wrapEl) wrapEl.classList.remove('wide');
+        list.innerHTML = `
+          <div class="empty">
+            <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="5"/><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13.5" r="1"/></svg>
+            <p>No games tracked yet.<br>Hit <strong>Track a game</strong> to start your countdown.</p>
+          </div>`;
+        renderSideNav([]);
+        return;
+      }
 
-    if (!visible.length) {
-      list.className = 'list';
-      document.getElementById('wrap').classList.remove('wide');
-      list.innerHTML = `
-        <div class="empty">
-          <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="5"/><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13.5" r="1"/></svg>
-          <p>No games match this filter.</p>
-        </div>`;
-      renderSideNav([]);
-      return;
-    }
+      if (!visible.length) {
+        list.className = 'list';
+        const wrapEl = document.getElementById('wrap');
+        if (wrapEl) wrapEl.classList.remove('wide');
+        list.innerHTML = `
+          <div class="empty">
+            <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="5"/><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13.5" r="1"/></svg>
+            <p>No games match this filter.</p>
+          </div>`;
+        renderSideNav([]);
+        return;
+      }
 
-    const byName = (a, b) => a.name.localeCompare(b.name);
-    const dated = visible.filter(g => !g.tba);
-    const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
-    const byReleaseDateDesc = (a, b) => daysUntil(b.date) - daysUntil(a.date);
-    const released = dated.filter(g => daysUntil(g.date) < 0).sort(byReleaseDateDesc);
-    const tbaGames = visible.filter(g => g.tba).sort(byName);
-
-    // soonest upcoming first
-    const byDate = (a, b) => daysUntil(a.date) - daysUntil(b.date);
-
-    const chronological = upcoming.sort(byDate);
+      const byName = (a, b) => a.name.localeCompare(b.name);
+      const dated = visible.filter(g => !g.tba && typeof g.date === 'string' && g.date.length === 10);
+      const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
+      const byReleaseDateDesc = (a, b) => daysUntil(b.date) - daysUntil(a.date);
+      const released = dated.filter(g => daysUntil(g.date) < 0).sort(byReleaseDateDesc);
+      const tbaGames = visible.filter(g => g.tba).sort(byName);
+      const byDate = (a, b) => daysUntil(a.date) - daysUntil(b.date);
+      const chronological = upcoming.sort(byDate);
 
     const itemFn = viewMode === 'grid' ? tileHTML : cardHTML;
-    const navSections = [];
-    let secId = 0;
-    function sepHTML(label, navLabel, kind, count, sum) {
-      const id = 'sec-' + (secId++);
-      navSections.push({ id, label: navLabel, kind, count, sum });
-      return `<div class="month-sep" id="${id}"><span>${esc(label)}</span></div>`;
-    }
-    function priceSum(arr) {
-      const total = arr.reduce((s, g) => s + (typeof g.price === 'number' ? g.price : 0), 0);
-      return total > 0 ? total : null;
-    }
-
-    // pull out "this week" / "next week" (Monday-start calendar weeks) as special groups up top
-    const now = new Date();
-    const dow = (now.getDay() + 6) % 7; // 0=Mon .. 6=Sun
-    const daysToWeekEnd = 6 - dow; // days from today through this Sunday
-    const thisWeek = chronological.filter(g => daysUntil(g.date) <= daysToWeekEnd);
-    const nextWeek = chronological.filter(g => {
-      const d = daysUntil(g.date);
-      return d > daysToWeekEnd && d <= daysToWeekEnd + 7;
-    });
-    const rest = chronological.filter(g => daysUntil(g.date) > daysToWeekEnd + 7);
-
-    let html = '';
-    if (thisWeek.length) {
-      html += sepHTML('This Week', 'This week', 'week', thisWeek.length, priceSum(thisWeek)) + thisWeek.map(itemFn).join('');
-    }
-    if (nextWeek.length) {
-      html += sepHTML('Next Week', 'Next week', 'week', nextWeek.length, priceSum(nextWeek)) + nextWeek.map(itemFn).join('');
-    }
-
-    // bucket the remainder by release month, keeping bucket order chronological
-    const buckets = [];
-    let curMonth = null, curArr = null;
-    rest.forEach(g => {
-      const mk = g.date.slice(0, 7);   // YYYY-MM
-      if (mk !== curMonth) {
-        curMonth = mk;
-        curArr = [];
-        buckets.push(curArr);
+      const navSections = [];
+      let secId = 0;
+      function sepHTML(label, navLabel, kind, count, sum) {
+        const id = 'sec-' + (secId++);
+        navSections.push({ id, label: navLabel, kind, count, sum });
+        return `<div class="month-sep" id="${id}"><span>${esc(label)}</span></div>`;
       }
-      curArr.push(g);
-    });
-    html += buckets.map(b =>
-      sepHTML(monthLabel(b[0].date), shortMonthLabel(b[0].date), 'month', b.length, priceSum(b)) +
-      b.map(itemFn).join('')
-    ).join('');
-    if (released.length) {
-      html += sepHTML('Out now', 'Out now', 'now', released.length) + released.map(itemFn).join('');
+      function priceSum(arr) {
+        const total = arr.reduce((s, g) => s + (typeof g.price === 'number' ? g.price : 0), 0);
+        return total > 0 ? total : null;
+      }
+
+      // pull out "this week" / "next week" (Monday-start calendar weeks) as special groups up top
+      const now = new Date();
+      const dow = (now.getDay() + 6) % 7; // 0=Mon .. 6=Sun
+      const daysToWeekEnd = 6 - dow; // days from today through this Sunday
+      const thisWeek = chronological.filter(g => daysUntil(g.date) <= daysToWeekEnd);
+      const nextWeek = chronological.filter(g => {
+        const d = daysUntil(g.date);
+        return d > daysToWeekEnd && d <= daysToWeekEnd + 7;
+      });
+      const rest = chronological.filter(g => daysUntil(g.date) > daysToWeekEnd + 7);
+
+      let html = '';
+      if (thisWeek.length) {
+        html += sepHTML('This Week', 'This week', 'week', thisWeek.length, priceSum(thisWeek)) + thisWeek.map(itemFn).join('');
+      }
+      if (nextWeek.length) {
+        html += sepHTML('Next Week', 'Next week', 'week', nextWeek.length, priceSum(nextWeek)) + nextWeek.map(itemFn).join('');
+      }
+
+      // bucket the remainder by release month, keeping bucket order chronological
+      const buckets = [];
+      let curMonth = null, curArr = null;
+      rest.forEach(g => {
+        const mk = g.date.slice(0, 7);   // YYYY-MM
+        if (mk !== curMonth) {
+          curMonth = mk;
+          curArr = [];
+          buckets.push(curArr);
+        }
+        curArr.push(g);
+      });
+      html += buckets.map(b =>
+        sepHTML(monthLabel(b[0].date), shortMonthLabel(b[0].date), 'month', b.length, priceSum(b)) +
+        b.map(itemFn).join('')
+      ).join('');
+      if (released.length) {
+        html += sepHTML('Out now', 'Out now', 'now', released.length) + released.map(itemFn).join('');
+      }
+      if (tbaGames.length) {
+        html += sepHTML('Coming soon', 'Soon', 'soon', tbaGames.length) + tbaGames.map(itemFn).join('');
+      }
+      list.innerHTML = html;
+      if (navSections.length) navSections.unshift({ id: 'top', label: 'Top', kind: 'top' });
+      renderSideNav(navSections);
+    } catch (err) {
+      console.warn('Render error:', err);
+      // fallback: show a safe error message
+      list.innerHTML = `
+        <div class="empty">
+          <p>Something went wrong while rendering. Your data is safe — try refreshing the page.</p>
+          <p style="font-size:0.8rem;opacity:0.6;margin-top:8px;">${esc(err.message || '')}</p>
+        </div>`;
     }
-    if (tbaGames.length) {
-      html += sepHTML('Coming soon', 'Soon', 'soon', tbaGames.length) + tbaGames.map(itemFn).join('');
-    }
-    list.innerHTML = html;
-    if (navSections.length) navSections.unshift({ id: 'top', label: 'Top', kind: 'top' });
-    renderSideNav(navSections);
   }
 
   function renderCalendar(visible) {
@@ -2431,7 +2695,7 @@
     // Build a map of date -> games, respecting filters
     const map = {};
     visible.forEach(g => {
-      if (g.tba) return;
+      if (g.tba || typeof g.date !== 'string' || g.date.length !== 10) return;
       if (!map[g.date]) map[g.date] = [];
       map[g.date].push(g);
     });
@@ -2450,9 +2714,9 @@
     for (let d = 1; d <= daysInMonth; d++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const isToday = dateStr === todayStr;
-      const games = map[dateStr] || [];
+      const gamesOnDay = map[dateStr] || [];
       let gameHTML = '';
-      games.forEach(g => {
+      gamesOnDay.forEach(g => {
         const rel = daysUntil(g.date) < 0 ? ' released' : '';
         gameHTML += `<div class="cal-game${rel}" data-id="${g.id}">${esc(g.name)}</div>`;
       });
@@ -2505,7 +2769,9 @@
   }
 
   function shortMonthLabel(iso) {
+    if (!iso || typeof iso !== 'string') return '';
     const [y, m] = iso.split('-').map(Number);
+    if (!y || !m) return iso;
     return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'short' }) + " '" + String(y).slice(2);
   }
 
@@ -2530,7 +2796,7 @@
   function positionSideNav() {
     const nav = document.getElementById('sideNav');
     const wrapRect = document.getElementById('wrap').getBoundingClientRect();
-    nav.classList.remove('nav-cramped'); // measure at full width — never trust offsetWidth while display:none
+    nav.classList.remove('nav-cramped');
     const navWidth = nav.offsetWidth || 110;
     const space = wrapRect.left;
     if (space < navWidth + 34) {
@@ -2540,7 +2806,6 @@
     nav.style.left = (space - navWidth - 22) + 'px';
   }
   window.addEventListener('resize', positionSideNav);
-  // .wrap animates its max-width when switching list/grid; re-measure once that settles
   document.getElementById('wrap').addEventListener('transitionend', e => {
     if (e.propertyName === 'max-width') positionSideNav();
   });
@@ -2559,7 +2824,6 @@
     if (!count) return '';
     return `<div class="stat-row"><span class="dot"${color ? ` style="background:${color}"` : ''}></span><span class="stat-name">${esc(name)}</span><span class="stat-count">${count}</span></div>`;
   }
-  // wraps a group of stat rows; omits the whole group (title + divider) if every row was empty
   function statGroup(title, rows) {
     const html = rows.filter(Boolean).join('');
     if (!html) return '';
@@ -2571,7 +2835,7 @@
     panel.classList.toggle('stats-empty', !games.length);
     if (!games.length) { panel.innerHTML = ''; return; }
 
-    const dated = visible.filter(g => !g.tba);
+    const dated = visible.filter(g => !g.tba && typeof g.date === 'string' && g.date.length === 10);
     const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
     const outNow = dated.filter(g => daysUntil(g.date) < 0);
     const soon = visible.filter(g => g.tba);
@@ -2642,7 +2906,6 @@
     if (e.propertyName === 'max-width') positionStatsPanel();
   });
 
-  // small status badge: ready / prequel / queued
   function tagList(g) {
     const label = STATUS_LABEL[g.status];
     const typeLabel = TYPE_LABEL[g.type];
@@ -2676,7 +2939,6 @@
     if (typeof g.price === 'number') s += `<span class="price-badge">${g.priceEstimated ? '~' : ''}${fmtPrice(g.price)}</span>`;
     return s;
   }
-  // grid tiles are narrow — cap visible badges and roll the rest into a "+N" chip
   function tileTagsHTML(g) {
     const tags = tagList(g);
     const shown = tags.slice(0, 2);
@@ -2777,7 +3039,6 @@
       </div>`;
   }
 
-  // build the colour swatch row (a "None"/default option + presets)
   function buildSwatches() {
     swatches.innerHTML =
       `<div class="sw none" data-color="" title="Default glass">
@@ -2795,13 +3056,11 @@
       customSwatch.classList.add('has-color', 'sel');
       customSwatch.style.background = value;
     } else {
-      // a preset/None was chosen — revert the custom chip to its "+" add state
       customSwatch.classList.remove('has-color', 'sel');
       customSwatch.style.background = '';
     }
   }
 
-  // an image (when set) overrides the colour as the card background
   function setImage(url) {
     pickedImage = url || null;
   }
@@ -2819,7 +3078,6 @@
     if (gTba.checked) gDate.classList.remove('invalid');
   });
 
-  // open Brave image search for the game title in a new tab
   document.getElementById('imgSearchBtn').addEventListener('click', () => {
     const q = gName.value.trim();
     if (!q) { gName.classList.add('invalid'); gName.focus(); return; }
@@ -2832,7 +3090,7 @@
     saveBtn.textContent = game ? 'Update' : 'Save';
 
     gName.value = game ? game.name : '';
-    gDate.value = game && !game.tba ? game.date : '';
+    gDate.value = game && !game.tba && typeof game.date === 'string' ? game.date : '';
     gTba.checked = !!(game && game.tba);
     gDate.disabled = gTba.checked;
     setStatus(game ? game.status : null);
@@ -2840,11 +3098,28 @@
     gHype.value = game && game.hype ? game.hype : '';
     gPrice.value = game && typeof game.price === 'number' ? game.price : '';
     gPriceEst.checked = !!(game && game.priceEstimated);
+    _steamAppId = (game && game.steamAppId) || null;
+    const steamRow = document.getElementById('steamIdRow');
+    const steamDisplay = document.getElementById('steamIdDisplay');
+    const lookupBtn = document.getElementById('priceLookupBtn');
+    const refreshBtn = document.getElementById('steamRefreshBtn');
+    if (_steamAppId) {
+      steamDisplay.textContent = _steamAppId;
+      steamDisplay.href = `https://store.steampowered.com/app/${_steamAppId}/`;
+      steamRow.style.display = '';
+      lookupBtn.style.display = 'none';
+    } else {
+      steamRow.style.display = 'none';
+      lookupBtn.style.display = '';
+    }
+    refreshBtn.disabled = false;
+    lookupBtn.classList.remove('busy');
+    document.getElementById('steamResults').innerHTML = '';
+    document.getElementById('steamResults').classList.remove('show');
     gImageUrl.value = game && game.image ? game.image : '';
     setImage(game ? game.image : null);
     gNotes.value = game && game.notes ? game.notes : '';
 
-    // restore colour selection
     if (game && game.color) {
       if (PRESET_COLORS.includes(game.color)) {
         selectColor(game.color, false);
@@ -2853,7 +3128,7 @@
         selectColor(game.color, true);
       }
     } else {
-      selectColor('', false);   // default to glass, "None" selected
+      selectColor('', false);
     }
 
     hideResults();
@@ -2862,6 +3137,132 @@
     setTimeout(() => gName.focus(), 50);
   }
   function closeModal() { overlay.classList.remove('show'); }
+
+  // — Steam price lookup —
+  const CS_API = 'https://www.cheapshark.com/api/1.0';
+  const PROXIES = [
+    '',
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?url='
+  ];
+
+  async function fetchCADPrice(steamAppId, attempt = 0) {
+    if (attempt >= PROXIES.length) return null;
+    const base = `https://store.steampowered.com/api/appdetails?appids=${steamAppId}&cc=ca&l=en&filters=price_overview`;
+    const url = PROXIES[attempt] ? PROXIES[attempt] + encodeURIComponent(base) : base;
+    try {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const txt = await r.text();
+      let d;
+      try { d = JSON.parse(txt); } catch { throw new Error('Not JSON'); }
+      if (d && typeof d.contents === 'string' && d.status) {
+        try { d = JSON.parse(d.contents); } catch { return null; }
+      }
+      const price = d[String(steamAppId)]?.data?.price_overview;
+      if (price) return { cad: price.final / 100, currency: 'CAD' };
+      return null;
+    } catch {
+      return fetchCADPrice(steamAppId, attempt + 1);
+    }
+  }
+
+  async function lookupSteamPrice() {
+    const name = gName.value.trim();
+    if (!name) return;
+    const btn = document.getElementById('priceLookupBtn');
+    const resultsEl = document.getElementById('steamResults');
+    if (btn.classList.contains('busy')) return;
+    btn.classList.add('busy');
+    resultsEl.innerHTML = '';
+    resultsEl.classList.remove('show');
+    try {
+      const res = await fetch(`${CS_API}/games?title=${encodeURIComponent(name)}&limit=10`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        resultsEl.innerHTML = '<div class="res" style="cursor:default;opacity:0.6">No results found on Steam.</div>';
+        resultsEl.classList.add('show');
+        return;
+      }
+      resultsEl.innerHTML = data.map(item =>
+        `<div class="res" data-id="${item.steamAppID}" data-csid="${item.gameID}">${esc(item.external)}</div>`
+      ).join('');
+      resultsEl.classList.add('show');
+      resultsEl.querySelectorAll('.res').forEach(el => {
+        el.addEventListener('click', async () => {
+          resultsEl.classList.remove('show');
+          await selectSteamResult(el.dataset.id, el.dataset.csid);
+        });
+      });
+    } catch (e) {
+      resultsEl.innerHTML = `<div class="res" style="cursor:default;opacity:0.6">Steam search error (${e.message}).</div>`;
+      resultsEl.classList.add('show');
+    } finally {
+      btn.classList.remove('busy');
+    }
+  }
+
+  async function selectSteamResult(steamAppId, csId) {
+    const refreshBtn = document.getElementById('steamRefreshBtn');
+    refreshBtn.disabled = true;
+    _steamAppId = parseInt(steamAppId, 10);
+    const sd = document.getElementById('steamIdDisplay');
+    sd.textContent = _steamAppId;
+    sd.href = `https://store.steampowered.com/app/${_steamAppId}/`;
+    document.getElementById('steamIdRow').style.display = '';
+    document.getElementById('priceLookupBtn').style.display = 'none';
+    try {
+      const cad = await fetchCADPrice(steamAppId);
+      if (cad) {
+        gPrice.value = cad.cad.toFixed(2);
+        gPriceEst.checked = false;
+      } else {
+        const resultsEl = document.getElementById('steamResults');
+        resultsEl.innerHTML = '<div class="res" style="cursor:default;opacity:0.6">Could not fetch Canadian Steam price.</div>';
+        resultsEl.classList.add('show');
+      }
+    } catch (e) {
+      const resultsEl = document.getElementById('steamResults');
+      resultsEl.innerHTML = `<div class="res" style="cursor:default;opacity:0.6">Price fetch error (${e.message}).</div>`;
+      resultsEl.classList.add('show');
+    } finally {
+      refreshBtn.disabled = false;
+    }
+  }
+
+  async function refreshSteamPrice() {
+    const refreshBtn = document.getElementById('steamRefreshBtn');
+    refreshBtn.disabled = true;
+    try {
+      const cad = await fetchCADPrice(_steamAppId);
+      if (cad) {
+        gPrice.value = cad.cad.toFixed(2);
+        gPriceEst.checked = false;
+        toast('Price updated');
+      } else {
+        const resultsEl = document.getElementById('steamResults');
+        resultsEl.innerHTML = '<div class="res" style="cursor:default;opacity:0.6">Could not refresh Canadian Steam price.</div>';
+        resultsEl.classList.add('show');
+      }
+    } catch (e) {
+      const resultsEl = document.getElementById('steamResults');
+      resultsEl.innerHTML = `<div class="res" style="cursor:default;opacity:0.6">Refresh error (${e.message}).</div>`;
+      resultsEl.classList.add('show');
+    } finally {
+      refreshBtn.disabled = false;
+    }
+  }
+
+  document.getElementById('priceLookupBtn').addEventListener('click', lookupSteamPrice);
+  document.getElementById('steamRefreshBtn').addEventListener('click', () => {
+    if (_steamAppId) refreshSteamPrice();
+  });
+  document.getElementById('steamRemoveBtn').addEventListener('click', () => {
+    _steamAppId = null;
+    document.getElementById('steamIdRow').style.display = 'none';
+    document.getElementById('priceLookupBtn').style.display = '';
+  });
 
   const formErr = document.getElementById('formErr');
 
@@ -2895,6 +3296,7 @@
       hype: gHype.value || null,
       price: gPrice.value !== '' ? Math.round(parseFloat(gPrice.value) * 100) / 100 : null,
       priceEstimated: gPrice.value !== '' && gPriceEst.checked,
+      steamAppId: _steamAppId,
       color: pickedImage ? null : pickedColor,
       image: pickedImage || null,
       notes: gNotes.value.trim() || null
@@ -2922,13 +3324,12 @@
 
   function hideResults() { results.classList.remove('show'); results.innerHTML = ''; }
 
-  // earliest P577 (publication date) across an entity's claims, as yyyy-mm-dd
   function earliestRelease(entity) {
     const claims = entity.claims && entity.claims.P577;
     if (!claims) return null;
     let best = null;
     for (const c of claims) {
-      const t = c.mainsnak?.datavalue?.value?.time; // e.g. +2025-11-19T00:00:00Z
+      const t = c.mainsnak?.datavalue?.value?.time;
       if (!t) continue;
       const m = t.match(/^\+(\d{4})-(\d{2})-(\d{2})/);
       if (!m) continue;
@@ -2941,7 +3342,6 @@
     return best;
   }
 
-  // Wikimedia Commons image url from a P18 (image) claim, if present
   function entityImage(entity) {
     const file = entity.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
     if (!file) return null;
@@ -2976,7 +3376,7 @@
           date: e ? earliestRelease(e) : null,
           image: e ? entityImage(e) : null
         };
-      }).filter(r => r.date); // only entities that actually have a release date
+      }).filter(r => r.date);
 
       if (!rows.length) { showNote('Found matches, but no release date is listed.'); return; }
       showResults(rows);
@@ -3005,7 +3405,7 @@
       const r = rows[+el.dataset.i];
       gName.value = r.name;
       gDate.value = r.date;
-      if (r.image) {                 // auto-fill artwork when Wikidata has it
+      if (r.image) {
         gImageUrl.value = r.image;
         setImage(r.image);
       }
@@ -3026,7 +3426,6 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeModal(); closeSettings(); closeConfirm(); closeAnalytics(); closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); }
     if (e.key === 'Enter' && overlay.classList.contains('show')) addGame();
-    // shortcuts — only when not typing and no modal is open
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
     const modalOpen = document.querySelector('.overlay.show');
     if (typing || modalOpen || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -3072,7 +3471,6 @@
   const confirmTitle = document.getElementById('confirmTitle');
   const confirmActionBtn = document.getElementById('confirmDeleteBtn');
   let confirmAction = null;
-  // generic confirm dialog: pass what to show and what to run if the user confirms
   function openConfirmAction({ title, message, actionLabel, danger = true, onConfirm }) {
     confirmTitle.textContent = title;
     confirmMsg.textContent = message;
@@ -3176,7 +3574,7 @@
     const btn = e.target.closest('.vt-btn');
     if (!btn || btn.dataset.view === viewMode) return;
     viewMode = btn.dataset.view;
-    calMonth = null; calYear = null; // reset calendar when switching to it
+    calMonth = null; calYear = null;
     localStorage.setItem(VIEW_KEY, viewMode);
     render();
   });
@@ -3246,7 +3644,7 @@
     saveFilterModes(PRICE_FILTER_KEY, priceFilterModes);
     render();
   });
-  // --- Keyboard card navigation ---
+
   let focusedCardIdx = -1;
   function focusCard(idx) {
     const cards = list.querySelectorAll('.card, .tile');
@@ -3257,7 +3655,6 @@
     cards.forEach((c, i) => c.classList.toggle('kb-focus', i === idx));
     cards[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
-  // reset focused card on render
   const origRender = render;
   render = function() { origRender(); focusedCardIdx = -1; };
 
@@ -3297,13 +3694,13 @@
     render();
   });
 
-  // --- Settings: open/close, backup & restore ---
-  const APP_VERSION = '1.2.1';
+  // --- Settings ---
+  const APP_VERSION = '1.4.0';
+  const DEV_BUILD = false;
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
 
-  // --- Theme: dark / light modes with colour styles ---
   const MODES = {
     dark: {
       label: 'Dark',
@@ -3558,13 +3955,12 @@
   };
   const MODE_KEY = 'nexgame.mode';
   const THEME_KEY = 'nexgame.theme';
-  const THEME_OVERRIDE_KEY = 'nexgame.themeOverride';
   let storedMode = localStorage.getItem(MODE_KEY);
   if (storedMode !== 'light' && storedMode !== 'system') storedMode = 'dark';
   let effectiveMode = storedMode === 'system'
     ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
     : storedMode;
-  let modeName = storedMode; // the user's chosen mode (dark/light/system)
+  let modeName = storedMode;
   let themeName = localStorage.getItem(THEME_KEY);
   if (!themeName || !MODES[effectiveMode].themes[themeName]) {
     themeName = effectiveMode === 'dark' ? 'nebula' : 'daybreak';
@@ -3688,7 +4084,6 @@
     buildThemes();
   }
 
-  // follow system preference changes
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (modeName === 'system') {
       updateEffectiveMode();
@@ -3727,6 +4122,7 @@
   settingsTabs.forEach(tab => {
     tab.addEventListener('click', () => switchSettingsTab(tab.dataset.panel));
   });
+
   const analyticsOverlay = document.getElementById('analyticsOverlay');
   function openAnalytics() {
     renderAnalytics();
@@ -3745,7 +4141,6 @@
       return;
     }
     archivedList.innerHTML = archived.map(g => {
-      const d = daysUntil(g.date);
       const date = g.tba ? 'Coming soon' : fmtDate(g.date);
       return `<div class="archived-item">
         <div class="archived-name">${esc(g.name)}</div>
@@ -3770,7 +4165,6 @@
   document.getElementById('archivedClose').addEventListener('click', closeArchivedPage);
   archivedOverlay.addEventListener('click', e => { if (e.target === archivedOverlay) closeArchivedPage(); });
 
-  // renders a fixed, ordered set of buckets (zero counts included) — for distributions, not category breakdowns
   function anBucketRows(order, labels, counts, colors) {
     const max = Math.max(1, ...order.map(k => counts[k] || 0));
     return '<div class="an-bars">' + order.map(k => `
@@ -3785,15 +4179,18 @@
   const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
   function quarterKey(iso) {
+    if (!iso || typeof iso !== 'string') return '';
     const [y, m] = iso.split('-').map(Number);
+    if (!y || !m) return '';
     return `${y}-Q${Math.ceil(m / 3)}`;
   }
   function quarterLabel(key) {
+    if (!key || typeof key !== 'string') return '';
     const [y, q] = key.split('-Q');
     return `Q${q} '${y.slice(2)}`;
   }
-  // step a "YYYY-QN" key forward by one quarter
   function nextQuarterKey(key) {
+    if (!key || typeof key !== 'string') return '';
     const [y, q] = key.split('-Q').map(Number);
     return q === 4 ? `${y + 1}-Q1` : `${y}-Q${q + 1}`;
   }
@@ -3815,14 +4212,13 @@
       return true;
     });
 
-    const dated = filteredGames.filter(g => !g.tba);
+    const dated = filteredGames.filter(g => !g.tba && typeof g.date === 'string' && g.date.length === 10);
     const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
     const avgLead = upcoming.length
       ? Math.round(upcoming.reduce((s, g) => s + daysUntil(g.date), 0) / upcoming.length)
       : null;
     const totalStore = filteredGames.filter(g => !g.tba).reduce((s, g) => s + (typeof g.price === 'number' ? g.price : 0), 0);
 
-    // releases per month, across all dated entries (past + future) — the one chart the stats panel doesn't show
     const monthCounts = {};
     dated.forEach(g => {
       const mk = g.date.slice(0, 7);
@@ -3840,7 +4236,6 @@
         <div class="an-chart-label">${esc(shortMonthLabel(k + '-01'))}</div>
       </div>`).join('') + '</div>' : '<div class="an-empty">No dated games yet.</div>';
 
-    // longest gap with no releases, among upcoming dates (today's "quiet stretch" ahead)
     let longestGap = null;
     const upcomingDatesSorted = [...new Set(upcoming.map(g => g.date))].sort();
     for (let i = 1; i < upcomingDatesSorted.length; i++) {
@@ -3850,7 +4245,6 @@
       }
     }
 
-    // which weekday games most commonly release on
     const weekdayCounts = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
     dated.forEach(g => {
       const [y, m, d] = g.date.split('-').map(Number);
@@ -3858,7 +4252,6 @@
     });
     const topWeekday = WEEKDAY_ORDER.reduce((best, k) => (weekdayCounts[k] > (weekdayCounts[best] || 0) ? k : best), WEEKDAY_ORDER[0]);
 
-    // lead-time distribution for what's still upcoming
     const leadBuckets = { week: 0, month: 0, quarter: 0, half: 0, far: 0 };
     upcoming.forEach(g => {
       const d = daysUntil(g.date);
@@ -3870,7 +4263,6 @@
     });
     const leadLabels = { week: 'Within a week', month: 'Within a month', quarter: '1–3 months', half: '3–6 months', far: '6+ months' };
 
-    // quarterly trend: counts per quarter, only from the current quarter onward, with quarter-over-quarter change
     const curQ = quarterKey(new Date().toISOString().slice(0, 10));
     const qCounts = {};
     dated.forEach(g => {
@@ -3939,7 +4331,6 @@
         <div class="an-title">Lead time of upcoming releases</div>
         ${anBucketRows(['week', 'month', 'quarter', 'half', 'far'], leadLabels, leadBuckets)}
       </div>`;
-    // Attach filter listeners after rendering
     setTimeout(() => {
       const statusSelect = document.getElementById('anStatusFilter');
       const hypeSelect = document.getElementById('anHypeFilter');
@@ -3974,6 +4365,24 @@
   document.getElementById('settingsClose').addEventListener('click', closeSettings);
   settingsOverlay.addEventListener('click', e => { if (e.target === settingsOverlay) closeSettings(); });
 
+  // More menu dropdown
+  const moreBtn = document.getElementById('moreBtn');
+  const moreDropdown = document.getElementById('moreDropdown');
+  moreBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    moreBtn.classList.toggle('open');
+    moreDropdown.classList.toggle('open');
+  });
+  document.addEventListener('click', () => {
+    moreBtn.classList.remove('open');
+    moreDropdown.classList.remove('open');
+  });
+  moreDropdown.addEventListener('click', e => {
+    e.stopPropagation();
+    moreBtn.classList.remove('open');
+    moreDropdown.classList.remove('open');
+  });
+
   document.getElementById('backupBtn').addEventListener('click', () => {
     const payload = {
       app: 'NexGame',
@@ -3994,7 +4403,6 @@
     restoreNote.className = 'set-note ok';
   });
 
-  // parse + apply a backup object; shared by file restore and Dropbox sync. Throws on bad data.
   function applyBackupData(data) {
     const arr = Array.isArray(data) ? data : data.games;
     if (!Array.isArray(arr)) throw new Error('no games array');
@@ -4009,6 +4417,7 @@
       hype: HYPE_LABEL[g.hype] ? g.hype : null,
       price: typeof g.price === 'number' ? g.price : null,
       priceEstimated: !!g.priceEstimated,
+      steamAppId: typeof g.steamAppId === 'number' ? g.steamAppId : null,
       color: g.color || null,
       image: g.image || null,
       notes: typeof g.notes === 'string' ? g.notes || null : null
@@ -4044,7 +4453,6 @@
     restoreFile.value = '';
   });
 
-  // --- Toast: small transient notice, bottom-centre ---
   let _toastTimer = null;
   function toast(msg) {
     let el = document.getElementById('toast');
@@ -4060,7 +4468,7 @@
     _toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
   }
 
-  // --- Dropbox sync (client-side OAuth2 PKCE, no backend) ---
+  // --- Dropbox sync ---
   const DBX_KEY = 'nexgame.dropbox';
   const DBX_PATH = '/nexgame-backup.json';
   let dbx = JSON.parse(localStorage.getItem(DBX_KEY) || 'null') ||
@@ -4076,11 +4484,10 @@
     dbxSyncBtn.classList.toggle('syncing', _syncOps > 0);
   }
 
-  // auto-upload: debounced push after 10s of inactivity
   let _syncTimer = null, _skipAutoUpload = false, _lastUploadedState = '';
   function scheduleAutoUpload() {
     if (!dbx.accessToken || !dbx.autoUpload) return;
-    if (_skipAutoUpload) return; // applying a download — don't bounce it back up
+    if (_skipAutoUpload) return;
     clearTimeout(_syncTimer);
     _syncTimer = setTimeout(() => dropboxUpload(true), 10000);
   }
@@ -4124,7 +4531,7 @@
     const params = new URLSearchParams(location.search);
     const code = params.get('code');
     if (!code) return;
-    history.replaceState(null, '', location.pathname + location.hash); // strip ?code= from the URL
+    history.replaceState(null, '', location.pathname + location.hash);
     settingsOverlay.classList.add('show');
     const verifier = sessionStorage.getItem('nexgame.dbx.verifier');
     if (!verifier || !dbx.appKey) return;
@@ -4171,7 +4578,7 @@
     _skipAutoUpload = true;
     try {
       const counts = applyBackupData(parsed);
-      _lastUploadedState = dbxSnapshot(); // we now match Dropbox; don't re-upload it
+      _lastUploadedState = dbxSnapshot();
       return counts;
     } finally { _skipAutoUpload = false; }
   }
@@ -4179,7 +4586,7 @@
   async function dropboxUpload(silent) {
     if (!await dropboxRefreshIfNeeded()) { if (!silent) toast('⚠ Dropbox session expired — reconnect'); return; }
     const snapshot = dbxSnapshot();
-    if (silent && snapshot === _lastUploadedState) return; // nothing changed since last push
+    if (silent && snapshot === _lastUploadedState) return;
     if (dbx.mock) {
       setSyncSpinning(true);
       await delay(700);
@@ -4268,7 +4675,6 @@
     });
   }
 
-  // Offer to pull in the remote file if it's newer than our last local sync.
   async function dropboxCheckForUpdates() {
     if (!dbx.accessToken || dbx.mock) return;
     if (!await dropboxRefreshIfNeeded()) return;
@@ -4277,15 +4683,15 @@
         method: 'POST', headers: { 'Authorization': 'Bearer ' + dbx.accessToken, 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: DBX_PATH })
       });
-      if (!res.ok) return; // no remote file yet, or a transient error
+      if (!res.ok) return;
       const j = await res.json();
       const remoteAt = Date.parse(j.server_modified || '');
       if (!remoteAt) return;
       if (remoteAt > (dbx.lastSyncAt || 0) + 5000 && remoteAt !== dbx.dismissedRemoteAt) {
-        if (dbx.autoSync) dropboxDownload(true);  // pull silently without prompting
+        if (dbx.autoSync) dropboxDownload(true);
         else openDbxSyncPrompt(remoteAt);
       }
-    } catch (e) { /* offline or blocked — silently skip */ }
+    } catch (e) {}
   }
   let _dbxPendingRemoteAt = 0;
   const dbxSyncOverlay = document.getElementById('dbxSyncOverlay');
@@ -4345,14 +4751,14 @@
   dropboxHandleRedirect();
   dropboxCheckForUpdates();
 
-  // --- Import wishlist: text file (one title per line) -> Wikidata lookup -> bulk add ---
+  // --- Import wishlist ---
   const importBtn = document.getElementById('importBtn');
   const importFileInput = document.getElementById('importFile');
   const importOverlay = document.getElementById('importOverlay');
   const importList = document.getElementById('importList');
   const importCancelBtn = document.getElementById('importCancelBtn');
   const importAddBtn = document.getElementById('importAddBtn');
-  let importRows = []; // { name, status: 'pending'|'searching'|'found'|'none', date, image, include }
+  let importRows = [];
 
   importBtn.addEventListener('click', () => importFileInput.click());
   importFileInput.addEventListener('change', () => {
@@ -4536,6 +4942,196 @@
     closeImport();
   });
 
+  // --- Bulk Steam ID update ---
+  const steamBulkBtn = document.getElementById('steamBulkBtn');
+  const steamBulkOverlay = document.getElementById('steamBulkOverlay');
+  const steamBulkList = document.getElementById('steamBulkList');
+  const steamBulkCancelBtn = document.getElementById('steamBulkCancelBtn');
+  const steamBulkStartBtn = document.getElementById('steamBulkStartBtn');
+  const steamBulkSaveBtn = document.getElementById('steamBulkSaveBtn');
+  let steamBulkRows = [];
+
+  steamBulkBtn.addEventListener('click', () => {
+    closeSettings();
+    const pending = games.filter(g => !g.steamAppId);
+    if (!pending.length) { toast('All games already have a Steam ID'); return; }
+    steamBulkRows = pending.map(g => ({
+      gameId: g.id,
+      name: g.name,
+      searchName: g.name,
+      matches: [],
+      status: 'pending',
+      selectedIdx: -1,
+      skip: false
+    }));
+    renderSteamBulkList();
+    steamBulkStartBtn.disabled = false;
+    steamBulkOverlay.classList.add('show');
+  });
+
+  function closeSteamBulk() {
+    steamBulkOverlay.classList.remove('show');
+    steamBulkStartBtn.disabled = false;
+    steamBulkRows = [];
+  }
+
+  function renderSteamBulkList() {
+    steamBulkList.innerHTML = steamBulkRows.map((r, i) => {
+      let statusHtml, matchHtml, selectHtml;
+      if (r.status === 'searching') {
+        statusHtml = '<span class="sb-searching"><span class="sb-dot"></span><span class="sb-dot"></span><span class="sb-dot"></span></span>';
+        matchHtml = '';
+        selectHtml = '';
+      } else if (r.status === 'found') {
+        statusHtml = '<span class="sb-status" style="color:var(--accent-2)">✓</span>';
+        matchHtml = `<span class="sb-match"><strong>${esc(r.matches[r.selectedIdx]?.name || '')}</strong></span>`;
+        selectHtml = r.matches.length > 1 ? `<select class="sb-select" data-i="${i}">${
+          r.matches.map((m, mi) => `<option value="${mi}"${mi === r.selectedIdx ? ' selected' : ''}>${esc(m.name)}</option>`).join('')
+        }</select>` : '';
+      } else if (r.status === 'none') {
+        statusHtml = '<span class="sb-status" style="opacity:0.5">No match</span>';
+        matchHtml = '';
+        selectHtml = '';
+      } else {
+        statusHtml = '<span class="sb-status">…</span>';
+        matchHtml = '';
+        selectHtml = '';
+      }
+      return `<div class="sb-row">
+        <span class="sb-name">${esc(r.name)}</span>
+        <input class="sb-input" data-i="${i}" value="${esc(r.searchName)}" spellcheck="false">
+        ${matchHtml}
+        ${selectHtml}
+        ${statusHtml}
+        <button type="button" class="sb-rere" data-i="${i}" title="Search again">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        </button>
+        <label class="sb-skip"><input type="checkbox" class="sb-skip-chk" data-i="${i}" ${r.skip ? 'checked' : ''}>Skip</label>
+      </div>`;
+    }).join('');
+  }
+
+  steamBulkList.addEventListener('change', e => {
+    const sel = e.target.closest('.sb-select');
+    if (sel) { steamBulkRows[+sel.dataset.i].selectedIdx = +sel.value; return; }
+    const sk = e.target.closest('.sb-skip-chk');
+    if (sk) { steamBulkRows[+sk.dataset.i].skip = sk.checked; return; }
+    const inp = e.target.closest('.sb-input');
+    if (inp) { steamBulkRows[+inp.dataset.i].searchName = inp.value; }
+  });
+
+  steamBulkList.addEventListener('click', e => {
+    const btn = e.target.closest('.sb-rere');
+    if (btn) { e.preventDefault(); researchSteamBulkRow(+btn.dataset.i); }
+  });
+
+  async function searchSteamSuggest(name, attempt = 0) {
+    if (attempt >= PROXIES.length) return [];
+    const base = `https://store.steampowered.com/search/suggest?term=${encodeURIComponent(name)}&f=games&cc=US&l=en`;
+    const url = PROXIES[attempt] ? PROXIES[attempt] + encodeURIComponent(base) : base;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const raw = await res.text();
+      let html = raw;
+      if (raw.startsWith('{')) {
+        try {
+          const wrapped = JSON.parse(raw);
+          if (wrapped && typeof wrapped.contents === 'string' && wrapped.status) {
+            html = wrapped.contents;
+          }
+        } catch {}
+      }
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const matches = [...doc.querySelectorAll('.match')].map(el => ({
+        appId: el.getAttribute('data-ds-appid') || '',
+        name: (el.querySelector('.match_name')?.textContent || '').trim(),
+      })).filter(m => m.appId && m.name);
+      if (matches.length) return matches;
+    } catch {}
+    return searchSteamSuggest(name, attempt + 1);
+  }
+
+  async function searchSteamWikidata(name) {
+    try {
+      const sURL = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(name)}&language=en&uselang=en&format=json&type=item&limit=5&origin=*`;
+      const hits = (await fetch(sURL).then(x => x.json())).search || [];
+      if (!hits.length) return [];
+      const ids = hits.map(h => h.id).join('|');
+      const eURL = `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${ids}&props=claims&languages=en&format=json&origin=*`;
+      const eData = await fetch(eURL).then(x => x.json());
+      const ents = eData.entities || {};
+      const matches = [];
+      for (const h of hits) {
+        const e = ents[h.id];
+        if (!e || !e.claims) continue;
+        const steamClaim = e.claims.P1733;
+        if (steamClaim && Array.isArray(steamClaim)) {
+          for (const claim of steamClaim) {
+            const appId = claim?.mainsnak?.datavalue?.value;
+            if (appId) {
+              matches.push({ appId: String(appId), name: (h.label || h.id) });
+              break;
+            }
+          }
+        }
+      }
+      return matches;
+    } catch { return []; }
+  }
+
+  async function researchSteamBulkRow(i) {
+    const r = steamBulkRows[i];
+    r.matches = [];
+    r.selectedIdx = -1;
+    r.status = 'searching';
+    renderSteamBulkList();
+    r.matches = await searchSteamSuggest(r.searchName);
+    if (!r.matches.length) r.matches = await searchSteamWikidata(r.searchName);
+    if (!r.matches.length) { r.status = 'none'; }
+    else { r.status = 'found'; r.selectedIdx = 0; }
+    renderSteamBulkList();
+  }
+
+  async function runSteamBulkLookups() {
+    for (let i = 0; i < steamBulkRows.length; i++) {
+      const r = steamBulkRows[i];
+      if (r.skip) continue;
+      r.status = 'searching';
+      renderSteamBulkList();
+      r.matches = await searchSteamSuggest(r.searchName);
+      if (!r.matches.length) r.matches = await searchSteamWikidata(r.searchName);
+      if (!r.matches.length) { r.status = 'none'; }
+      else { r.status = 'found'; r.selectedIdx = 0; }
+      renderSteamBulkList();
+    }
+  }
+
+  steamBulkOverlay.addEventListener('click', e => { if (e.target === steamBulkOverlay) closeSteamBulk(); });
+  steamBulkCancelBtn.addEventListener('click', closeSteamBulk);
+  steamBulkStartBtn.addEventListener('click', () => {
+    steamBulkStartBtn.disabled = true;
+    runSteamBulkLookups();
+  });
+
+  steamBulkSaveBtn.addEventListener('click', () => {
+    let count = 0;
+    for (const r of steamBulkRows) {
+      if (r.skip || r.status !== 'found' || r.selectedIdx < 0) continue;
+      const idStr = r.matches[r.selectedIdx].appId;
+      const id = parseInt(idStr, 10);
+      if (!id || isNaN(id)) continue;
+      const game = games.find(g => g.id === r.gameId);
+      if (game) {
+        game.steamAppId = id;
+        count++;
+      }
+    }
+    if (count) { save(); render(); toast(`Updated Steam IDs for ${count} game${count === 1 ? '' : 's'}`); }
+    closeSteamBulk();
+  });
+
   buildSwatches();
   render();
 
@@ -4549,6 +5145,7 @@
     versionOverlay.classList.add('show');
   }
   localStorage.setItem(VERSION_KEY, APP_VERSION);
+  if (DEV_BUILD) document.querySelector('.dev-banner').classList.add('show');
   versionOk.onclick = () => versionOverlay.classList.remove('show');
   versionChangelog.onclick = () => {
     versionOverlay.classList.remove('show');
@@ -4557,7 +5154,6 @@
   };
   versionOverlay.addEventListener('click', e => { if (e.target === versionOverlay) versionOverlay.classList.remove('show'); });
 
-  // register the service worker so the app is installable / works offline
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js').catch(() => {});
