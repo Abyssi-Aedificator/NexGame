@@ -641,6 +641,7 @@
     background: var(--surface);
     border: 1px solid var(--border);
     backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     color: var(--text);
   }
   .price-row { display: flex; align-items: center; gap: 10px; }
@@ -753,6 +754,7 @@
     padding: 26px;
     background: var(--modal-bg);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border);
     box-shadow: 0 20px 60px rgba(0,0,0,0.5);
   }
@@ -1570,6 +1572,7 @@
     background: var(--surface);
     border: 1px solid var(--border);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     transition: left .2s ease;
   }
@@ -1656,6 +1659,7 @@
     background: var(--surface);
     border: 1px solid var(--border);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     transition: right .2s ease;
     scrollbar-width: thin;
@@ -2165,6 +2169,27 @@
           <div class="set-label">Changelog</div>
               <div class="changelog">
                 <div class="cl-entry">
+                  <div class="cl-ver">1.4.2 <span class="cl-date">2026-07-15</span></div>
+                  <ul>
+                    <li>Fixed calendar month reset — January (month 0) was treated as falsy, causing the calendar to snap back to the current month on every render.</li>
+                    <li>Fixed calendar view persistence — switching to calendar view was lost on page reload because the view-mode restore only checked for 'grid' or 'list'.</li>
+                    <li>Added missing <code>-webkit-backdrop-filter</code> vendor prefix on four elements (price badge, modal, side nav, stats panel) for Safari compatibility.</li>
+                    <li>Fixed unhandled promise rejection in Dropbox auto-sync — <code>dropboxDownload</code> call was not awaited inside <code>dropboxCheckForUpdates</code>, risking a crash if the token refresh endpoint returned non-JSON.</li>
+                    <li>Fixed fragile <code>e.target</code> reference in archived-game restore handler — now uses <code>e.currentTarget</code> via the button reference.</li>
+                    <li>Added null guard to <code>positionSideNav</code> and <code>positionStatsPanel</code> to prevent crash if <code>#wrap</code> is absent.</li>
+                    <li>Eliminated redundant double <code>render()</code> call at startup — chip colour initialisation no longer triggers a separate full re-render.</li>
+                  </ul>
+                </div>
+                <div class="cl-entry">
+                  <div class="cl-ver">1.4.1 <span class="cl-date">2026-07-15</span></div>
+                  <ul>
+                    <li>Animated background — gradient blobs now drift and morph for a living backdrop.</li>
+                    <li>Staggered entry animations — cards fade and slide up as you scroll, with a cascading delay.</li>
+                    <li>Adaptive cover accents — card borders and countdown glows pick up the dominant colour from each game's cover art.</li>
+                    <li>Micro-interactions — press-scale feedback on cards and buttons, ripple effect on click, and shimmer loading state on Steam lookups.</li>
+                  </ul>
+                </div>
+                <div class="cl-entry">
                   <div class="cl-ver">1.4.0 <span class="cl-date">2026-07-08</span></div>
                   <ul>
                     <li>Bulk Steam ID update — Settings page now has a "Bulk update Steam IDs" button that searches Steam for all games missing an App ID. Review matches, skip games, and save in one go.</li>
@@ -2445,7 +2470,7 @@
   }
 
   const VIEW_KEY = 'nexgame.view';
-  let viewMode = localStorage.getItem(VIEW_KEY) === 'grid' ? 'grid' : 'list';
+  let viewMode = ['grid','list','calendar'].includes(localStorage.getItem(VIEW_KEY)) ? localStorage.getItem(VIEW_KEY) : 'list';
   const FILTER_KEY = 'nexgame.filter';
   const STATUS_FILTERS = ['none', 'queued', 'prequel', 'ready'];
   const STATUS_FILTER_SUMMARY = {
@@ -2682,8 +2707,8 @@
 
   function renderCalendar(visible) {
     const now = new Date();
-    if (!calMonth) calMonth = now.getMonth();
-    if (!calYear) calYear = now.getFullYear();
+    if (calMonth == null) calMonth = now.getMonth();
+    if (calYear == null) calYear = now.getFullYear();
     const year = calYear, month = calMonth;
     const first = new Date(year, month, 1);
     const last = new Date(year, month + 1, 0);
@@ -2795,7 +2820,9 @@
 
   function positionSideNav() {
     const nav = document.getElementById('sideNav');
-    const wrapRect = document.getElementById('wrap').getBoundingClientRect();
+    const wrap = document.getElementById('wrap');
+    if (!nav || !wrap) return;
+    const wrapRect = wrap.getBoundingClientRect();
     nav.classList.remove('nav-cramped');
     const navWidth = nav.offsetWidth || 110;
     const space = wrapRect.left;
@@ -2890,8 +2917,10 @@
 
   function positionStatsPanel() {
     const panel = document.getElementById('statsPanel');
-    if (!panel.innerHTML.trim()) return;
-    const wrapRect = document.getElementById('wrap').getBoundingClientRect();
+    if (!panel || !panel.innerHTML.trim()) return;
+    const wrap = document.getElementById('wrap');
+    if (!wrap) return;
+    const wrapRect = wrap.getBoundingClientRect();
     const panelWidth = panel.offsetWidth || 220;
     const space = document.documentElement.clientWidth - wrapRect.right;
     if (space < panelWidth + 34) {
@@ -3695,7 +3724,7 @@
   });
 
   // --- Settings ---
-  const APP_VERSION = '1.4.0';
+  const APP_VERSION = '1.4.1';
   const DEV_BUILD = false;
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
@@ -4057,18 +4086,18 @@
         applyChipColours();
       });
     });
-    applyChipColours();
+    applyChipColours(true);
   }
 
   function saveChipColours() {
     localStorage.setItem(CHIP_COLOUR_KEY, JSON.stringify(chipColors));
   }
 
-  function applyChipColours() {
+  function applyChipColours(skipRender) {
     const root = document.documentElement.style;
     ['queued', 'prequel', 'ready'].forEach(k => root.setProperty(`--chip-status-${k}`, chipColors[k] || DEFAULT_CHIP_COLORS[k]));
     ['under', 'high', 'terminal'].forEach(k => root.setProperty(`--chip-hype-${k}`, chipColors[k] || DEFAULT_CHIP_COLORS[k]));
-    render();
+    if (!skipRender) render();
   }
 
   function setMode(name) {
@@ -4150,7 +4179,7 @@
     }).join('');
     document.querySelectorAll('.archived-restore').forEach(btn => {
       btn.addEventListener('click', e => {
-        const g = archived.find(x => x.id === e.target.dataset.id);
+        const g = archived.find(x => x.id === btn.dataset.id);
         if (g) unarchiveGame(g);
         renderArchivedList();
       });
@@ -4688,7 +4717,7 @@
       const remoteAt = Date.parse(j.server_modified || '');
       if (!remoteAt) return;
       if (remoteAt > (dbx.lastSyncAt || 0) + 5000 && remoteAt !== dbx.dismissedRemoteAt) {
-        if (dbx.autoSync) dropboxDownload(true);
+        if (dbx.autoSync) dropboxDownload(true).catch(() => {});
         else openDbxSyncPrompt(remoteAt);
       }
     } catch (e) {}
