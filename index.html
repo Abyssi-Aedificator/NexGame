@@ -1437,7 +1437,7 @@
     display: none;
   }
   .err.show { display: block; }
-  .field input.invalid { border-color: #ff6b9d; background: color-mix(in srgb, #ff6b9d 15%, transparent); }
+  .field input.invalid { border-color: #ff6b9d; background: rgba(255,107,157,0.15); background: color-mix(in srgb, #ff6b9d 15%, transparent); }
 
   .modal-actions { display: flex; gap: 12px; margin-top: 14px; }
   .modal-actions button {
@@ -1636,11 +1636,11 @@
     transform: translateX(2px);
   }
   .side-nav button.sn-now { color: var(--accent-2); }
-  .side-nav button.sn-now:hover { background: color-mix(in srgb, var(--accent-2) 18%, transparent); }
+  .side-nav button.sn-now:hover { background: var(--surface); background: color-mix(in srgb, var(--accent-2) 18%, transparent); }
   .side-nav button.sn-soon { color: var(--accent-2); opacity: 0.85; }
-  .side-nav button.sn-soon:hover { background: color-mix(in srgb, var(--accent-2) 18%, transparent); }
+  .side-nav button.sn-soon:hover { background: var(--surface); background: color-mix(in srgb, var(--accent-2) 18%, transparent); }
   .side-nav button.sn-week { color: var(--accent-2); }
-  .side-nav button.sn-week:hover { background: color-mix(in srgb, var(--accent-2) 18%, transparent); }
+  .side-nav button.sn-week:hover { background: var(--surface); background: color-mix(in srgb, var(--accent-2) 18%, transparent); }
 
   .stats-panel {
     position: fixed;
@@ -2169,6 +2169,16 @@
           <div class="set-label">Changelog</div>
               <div class="changelog">
                 <div class="cl-entry">
+                  <div class="cl-ver">1.4.3 <span class="cl-date">2026-07-15</span></div>
+                  <ul>
+                    <li>Changelog corrected — 1.4.1 entry removed feature claims for functionality that had not been shipped.</li>
+                    <li>Dropbox <code>JSON.parse</code> wrapped in try/catch to prevent a hard crash on corrupt local storage.</li>
+                    <li>Calendar "Today" button now uses the current date at click time instead of a stale snapshot.</li>
+                    <li>Import overlay lookups are now cancelled when the overlay is closed, avoiding stale mutations after dismiss.</li>
+                    <li>Added CSS fallbacks for <code>color-mix()</code> to improve compatibility with older browsers.</li>
+                  </ul>
+                </div>
+                <div class="cl-entry">
                   <div class="cl-ver">1.4.2 <span class="cl-date">2026-07-15</span></div>
                   <ul>
                     <li>Fixed calendar month reset — January (month 0) was treated as falsy, causing the calendar to snap back to the current month on every render.</li>
@@ -2182,12 +2192,7 @@
                 </div>
                 <div class="cl-entry">
                   <div class="cl-ver">1.4.1 <span class="cl-date">2026-07-15</span></div>
-                  <ul>
-                    <li>Animated background — gradient blobs now drift and morph for a living backdrop.</li>
-                    <li>Staggered entry animations — cards fade and slide up as you scroll, with a cascading delay.</li>
-                    <li>Adaptive cover accents — card borders and countdown glows pick up the dominant colour from each game's cover art.</li>
-                    <li>Micro-interactions — press-scale feedback on cards and buttons, ripple effect on click, and shimmer loading state on Steam lookups.</li>
-                  </ul>
+                  <ul></ul>
                 </div>
                 <div class="cl-entry">
                   <div class="cl-ver">1.4.0 <span class="cl-date">2026-07-08</span></div>
@@ -2776,7 +2781,7 @@
       btn.addEventListener('click', e => {
         e.stopPropagation();
         const action = btn.dataset.cal;
-        if (action === 'today') { calMonth = now.getMonth(); calYear = now.getFullYear(); }
+        if (action === 'today') { const d = new Date(); calMonth = d.getMonth(); calYear = d.getFullYear(); }
         else if (action === 'prev') { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } }
         else if (action === 'next') { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } }
         render();
@@ -3724,7 +3729,7 @@
   });
 
   // --- Settings ---
-  const APP_VERSION = '1.4.1';
+  const APP_VERSION = '1.4.3';
   const DEV_BUILD = false;
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
@@ -4500,8 +4505,9 @@
   // --- Dropbox sync ---
   const DBX_KEY = 'nexgame.dropbox';
   const DBX_PATH = '/nexgame-backup.json';
-  let dbx = JSON.parse(localStorage.getItem(DBX_KEY) || 'null') ||
-    { appKey: '', accessToken: '', refreshToken: '', expiresAt: 0, account: '', lastSync: '', lastSyncAt: 0, dismissedRemoteAt: 0, autoSync: false, autoUpload: false, mock: false };
+  let dbx;
+  try { dbx = JSON.parse(localStorage.getItem(DBX_KEY) || 'null'); } catch {}
+  if (!dbx) dbx = { appKey: '', accessToken: '', refreshToken: '', expiresAt: 0, account: '', lastSync: '', lastSyncAt: 0, dismissedRemoteAt: 0, autoSync: false, autoUpload: false, mock: false };
   const dbxSave = () => localStorage.setItem(DBX_KEY, JSON.stringify(dbx));
   const dbxRedirectUri = () => location.origin + location.pathname;
   const dbxSnapshot = () => JSON.stringify({ games, archived });
@@ -4788,6 +4794,7 @@
   const importCancelBtn = document.getElementById('importCancelBtn');
   const importAddBtn = document.getElementById('importAddBtn');
   let importRows = [];
+  let _importAborted = false;
 
   importBtn.addEventListener('click', () => importFileInput.click());
   importFileInput.addEventListener('change', () => {
@@ -4815,6 +4822,7 @@
     runImportLookups();
   }
   function closeImport() {
+    _importAborted = true;
     importOverlay.classList.remove('show');
     importRows = [];
   }
@@ -4890,6 +4898,7 @@
   });
 
   async function researchRow(i) {
+    if (_importAborted) return;
     const r = importRows[i];
     r.showCandidates = true;
     r.candidates = r.candidates || [];
@@ -4898,11 +4907,13 @@
       const sURL = `${WD}?action=wbsearchentities&search=${encodeURIComponent(r.name)}` +
         `&language=en&uselang=en&format=json&type=item&limit=10&origin=*`;
       const hits = (await fetch(sURL).then(x => x.json())).search || [];
+      if (_importAborted) return;
       let candidates = [];
       if (hits.length) {
         const ids = hits.map(h => h.id).join('|');
         const eURL = `${WD}?action=wbgetentities&ids=${ids}&props=claims|descriptions|labels&languages=en&format=json&origin=*`;
         const eData = await fetch(eURL).then(x => x.json());
+        if (_importAborted) return;
         const ents = eData.entities || {};
         candidates = hits.map(h => {
           const e = ents[h.id];
@@ -4919,11 +4930,14 @@
     } catch {
       r.candidates = [];
     }
+    if (_importAborted) return;
     renderImportList();
   }
 
   async function runImportLookups() {
+    _importAborted = false;
     for (const r of importRows) {
+      if (_importAborted) return;
       if (r.dup) continue;
       r.status = 'searching';
       renderImportList();
@@ -4931,11 +4945,13 @@
         const sURL = `${WD}?action=wbsearchentities&search=${encodeURIComponent(r.name)}` +
           `&language=en&uselang=en&format=json&type=item&limit=10&origin=*`;
         const hits = (await fetch(sURL).then(x => x.json())).search || [];
+        if (_importAborted) return;
         let best = null;
         if (hits.length) {
           const ids = hits.map(h => h.id).join('|');
           const eURL = `${WD}?action=wbgetentities&ids=${ids}&props=claims&languages=en&format=json&origin=*`;
           const ents = (await fetch(eURL).then(x => x.json())).entities || {};
+          if (_importAborted) return;
           for (const h of hits) {
             const e = ents[h.id];
             const date = e ? earliestRelease(e) : null;
@@ -4947,6 +4963,7 @@
       } catch {
         r.status = 'none'; r.tba = true; r.include = true;
       }
+      if (_importAborted) return;
       renderImportList();
     }
   }
