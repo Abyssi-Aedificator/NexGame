@@ -668,6 +668,18 @@
   }
   .card-note-badge:hover { opacity: 1; background: var(--surface-hover); }
   .card-note-badge svg { width: 11px; height: 11px; }
+  .card-reminder-badge {
+    display: inline-flex; align-items: center;
+    padding: 1px 5px; border-radius: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity .15s, background .15s;
+    color: var(--accent-2);
+  }
+  .card-reminder-badge:hover { opacity: 1; background: var(--surface-hover); }
+  .card-reminder-badge svg { width: 11px; height: 11px; }
   .card-note {
     font-size: 0.78rem; opacity: 0.75;
     margin-top: 6px; padding: 6px 8px;
@@ -713,7 +725,7 @@
 
   .actions { flex-shrink: 0; display: flex; gap: 2px; opacity: 0; transition: opacity .15s; }
   .card:hover .actions { opacity: 1; }
-  .del, .edit, .archive {
+  .del, .edit, .archive, .remind {
     background: rgba(0,0,0,0.4); border: none;
     color: #fff;
     cursor: pointer;
@@ -724,7 +736,8 @@
   .del:hover { color: #ffb3c8; background: rgba(0,0,0,0.65); }
   .edit:hover { color: #b9e6ff; background: rgba(0,0,0,0.65); }
   .archive:hover { color: #c8b9ff; background: rgba(0,0,0,0.65); }
-  .del svg, .edit svg, .archive svg { width: 18px; height: 18px; }
+  .remind:hover { color: #ffe066; background: rgba(0,0,0,0.65); }
+  .del svg, .edit svg, .archive svg, .remind svg { width: 18px; height: 18px; }
 
   .empty {
     text-align: center;
@@ -2040,6 +2053,15 @@
           <textarea id="gNotes" placeholder="e.g. waiting for reviews, buy on sale…" maxlength="500"></textarea>
         </div>
       </div>
+      <div class="field">
+        <label for="gReminder">Release reminder</label>
+        <select id="gReminder">
+          <option value="">No reminder</option>
+          <option value="1">1 day before</option>
+          <option value="3">3 days before</option>
+          <option value="7">1 week before</option>
+        </select>
+      </div>
       <div class="err" id="formErr"></div>
       <div class="modal-actions">
         <button class="btn-cancel" id="cancelBtn">Cancel</button>
@@ -2179,6 +2201,7 @@
                   <div class="cl-ver">1.5.0 <span class="cl-date">2026-07-15</span></div>
                   <ul>
                     <li>Bulk field editor — select multiple games and set their Type, Status, or Hype in one action from Settings.</li>
+                    <li>Release reminders — set a bell on any game to get a browser notification 1 day, 3 days, or 1 week before release.</li>
                   </ul>
                 </div>
                 <div class="cl-entry">
@@ -2418,6 +2441,7 @@
   const gPrice = document.getElementById('gPrice');
   const gPriceEst = document.getElementById('gPriceEst');
   const gNotes = document.getElementById('gNotes');
+  const gReminder = document.getElementById('gReminder');
 
   function getType() {
     const sel = typeRadios.find(r => r.checked);
@@ -2632,6 +2656,8 @@
   const ARCHIVE_SVG = `<svg viewBox="0 0 24 24"><path d="M3 8h18M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4"/></svg>`;
   const OWNED_SVG = `<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>`;
   const NOTE_SVG = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8"/></svg>`;
+  const BELL_SVG = `<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`;
+  const BELL_FILLED_SVG = `<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" fill="currentColor" stroke="none"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`;
 
   // background inline-style shared by both layouts
   function bgStyle(g) {
@@ -3044,15 +3070,17 @@
       const style = bgStyle(g);
     const noteIcon = g.notes ? `<span class="card-note-badge" title="Has notes">${NOTE_SVG}</span>` : '';
     const noteContent = g.notes ? `<div class="card-note" id="note-${g.id}">${esc(g.notes)}</div>` : '';
+    const remindIcon = g.reminder && !g.tba ? `<span class="card-reminder-badge" title="Reminder: ${g.reminder}d before" data-id="${g.id}">${BELL_FILLED_SVG}</span>` : '';
     return `
       <div class="card${style ? ' has-bg' : ''}"${mergedStyle(g)}>
         <div class="countdown out"><div class="num">Coming</div><div class="lbl">soon</div></div>
         <div class="info">
           <div class="title-row"><h2>${esc(g.name)}</h2>${priceBadgeHTML(g)}</div>
-          <div class="meta"><span>Release date TBA</span>${tags}${noteIcon}</div>
+          <div class="meta"><span>Release date TBA</span>${tags}${remindIcon}${noteIcon}</div>
           ${noteContent}
         </div>
         <div class="actions">
+          <button class="remind" data-id="${g.id}" title="Set release reminder">${BELL_SVG}</button>
           <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
           <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
           <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
@@ -3071,16 +3099,18 @@
     const style = bgStyle(g);
     const noteIcon = g.notes ? `<span class="card-note-badge" title="Has notes">${NOTE_SVG}</span>` : '';
     const noteContent = g.notes ? `<div class="card-note" id="note-${g.id}">${esc(g.notes)}</div>` : '';
+    const remindIcon = g.reminder ? `<span class="card-reminder-badge" title="Reminder: ${g.reminder}d before" data-id="${g.id}">${BELL_FILLED_SVG}</span>` : '';
     return `
       <div class="card${d < 0 ? ' released' : ''}${style ? ' has-bg' : ''}"${mergedStyle(g)}>
         ${cd}
         <div class="info">
           <div class="title-row"><h2>${esc(g.name)}</h2>${d < 0 ? '' : priceBadgeHTML(g)}</div>
-          <div class="meta"><span>${fmtDate(g.date)}</span>${tags}</div>
+          <div class="meta"><span>${fmtDate(g.date)}</span>${tags}${remindIcon}</div>
           ${noteIcon}
           ${noteContent}
         </div>
         <div class="actions">
+          <button class="remind" data-id="${g.id}" title="Set release reminder">${BELL_SVG}</button>
           <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
           <button class="archive" data-id="${g.id}" title="${d < 0 ? 'Mark as owned' : 'Archive'}">${d < 0 ? OWNED_SVG : ARCHIVE_SVG}</button>
           <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
@@ -3098,6 +3128,7 @@
           <div class="tile-actions">
             <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
             <button class="archive" data-id="${g.id}" title="Archive">${ARCHIVE_SVG}</button>
+            <button class="remind" data-id="${g.id}" title="Set release reminder">${BELL_SVG}</button>
             ${noteIcon}
             <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
           </div>
@@ -3119,6 +3150,7 @@
         <div class="tile-actions">
           <button class="edit" data-id="${g.id}" title="Edit">${EDIT_SVG}</button>
           <button class="archive" data-id="${g.id}" title="${d < 0 ? 'Mark as owned' : 'Archive'}">${d < 0 ? OWNED_SVG : ARCHIVE_SVG}</button>
+          <button class="remind" data-id="${g.id}" title="Set release reminder">${BELL_SVG}</button>
           ${noteIcon}
           <button class="del" data-id="${g.id}" title="Remove">${DEL_SVG}</button>
         </div>
@@ -3167,6 +3199,7 @@
 
   gTba.addEventListener('change', () => {
     gDate.disabled = gTba.checked;
+    gReminder.disabled = gTba.checked;
     if (gTba.checked) gDate.classList.remove('invalid');
   });
 
@@ -3185,6 +3218,7 @@
     gDate.value = game && !game.tba && typeof game.date === 'string' ? game.date : '';
     gTba.checked = !!(game && game.tba);
     gDate.disabled = gTba.checked;
+    gReminder.disabled = gTba.checked;
     setStatus(game ? game.status : null);
     setType(game ? game.type : null);
     gHype.value = game && game.hype ? game.hype : '';
@@ -3211,6 +3245,7 @@
     gImageUrl.value = game && game.image ? game.image : '';
     setImage(game ? game.image : null);
     gNotes.value = game && game.notes ? game.notes : '';
+    gReminder.value = game && game.reminder ? game.reminder : '';
 
     if (game && game.color) {
       if (PRESET_COLORS.includes(game.color)) {
@@ -3391,7 +3426,8 @@
       steamAppId: _steamAppId,
       color: pickedImage ? null : pickedColor,
       image: pickedImage || null,
-      notes: gNotes.value.trim() || null
+      notes: gNotes.value.trim() || null,
+      reminder: gReminder.value ? +gReminder.value : null
     };
     if (editingId) {
       const g = games.find(x => x.id === editingId);
@@ -3538,6 +3574,21 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); }
     if (tileNoteBtn) {
       const g = games.find(x => x.id === tileNoteBtn.dataset.id);
       if (g && g.notes) toast(g.notes);
+      return;
+    }
+    const remindBtn = e.target.closest('.remind');
+    if (remindBtn) {
+      e.stopPropagation();
+      const g = games.find(x => x.id === remindBtn.dataset.id);
+      if (!g || g.tba) { toast('Set a release date first'); return; }
+      if (!g.reminder) g.reminder = 7;
+      else if (g.reminder === 7) g.reminder = 3;
+      else if (g.reminder === 3) g.reminder = 1;
+      else g.reminder = null;
+      if (g.reminder && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+      save(); render();
       return;
     }
     const editBtn = e.target.closest('.edit');
@@ -3789,7 +3840,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); }
 
   // --- Settings ---
   const APP_VERSION = '1.5.0';
-  const DEV_BUILD = true;
+  const DEV_BUILD = false;
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
@@ -4513,7 +4564,8 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); }
       steamAppId: typeof g.steamAppId === 'number' ? g.steamAppId : null,
       color: g.color || null,
       image: g.image || null,
-      notes: typeof g.notes === 'string' ? g.notes || null : null
+      notes: typeof g.notes === 'string' ? g.notes || null : null,
+      reminder: typeof g.reminder === 'number' && [1,3,7].includes(g.reminder) ? g.reminder : null
     });
     const valid = g => g && typeof g.name === 'string' && (typeof g.date === 'string' || g.tba);
     const clean = arr.filter(valid).map(cleanGame);
@@ -5311,6 +5363,35 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); }
 
   buildSwatches();
   render();
+
+  // ---- release reminders ----
+  function checkReminders() {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+    const now = Date.now();
+    let reminded;
+    try { reminded = JSON.parse(localStorage.getItem('nexgame.reminded') || '{}'); } catch { reminded = {}; }
+    let changed = false;
+    for (const g of games) {
+      if (!g.reminder || !g.date || g.tba) continue;
+      const releaseMs = new Date(g.date + 'T12:00:00').getTime();
+      const remindMs = releaseMs - g.reminder * 86400000;
+      if (remindMs <= now && releaseMs > now) {
+        const lastFired = reminded[g.id] || 0;
+        if (now - lastFired > 86400000) {
+          new Notification(`${g.name} releases in ${g.reminder} day${g.reminder === 1 ? '' : 's'}!`, {
+            body: `Release date: ${fmtDate(g.date)}`,
+            icon: g.image || 'icon-192.png',
+            tag: `reminder-${g.id}`
+          });
+          reminded[g.id] = now;
+          changed = true;
+        }
+      }
+    }
+    if (changed) localStorage.setItem('nexgame.reminded', JSON.stringify(reminded));
+  }
+  checkReminders();
+  setInterval(checkReminders, 30 * 60 * 1000);
 
   // ---- version change notification ----
   const VERSION_KEY = 'nexgame.version';
