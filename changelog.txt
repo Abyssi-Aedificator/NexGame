@@ -4,6 +4,7 @@
 - Fixed data loss when localStorage is full — save() and saveArchived() now silently fail instead of crashing.
 - Fixed Dropbox sync crash when offline — refresh token errors no longer produce unhandled rejections.
 - Fixed Dropbox upload/download proceeding with expired tokens when no refresh token is available.
+- Fixed reminder notifications — Notification errors no longer abort the reminder loop for remaining games.
 - Escape key now closes the Steam Bulk overlay.
 - Import Wishlist now creates games with all fields initialised, matching the data model.
 

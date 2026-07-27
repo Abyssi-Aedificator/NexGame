@@ -5254,11 +5254,13 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
       if (remindMs <= now && releaseMs > now) {
         const lastFired = reminded[g.id] || 0;
         if (now - lastFired > 86400000) {
-          new Notification(`${g.name} releases in ${g.reminder} day${g.reminder === 1 ? '' : 's'}!`, {
-            body: `Release date: ${fmtDate(g.date)}`,
-            icon: g.image || 'icon-192.png',
-            tag: `reminder-${g.id}`
-          });
+          try {
+            new Notification(`${g.name} releases in ${g.reminder} day${g.reminder === 1 ? '' : 's'}!`, {
+              body: `Release date: ${fmtDate(g.date)}`,
+              icon: g.image || 'icon-192.png',
+              tag: `reminder-${g.id}`
+            });
+          } catch {}
           reminded[g.id] = now;
           changed = true;
         }
