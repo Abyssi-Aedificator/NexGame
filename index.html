@@ -4567,7 +4567,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
   async function dropboxRefreshIfNeeded() {
     try {
       if (dbx.accessToken && Date.now() < dbx.expiresAt - 30000) return true;
-      if (!dbx.refreshToken || !dbx.appKey) return !!dbx.accessToken;
+      if (!dbx.refreshToken || !dbx.appKey) return false;
       const res = await fetch('https://api.dropboxapi.com/oauth2/token', {
         method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: dbx.refreshToken, client_id: dbx.appKey })
