@@ -1,3 +1,7 @@
+1.6.0
+- Changelog moved to changelog.txt — the Settings > About tab has been removed.
+- Simplified version update notification — no longer links to changelog.
+
 1.5.0
 - Bulk field editor — select multiple games and set their Type, Status, or Hype in one action from Settings.
 - Release reminders — set a bell on any game to get a browser notification 1 day, 3 days, or 1 week before release.
