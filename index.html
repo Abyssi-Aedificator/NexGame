@@ -2378,7 +2378,7 @@
   let games = load();
 
   function save() {
-    localStorage.setItem(STORE_KEY, JSON.stringify(games));
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(games)); } catch {}
     if (typeof scheduleAutoUpload === 'function') scheduleAutoUpload();
   }
 
@@ -3420,7 +3420,7 @@
   overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeModal(); closeSettings(); closeConfirm(); closeAnalytics(); 
-closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); }
+closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); closeSteamBulk(); }
     if (e.key === 'Enter' && overlay.classList.contains('show')) addGame();
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
     const modalOpen = document.querySelector('.overlay.show');
@@ -3521,7 +3521,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); }
     }
   }
   function saveArchived() {
-    localStorage.setItem(ARCHIVED_KEY, JSON.stringify(archived));
+    try { localStorage.setItem(ARCHIVED_KEY, JSON.stringify(archived)); } catch {}
     if (typeof scheduleAutoUpload === 'function') scheduleAutoUpload();
   }
   function closeConfirm() {
@@ -4486,7 +4486,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); }
   let dbx;
   try { dbx = JSON.parse(localStorage.getItem(DBX_KEY) || 'null'); } catch {}
   if (!dbx) dbx = { appKey: '', accessToken: '', refreshToken: '', expiresAt: 0, account: '', lastSync: '', lastSyncAt: 0, dismissedRemoteAt: 0, autoSync: false, autoUpload: false, mock: false };
-  const dbxSave = () => localStorage.setItem(DBX_KEY, JSON.stringify(dbx));
+  const dbxSave = () => { try { localStorage.setItem(DBX_KEY, JSON.stringify(dbx)); } catch {} };
   const dbxRedirectUri = () => location.origin + location.pathname;
   const dbxSnapshot = () => JSON.stringify({ games, archived });
   const dbxSyncBtn = document.getElementById('dbxSyncBtn');
@@ -4565,16 +4565,18 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); }
   }
 
   async function dropboxRefreshIfNeeded() {
-    if (dbx.accessToken && Date.now() < dbx.expiresAt - 30000) return true;
-    if (!dbx.refreshToken || !dbx.appKey) return !!dbx.accessToken;
-    const res = await fetch('https://api.dropboxapi.com/oauth2/token', {
-      method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: dbx.refreshToken, client_id: dbx.appKey })
-    });
-    const j = await res.json();
-    if (!res.ok) return false;
-    dbx.accessToken = j.access_token; dbx.expiresAt = Date.now() + (j.expires_in || 14400) * 1000; dbxSave();
-    return true;
+    try {
+      if (dbx.accessToken && Date.now() < dbx.expiresAt - 30000) return true;
+      if (!dbx.refreshToken || !dbx.appKey) return !!dbx.accessToken;
+      const res = await fetch('https://api.dropboxapi.com/oauth2/token', {
+        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: dbx.refreshToken, client_id: dbx.appKey })
+      });
+      const j = await res.json();
+      if (!res.ok) return false;
+      dbx.accessToken = j.access_token; dbx.expiresAt = Date.now() + (j.expires_in || 14400) * 1000; dbxSave();
+      return true;
+    } catch { return false; }
   }
 
   async function dropboxFetchAccount() {
@@ -4958,8 +4960,15 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); }
         date: r.tba ? null : r.date,
         tba: !!r.tba,
         status: null,
+        type: null,
+        hype: null,
+        price: null,
+        priceEstimated: false,
+        steamAppId: null,
         color: null,
-        image: r.image || null
+        image: r.image || null,
+        notes: null,
+        reminder: null
       });
     });
     if (toAdd.length) { save(); render(); }
