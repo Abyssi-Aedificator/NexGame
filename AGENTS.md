@@ -17,7 +17,7 @@ Single-file PWA. Everything lives in `index.html` (~5280 lines of embedded HTML,
 - `main` — production / stable
 - `dev` — active development (current default)
 
-Commits are short imperative descriptions or `Version X.Y.Z` for releases.
+Commits are short imperative descriptions or `Version X.Y.Z` for releases. Each bug fix or feature change should be committed individually (one commit per fix).
 
 ## Key conventions inside `index.html`
 

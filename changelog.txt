@@ -1,3 +1,13 @@
+1.6.0
+- Changelog moved to changelog.txt — the Settings > About tab has been removed.
+- Simplified version update notification — no longer links to changelog.
+- Fixed data loss when localStorage is full — save() and saveArchived() now silently fail instead of crashing.
+- Fixed Dropbox sync crash when offline — refresh token errors no longer produce unhandled rejections.
+- Fixed Dropbox upload/download proceeding with expired tokens when no refresh token is available.
+- Fixed reminder notifications — Notification errors no longer abort the reminder loop for remaining games.
+- Escape key now closes the Steam Bulk overlay.
+- Import Wishlist now creates games with all fields initialised, matching the data model.
+
 1.5.0
 - Bulk field editor — select multiple games and set their Type, Status, or Hype in one action from Settings.
 - Release reminders — set a bell on any game to get a browser notification 1 day, 3 days, or 1 week before release.
