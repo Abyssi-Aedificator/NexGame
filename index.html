@@ -1290,6 +1290,12 @@
   .sb-rere { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .sb-rere:hover { background: var(--surface-hover); }
   .sb-rere svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+  .bulk-controls { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .bulk-controls label { flex: 1; min-width: 120px; font-size: 0.82rem; font-weight: 600; opacity: 0.85; display: flex; flex-direction: column; gap: 4px; }
+  .bulk-controls select { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 6px 8px; font-size: 0.82rem; color-scheme: var(--color-scheme, dark); }
+  .bulk-actions { display: flex; gap: 8px; margin-bottom: 10px; }
+  .bulk-sel-all { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.78rem; padding: 4px 10px; cursor: pointer; opacity: 0.7; }
+  .bulk-sel-all:hover { opacity: 1; background: var(--surface); }
   .field label {
     display: block;
     font-size: 0.78rem;
@@ -2109,6 +2115,7 @@
           <div class="set-row">
             <button class="btn-cancel" id="resetHypeBtn">Reset all Hype</button>
             <button class="btn-cancel" id="resetStatusBtn">Reset all Status</button>
+            <button class="btn-save" id="bulkEditBtn">Bulk edit fields</button>
           </div>
           <div class="set-note" id="resetHypeNote"></div>
           <div class="set-note" id="resetStatusNote"></div>
@@ -2168,6 +2175,12 @@
         <div class="set-section">
           <div class="set-label">Changelog</div>
               <div class="changelog">
+                <div class="cl-entry">
+                  <div class="cl-ver">1.5.0 <span class="cl-date">2026-07-15</span></div>
+                  <ul>
+                    <li>Bulk field editor — select multiple games and set their Type, Status, or Hype in one action from Settings.</li>
+                  </ul>
+                </div>
                 <div class="cl-entry">
                   <div class="cl-ver">1.4.3 <span class="cl-date">2026-07-15</span></div>
                   <ul>
@@ -2294,6 +2307,51 @@
         <button class="btn-cancel" id="steamBulkCancelBtn">Cancel</button>
         <button class="btn-save" id="steamBulkStartBtn">Start search</button>
         <button class="btn-save" id="steamBulkSaveBtn">Save selected</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="bulkEditOverlay">
+    <div class="modal import-modal">
+      <h3>Bulk edit fields</h3>
+      <p class="set-desc">Select games, then choose which fields to update.</p>
+      <div class="bulk-controls">
+        <label>Type
+          <select id="bulkType">
+            <option value="">— No change —</option>
+            <option value="none">Clear type</option>
+            <option value="dlc">DLC</option>
+            <option value="patch">Patch</option>
+            <option value="ear">EAR</option>
+          </select>
+        </label>
+        <label>Status
+          <select id="bulkStatus">
+            <option value="">— No change —</option>
+            <option value="none">Clear status</option>
+            <option value="queued">Queued</option>
+            <option value="prequel">Prequel</option>
+            <option value="ready">Ready</option>
+          </select>
+        </label>
+        <label>Hype
+          <select id="bulkHype">
+            <option value="">— No change —</option>
+            <option value="none">Clear hype</option>
+            <option value="under">Under the Radar</option>
+            <option value="high">Idealistic Case</option>
+            <option value="terminal">Terminal Hype</option>
+          </select>
+        </label>
+      </div>
+      <div class="bulk-actions">
+        <button type="button" class="bulk-sel-all" id="bulkSelectAll">Select all</button>
+        <button type="button" class="bulk-sel-all" id="bulkDeselectAll">Deselect all</button>
+      </div>
+      <div class="import-list" id="bulkEditList"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="bulkEditCancelBtn">Cancel</button>
+        <button class="btn-save" id="bulkEditApplyBtn">Apply to selected</button>
       </div>
     </div>
   </div>
@@ -3458,7 +3516,8 @@
   saveBtn.addEventListener('click', addGame);
   overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeModal(); closeSettings(); closeConfirm(); closeAnalytics(); closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); }
+    if (e.key === 'Escape') { closeModal(); closeSettings(); closeConfirm(); closeAnalytics(); 
+closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); }
     if (e.key === 'Enter' && overlay.classList.contains('show')) addGame();
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
     const modalOpen = document.querySelector('.overlay.show');
@@ -3729,8 +3788,8 @@
   });
 
   // --- Settings ---
-  const APP_VERSION = '1.4.3';
-  const DEV_BUILD = false;
+  const APP_VERSION = '1.5.0';
+  const DEV_BUILD = true;
   const settingsOverlay = document.getElementById('settingsOverlay');
   const restoreFile = document.getElementById('restoreFile');
   const restoreNote = document.getElementById('restoreNote');
@@ -5177,6 +5236,78 @@
     if (count) { save(); render(); toast(`Updated Steam IDs for ${count} game${count === 1 ? '' : 's'}`); }
     closeSteamBulk();
   });
+
+  // --- Bulk field editor ---
+  const bulkEditBtn = document.getElementById('bulkEditBtn');
+  const bulkEditOverlay = document.getElementById('bulkEditOverlay');
+  const bulkEditList = document.getElementById('bulkEditList');
+  const bulkEditCancelBtn = document.getElementById('bulkEditCancelBtn');
+  const bulkEditApplyBtn = document.getElementById('bulkEditApplyBtn');
+  const bulkSelectAllBtn = document.getElementById('bulkSelectAll');
+  const bulkDeselectAllBtn = document.getElementById('bulkDeselectAll');
+  const bulkTypeSel = document.getElementById('bulkType');
+  const bulkStatusSel = document.getElementById('bulkStatus');
+  const bulkHypeSel = document.getElementById('bulkHype');
+  let bulkEditRows = [];
+
+  function openBulkEdit() {
+    closeSettings();
+    bulkEditRows = games.map(g => ({ id: g.id, name: g.name, type: g.type, status: g.status, hype: g.hype, selected: false }));
+    bulkTypeSel.value = '';
+    bulkStatusSel.value = '';
+    bulkHypeSel.value = '';
+    renderBulkEditList();
+    bulkEditOverlay.classList.add('show');
+  }
+
+  function closeBulkEdit() {
+    bulkEditOverlay.classList.remove('show');
+    bulkEditRows = [];
+  }
+
+  function renderBulkEditList() {
+    bulkEditList.innerHTML = bulkEditRows.map((r, i) => {
+      const tags = [];
+      if (r.type) tags.push(`<span class="tag tag-type tag-${r.type}">${TYPE_LABEL[r.type] || r.type}</span>`);
+      if (r.status) tags.push(`<span class="tag">${STATUS_LABEL[r.status] || r.status}</span>`);
+      if (r.hype) tags.push(`<span class="tag tag-hype tag-hype-${r.hype}">${HYPE_LABEL[r.hype] || r.hype}</span>`);
+      return `<div class="imp-row">
+        <input type="checkbox" class="imp-check" data-i="${i}" ${r.selected ? 'checked' : ''}>
+        <span class="imp-name">${esc(r.name)}</span>
+        ${tags.length ? `<span class="imp-tags">${tags.join(' ')}</span>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  bulkEditList.addEventListener('change', e => {
+    const chk = e.target.closest('.imp-check');
+    if (chk) bulkEditRows[+chk.dataset.i].selected = chk.checked;
+  });
+
+  bulkSelectAllBtn.addEventListener('click', () => { bulkEditRows.forEach(r => r.selected = true); renderBulkEditList(); });
+  bulkDeselectAllBtn.addEventListener('click', () => { bulkEditRows.forEach(r => r.selected = false); renderBulkEditList(); });
+
+  bulkEditApplyBtn.addEventListener('click', () => {
+    const tVal = bulkTypeSel.value, sVal = bulkStatusSel.value, hVal = bulkHypeSel.value;
+    if (!tVal && !sVal && !hVal) { toast('No fields to update'); return; }
+    const selected = bulkEditRows.filter(r => r.selected);
+    if (!selected.length) { toast('No games selected'); return; }
+    let count = 0;
+    for (const r of selected) {
+      const g = games.find(x => x.id === r.id);
+      if (!g) continue;
+      if (tVal) g.type = tVal === 'none' ? null : tVal;
+      if (sVal) g.status = sVal === 'none' ? null : sVal;
+      if (hVal) g.hype = hVal === 'none' ? null : hVal;
+      count++;
+    }
+    save(); render(); closeBulkEdit();
+    toast(`Updated ${count} game${count === 1 ? '' : 's'}`);
+  });
+
+  bulkEditBtn.addEventListener('click', openBulkEdit);
+  bulkEditCancelBtn.addEventListener('click', closeBulkEdit);
+  bulkEditOverlay.addEventListener('click', e => { if (e.target === bulkEditOverlay) closeBulkEdit(); });
 
   buildSwatches();
   render();
