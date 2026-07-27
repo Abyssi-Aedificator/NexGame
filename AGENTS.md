@@ -2,11 +2,12 @@
 
 ## Repo structure
 
-Single-file PWA. Everything lives in `index.html` (~5400 lines of embedded HTML, CSS, and JS). No build step, no bundler, no transpiler — just open `index.html` in a browser.
+Single-file PWA. Everything lives in `index.html` (~5280 lines of embedded HTML, CSS, and JS). No build step, no bundler, no transpiler — just open `index.html` in a browser.
 
 | File | Purpose |
 |------|---------|
 | `index.html` | Entire app (UI, styles, logic, data model) |
+| `changelog.txt` | Plain-text changelog (all version entries) |
 | `sw.js` | Service worker — offline cache only. Bump the `CACHE` string (e.g. `nexgame-v31`) whenever `index.html` changes. |
 | `manifest.webmanifest` | PWA install manifest |
 | `icon-192.png`, `icon-512.png` | App icons |
@@ -20,7 +21,7 @@ Commits are short imperative descriptions or `Version X.Y.Z` for releases.
 
 ## Key conventions inside `index.html`
 
-- **Version:** `APP_VERSION` constant (line ~3841). Also referenced in the changelog HTML and `sw.js` cache key.
+- **Version:** `APP_VERSION` constant (line ~3841). Also referenced in `sw.js` cache key.
 - **Dev banner:** `DEV_BUILD` boolean — shows/hides a red "Dev Build" banner. Set to `false` before shipping.
 - **Data model:** `games` array — each game has fields: `id, name, date, tba, status, type, hype, price, priceEstimated, steamAppId, color, image, notes, reminder`.
 - **Archived games:** separate `archived` array, same shape.
