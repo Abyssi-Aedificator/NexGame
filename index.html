@@ -959,8 +959,6 @@
   .set-panel { display: none; }
   .set-panel.active { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; padding-right: 4px; }
   .set-panel .set-section:last-child { margin-bottom: 0; }
-  #panel-about .set-section { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-  #panel-about .changelog { max-height: none; flex: 1; min-height: 0; overflow-y: auto; }
   .set-version {
     font-size: 0.8rem;
     opacity: 0.6;
@@ -1025,31 +1023,6 @@
   }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-  .changelog {
-    max-height: 230px;
-    overflow-y: auto;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-  }
-  .changelog::-webkit-scrollbar { width: 6px; }
-  .changelog::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  .changelog::-webkit-scrollbar-track { background: transparent; }
-  .cl-entry + .cl-entry { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
-  .cl-ver { font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-  .cl-current {
-    font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.5px;
-    padding: 2px 8px; border-radius: 20px;
-    background: var(--accent); color: var(--on-accent); font-weight: 700;
-  }
-  .cl-date {
-    font-size: 0.66rem; letter-spacing: 0.3px;
-    padding: 2px 8px; border-radius: 20px;
-    background: var(--surface); color: var(--text-muted); font-weight: 600;
-  }
-  .changelog ul { margin: 0; padding-left: 18px; }
-  .changelog li { font-size: 0.84rem; opacity: 0.88; margin-bottom: 5px; line-height: 1.4; }
   .field { margin-bottom: 16px; position: relative; }
   .name-row { display: flex; gap: 8px; }
   .name-row input { flex: 1; }
@@ -2092,10 +2065,6 @@
           <svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 12h18"/><path d="M7 22l-4-4 4-4"/><path d="M3 12v-2a6 6 0 0 1 10.7-3.8"/><path d="M21 12v2a6 6 0 0 1-10.7 3.8"/></svg>
           Sync
         </button>
-        <button class="set-tab" data-panel="about" role="tab">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          About
-        </button>
       </div>
 
       <div class="set-panels">
@@ -2193,107 +2162,6 @@
         </div>
       </div>
 
-      <div class="set-panel" id="panel-about" role="tabpanel">
-        <div class="set-section">
-          <div class="set-label">Changelog</div>
-              <div class="changelog">
-                <div class="cl-entry">
-                  <div class="cl-ver">1.5.0 <span class="cl-date">2026-07-15</span></div>
-                  <ul>
-                    <li>Bulk field editor — select multiple games and set their Type, Status, or Hype in one action from Settings.</li>
-                    <li>Release reminders — set a bell on any game to get a browser notification 1 day, 3 days, or 1 week before release.</li>
-                  </ul>
-                </div>
-                <div class="cl-entry">
-                  <div class="cl-ver">1.4.3 <span class="cl-date">2026-07-15</span></div>
-                  <ul>
-                    <li>Changelog corrected — 1.4.1 entry removed feature claims for functionality that had not been shipped.</li>
-                    <li>Dropbox <code>JSON.parse</code> wrapped in try/catch to prevent a hard crash on corrupt local storage.</li>
-                    <li>Calendar "Today" button now uses the current date at click time instead of a stale snapshot.</li>
-                    <li>Import overlay lookups are now cancelled when the overlay is closed, avoiding stale mutations after dismiss.</li>
-                    <li>Added CSS fallbacks for <code>color-mix()</code> to improve compatibility with older browsers.</li>
-                  </ul>
-                </div>
-                <div class="cl-entry">
-                  <div class="cl-ver">1.4.2 <span class="cl-date">2026-07-15</span></div>
-                  <ul>
-                    <li>Fixed calendar month reset — January (month 0) was treated as falsy, causing the calendar to snap back to the current month on every render.</li>
-                    <li>Fixed calendar view persistence — switching to calendar view was lost on page reload because the view-mode restore only checked for 'grid' or 'list'.</li>
-                    <li>Added missing <code>-webkit-backdrop-filter</code> vendor prefix on four elements (price badge, modal, side nav, stats panel) for Safari compatibility.</li>
-                    <li>Fixed unhandled promise rejection in Dropbox auto-sync — <code>dropboxDownload</code> call was not awaited inside <code>dropboxCheckForUpdates</code>, risking a crash if the token refresh endpoint returned non-JSON.</li>
-                    <li>Fixed fragile <code>e.target</code> reference in archived-game restore handler — now uses <code>e.currentTarget</code> via the button reference.</li>
-                    <li>Added null guard to <code>positionSideNav</code> and <code>positionStatsPanel</code> to prevent crash if <code>#wrap</code> is absent.</li>
-                    <li>Eliminated redundant double <code>render()</code> call at startup — chip colour initialisation no longer triggers a separate full re-render.</li>
-                  </ul>
-                </div>
-                <div class="cl-entry">
-                  <div class="cl-ver">1.4.1 <span class="cl-date">2026-07-15</span></div>
-                  <ul></ul>
-                </div>
-                <div class="cl-entry">
-                  <div class="cl-ver">1.4.0 <span class="cl-date">2026-07-08</span></div>
-                  <ul>
-                    <li>Bulk Steam ID update — Settings page now has a "Bulk update Steam IDs" button that searches Steam for all games missing an App ID. Review matches, skip games, and save in one go.</li>
-                    <li>Steam Price Lookup — click the clock icon next to the Price field to search for your game on Steam. Your game gets linked to its Steam App ID so you can refresh the price anytime, or tap the ID to open the store page. Remove the link with the ✕ button.</li>
-                    <li>Consolidated header — secondary actions (Analytics, Archived, Settings) are now grouped under a ⋮ menu so the toolbar stays clean as more features get added.</li>
-                    <li>Fixed version notification not appearing — app version constant now matches the changelog.</li>
-                  </ul>
-                </div>
-                <div class="cl-entry">
-                  <div class="cl-ver">1.3.0 <span class="cl-date">2026-07-07</span></div>
-                  <ul>
-                    <li>Calendar view — browse releases on a month grid with prev/next navigation.</li>
-                    <li>Game notes — add private notes to any game; expand to read on cards.</li>
-                    <li>Auto-switch mode — "System" option follows your OS light/dark preference.</li>
-                    <li>Custom card colours — pick a colour accent for each status and hype level.</li>
-                    <li>Keyboard navigation — Arrow keys to move focus, Enter to edit, Delete to remove.</li>
-                    <li>Redesigned settings page — modern pill controls, underline tabs, refined layout.</li>
-                    <li>Status colour on left, hype colour on right — both visible at the same time.</li>
-                    <li>Unique default chip colours — each status and hype level has a distinct colour.</li>
-                  </ul>
-                </div>
-                <div class="cl-entry">
-                  <div class="cl-ver">1.2.1</div>
-                  <ul>
-                    <li>Removed the "Link" status option.</li>
-                  </ul>
-                </div>
-                <div class="cl-entry">
-                  <div class="cl-ver">1.2.0</div>
-                  <ul>
-                    <li>Released games now show a "Mark as owned" action instead of "Archive" — one click moves them straight to the archived section.</li>
-                    <li>Upcoming games releasing this week or next now show in their own "This Week" / "Next Week" groups at the top of the list.</li>
-                  </ul>
-                </div>
-                <div class="cl-entry">
-                  <div class="cl-ver">1.1.1</div>
-                  <ul>
-                    <li>Added a Dropbox sync button next to Archived that spins while a sync is in progress.</li>
-                    <li>Reworked the update system — a "What's new" prompt now appears after an update instead of the old top banner.</li>
-                  </ul>
-                </div>
-                <div class="cl-entry">
-                  <div class="cl-ver">1.1.0</div>
-                  <ul>
-                    <li>New light mode with 10 accent colour themes — switch anytime in Settings.</li>
-                    <li>Action buttons now appear on hover for a cleaner look.</li>
-                    <li>Better text contrast in light mode across cards, buttons, and inputs.</li>
-                    <li>Fixed header toolbar (icons + Track a game) not aligning with the reset filters button in grid view.</li>
-                    <li>Removed the "Sort alphabetically" toggle — lists now always sort by release date.</li>
-                    <li>Removed the "Group by month" toggle — games are now always grouped by release month.</li>
-                    <li>The stats panel now reflects the active filters and search instead of always showing all tracked games.</li>
-                    <li>Added 5 new accent colour themes to both dark mode (Ember, Amber, Eclipse, Onyx, Aurora) and light mode (Poppy, Honey, Lavender, Mist, Citrus).</li>
-                  </ul>
-                </div>
-                <div class="cl-entry">
-                  <div class="cl-ver">1.0.0</div>
-                  <ul>
-                    <li>Full release — stable, polished, and ready for everyday use.</li>
-                  </ul>
-                </div>
-              </div>
-          </div>
-        </div>
       </div>
       </div>
     </div>
@@ -2404,10 +2272,9 @@
   <div class="overlay" id="versionOverlay">
     <div class="modal confirm-modal" style="text-align:center">
       <h3>✨ NexGame updated</h3>
-      <p class="set-desc" id="versionMessage" style="margin-bottom:22px">There's a new version. Check the changelog to see what's changed.</p>
+      <p class="set-desc" id="versionMessage" style="margin-bottom:22px">A new version is available.</p>
       <div class="modal-actions" style="justify-content:center">
         <button class="btn-save" id="versionOk">Got it</button>
-        <button class="btn-cancel" id="versionChangelog">What's new</button>
       </div>
     </div>
   </div>
@@ -5397,7 +5264,6 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); }
   const VERSION_KEY = 'nexgame.version';
   const versionOverlay = document.getElementById('versionOverlay');
   const versionOk = document.getElementById('versionOk');
-  const versionChangelog = document.getElementById('versionChangelog');
   const prevVersion = localStorage.getItem(VERSION_KEY);
   if (prevVersion && prevVersion !== APP_VERSION) {
     versionOverlay.classList.add('show');
@@ -5405,11 +5271,6 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); }
   localStorage.setItem(VERSION_KEY, APP_VERSION);
   if (DEV_BUILD) document.querySelector('.dev-banner').classList.add('show');
   versionOk.onclick = () => versionOverlay.classList.remove('show');
-  versionChangelog.onclick = () => {
-    versionOverlay.classList.remove('show');
-    openSettings();
-    switchSettingsTab('about');
-  };
   versionOverlay.addEventListener('click', e => { if (e.target === versionOverlay) versionOverlay.classList.remove('show'); });
 
   if ('serviceWorker' in navigator) {
