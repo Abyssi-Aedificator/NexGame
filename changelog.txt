@@ -1,3 +1,6 @@
+1.6.1
+- Version badge now visible next to the app title in the header.
+
 1.6.0
 - Changelog moved to changelog.txt — the Settings > About tab has been removed.
 - Simplified version update notification — no longer links to changelog.
