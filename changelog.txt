@@ -1,3 +1,6 @@
+1.6.2
+- Search bar now matches game notes as well as game names.
+
 1.6.1
 - Version badge now visible next to the app title in the header.
 
