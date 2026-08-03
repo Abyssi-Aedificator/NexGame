@@ -1904,7 +1904,7 @@
       </details>
       <div class="search-box">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input type="text" id="searchInput" placeholder="Search games…" autocomplete="off">
+        <input type="text" id="searchInput" placeholder="Search games or notes…" autocomplete="off">
         <button type="button" id="searchClear" title="Clear search" hidden>
           <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
@@ -2516,7 +2516,9 @@
 
   let searchQuery = '';
   function matchesSearch(g) {
-    return !searchQuery || g.name.toLowerCase().includes(searchQuery);
+    if (!searchQuery) return true;
+    if (g.name.toLowerCase().includes(searchQuery)) return true;
+    return !!(g.notes && g.notes.toLowerCase().includes(searchQuery));
   }
 
   function esc(s) {
