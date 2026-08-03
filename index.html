@@ -3430,8 +3430,8 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeModal(); closeSettings(); closeConfirm(); closeAnalytics(); 
 closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); closeSteamBulk(); }
-    if (e.key === 'Enter' && overlay.classList.contains('show')) addGame();
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+    if (e.key === 'Enter' && overlay.classList.contains('show') && !typing) addGame();
     const modalOpen = document.querySelector('.overlay.show');
     if (typing || modalOpen || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key === '/') { e.preventDefault(); searchInput.focus(); }
