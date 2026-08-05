@@ -5264,8 +5264,9 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
       const releaseMs = new Date(g.date + 'T12:00:00').getTime();
       const remindMs = releaseMs - g.reminder * 86400000;
       if (remindMs <= now && releaseMs > now) {
-        const lastFired = reminded[g.id] || 0;
-        if (now - lastFired > 86400000) {
+        const key = `${g.id}|${g.date}`;
+        const lastFired = reminded[key] || 0;
+        if (!lastFired) {
           try {
             new Notification(`${g.name} releases in ${g.reminder} day${g.reminder === 1 ? '' : 's'}!`, {
               body: `Release date: ${fmtDate(g.date)}`,
@@ -5273,7 +5274,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
               tag: `reminder-${g.id}`
             });
           } catch {}
-          reminded[g.id] = now;
+          reminded[key] = now;
           changed = true;
         }
       }
