@@ -680,12 +680,10 @@
     padding: 1px 5px; border-radius: 6px;
     background: var(--surface);
     border: 1px solid var(--border);
-    cursor: pointer;
     opacity: 0.55;
     transition: opacity .15s, background .15s;
     color: var(--accent-2);
   }
-  .card-reminder-badge:hover { opacity: 1; background: var(--surface-hover); }
   .card-reminder-badge svg { width: 11px; height: 11px; }
   .card-note {
     font-size: 0.78rem; opacity: 0.75;
@@ -1904,7 +1902,7 @@
       </details>
       <div class="search-box">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input type="text" id="searchInput" placeholder="Search games…" autocomplete="off">
+        <input type="text" id="searchInput" placeholder="Search games or notes…" autocomplete="off">
         <button type="button" id="searchClear" title="Clear search" hidden>
           <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
@@ -2299,7 +2297,7 @@
 <script>
   const STORE_KEY = 'nexgame.games.v1';
   const ARCHIVED_KEY = 'nexgame.archived.v1';
-  let archived = (() => { try { return JSON.parse(localStorage.getItem(ARCHIVED_KEY)) || []; } catch { return []; } })();
+  let archived = (() => { try { const p = JSON.parse(localStorage.getItem(ARCHIVED_KEY) || '[]'); return Array.isArray(p) ? p : []; } catch { return []; } })();
   const list = document.getElementById('list');
   const viewToggle = document.getElementById('viewToggle');
   const filterToggle = document.getElementById('filterToggle');
@@ -2516,7 +2514,9 @@
 
   let searchQuery = '';
   function matchesSearch(g) {
-    return !searchQuery || g.name.toLowerCase().includes(searchQuery);
+    if (!searchQuery) return true;
+    if (g.name.toLowerCase().includes(searchQuery)) return true;
+    return !!(g.notes && g.notes.toLowerCase().includes(searchQuery));
   }
 
   function esc(s) {
@@ -2698,7 +2698,7 @@
       cells.push(`<div class="cal-cell other-month"><div class="cal-day-num">${d}</div></div>`);
     }
     // days of the month
-    const todayStr = now.toISOString().slice(0, 10);
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     for (let d = 1; d <= daysInMonth; d++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const isToday = dateStr === todayStr;
@@ -3352,6 +3352,7 @@
   }
 
   async function lookup() {
+    if (lookupBtn.classList.contains('busy')) return;
     const q = gName.value.trim();
     if (!q) { gName.focus(); return; }
     setBusy(true);
@@ -3428,8 +3429,8 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeModal(); closeSettings(); closeConfirm(); closeAnalytics(); 
 closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); closeSteamBulk(); }
-    if (e.key === 'Enter' && overlay.classList.contains('show')) addGame();
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+    if (e.key === 'Enter' && overlay.classList.contains('show') && !typing) addGame();
     const modalOpen = document.querySelector('.overlay.show');
     if (typing || modalOpen || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key === '/') { e.preventDefault(); searchInput.focus(); }
@@ -3713,7 +3714,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
   });
 
   // --- Settings ---
-  const APP_VERSION = '1.6.1';
+  const APP_VERSION = '1.6.2';
   const verBadge = document.getElementById('verBadge');
   if (verBadge) verBadge.textContent = APP_VERSION;
   const DEV_BUILD = false;
@@ -4245,7 +4246,8 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
       monthCounts[mk] = (monthCounts[mk] || 0) + 1;
     });
     const monthKeys = Object.keys(monthCounts).sort();
-    const curMonthKey = new Date().toISOString().slice(0, 7);
+    const _nowM = new Date();
+    const curMonthKey = `${_nowM.getFullYear()}-${String(_nowM.getMonth() + 1).padStart(2, '0')}`;
     const maxMonthCount = monthKeys.length ? Math.max(...monthKeys.map(k => monthCounts[k])) : 0;
     const busiest = monthKeys.reduce((best, k) => (!best || monthCounts[k] > monthCounts[best]) ? k : best, null);
 
@@ -4270,7 +4272,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
       const [y, m, d] = g.date.split('-').map(Number);
       weekdayCounts[new Date(y, m - 1, d).getDay()]++;
     });
-    const topWeekday = WEEKDAY_ORDER.reduce((best, k) => (weekdayCounts[k] > (weekdayCounts[best] || 0) ? k : best), WEEKDAY_ORDER[0]);
+    const topWeekday = dated.length ? WEEKDAY_ORDER.reduce((best, k) => (weekdayCounts[k] > (weekdayCounts[best] || 0) ? k : best), WEEKDAY_ORDER[0]) : null;
 
     const leadBuckets = { week: 0, month: 0, quarter: 0, half: 0, far: 0 };
     upcoming.forEach(g => {
@@ -4283,7 +4285,8 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
     });
     const leadLabels = { week: 'Within a week', month: 'Within a month', quarter: '1–3 months', half: '3–6 months', far: '6+ months' };
 
-    const curQ = quarterKey(new Date().toISOString().slice(0, 10));
+    const _nowQ = new Date();
+    const curQ = quarterKey(`${_nowQ.getFullYear()}-${String(_nowQ.getMonth() + 1).padStart(2, '0')}-${String(_nowQ.getDate()).padStart(2, '0')}`);
     const qCounts = {};
     dated.forEach(g => {
       const qk = quarterKey(g.date);
@@ -4335,7 +4338,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
         <div class="an-insights">
           <div class="an-insight"><div class="num">${avgLead != null ? avgLead : '—'}</div><div class="lbl">Avg. days until release</div></div>
           <div class="an-insight"><div class="num">${busiest ? shortMonthLabel(busiest + '-01') : '—'}</div><div class="lbl">Busiest month${busiest ? ` (${monthCounts[busiest]})` : ''}</div></div>
-          <div class="an-insight"><div class="num">${esc(WEEKDAY_LABEL[topWeekday])}</div><div class="lbl">Most common release day</div></div>
+          <div class="an-insight"><div class="num">${topWeekday != null ? esc(WEEKDAY_LABEL[topWeekday]) : '—'}</div><div class="lbl">Most common release day</div></div>
           <div class="an-insight"><div class="num">${longestGap ? longestGap.days + 'd' : '—'}</div><div class="lbl">Longest gap ahead${longestGap ? ` (${fmtSlash(longestGap.from)} – ${fmtSlash(longestGap.to)})` : ''}</div></div>
         </div>
       </div>
@@ -4429,8 +4432,8 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
     const cleanGame = g => ({
       id: g.id || Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       name: g.name,
-      date: g.tba ? null : g.date,
-      tba: !!g.tba,
+      date: g.tba === true ? null : g.date,
+      tba: g.tba === true,
       status: STATUS_LABEL[g.status] ? g.status
         : (g.prequelPlayed ? 'prequel' : (g.queued ? 'queued' : null)),
       type: ['dlc', 'patch', 'ear'].includes(g.type) ? g.type : null,
@@ -4443,7 +4446,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
       notes: typeof g.notes === 'string' ? g.notes || null : null,
       reminder: typeof g.reminder === 'number' && [1,3,7].includes(g.reminder) ? g.reminder : null
     });
-    const valid = g => g && typeof g.name === 'string' && (typeof g.date === 'string' || g.tba);
+    const valid = g => g && typeof g.name === 'string' && (g.tba === true || (typeof g.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(g.date)));
     const clean = arr.filter(valid).map(cleanGame);
     if (!clean.length) throw new Error('no valid entries');
     games = clean;
@@ -4646,8 +4649,9 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
       const apply = () => {
         dbx.lastSync = new Date().toLocaleString(); dbx.lastSyncAt = Date.now(); dbxSave(); updateDropboxUI();
         toast('Synced from Dropbox (mock)');
+        return true;
       };
-      if (skipConfirm) { apply(); return; }
+      if (skipConfirm) { return apply(); }
       openConfirmAction({
         title: 'Download from Dropbox?',
         message: 'It will replace all games currently on this device.',
@@ -4673,9 +4677,10 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
           dbxApplyBackupText(text);
           dbx.lastSync = new Date().toLocaleString(); dbx.lastSyncAt = Date.now(); dbxSave(); updateDropboxUI();
           toast('Synced from Dropbox');
-        } catch { toast('⚠ Dropbox file isn\'t a NexGame backup'); }
+          return true;
+        } catch { toast('⚠ Dropbox file isn\'t a NexGame backup'); return false; }
       };
-      if (skipConfirm) { apply(); return; }
+      if (skipConfirm) { return apply(); }
       openConfirmAction({
         title: 'Download from Dropbox?',
         message: 'It will replace all games currently on this device.',
@@ -4729,7 +4734,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
     dbxSyncOverlay.classList.remove('show');
   }
   document.getElementById('dbxSyncLater').addEventListener('click', closeDbxSyncPrompt);
-  document.getElementById('dbxSyncNow').addEventListener('click', () => { dropboxDownload(true); closeDbxSyncPrompt(); });
+  document.getElementById('dbxSyncNow').addEventListener('click', async () => { if (await dropboxDownload(true)) closeDbxSyncPrompt(); });
   dbxSyncOverlay.addEventListener('click', e => { if (e.target === dbxSyncOverlay) closeDbxSyncPrompt(); });
 
   function updateDropboxUI() {
@@ -5261,8 +5266,9 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
       const releaseMs = new Date(g.date + 'T12:00:00').getTime();
       const remindMs = releaseMs - g.reminder * 86400000;
       if (remindMs <= now && releaseMs > now) {
-        const lastFired = reminded[g.id] || 0;
-        if (now - lastFired > 86400000) {
+        const key = `${g.id}|${g.date}`;
+        const lastFired = reminded[key] || 0;
+        if (!lastFired) {
           try {
             new Notification(`${g.name} releases in ${g.reminder} day${g.reminder === 1 ? '' : 's'}!`, {
               body: `Release date: ${fmtDate(g.date)}`,
@@ -5270,7 +5276,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
               tag: `reminder-${g.id}`
             });
           } catch {}
-          reminded[g.id] = now;
+          reminded[key] = now;
           changed = true;
         }
       }
