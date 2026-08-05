@@ -4271,7 +4271,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
       const [y, m, d] = g.date.split('-').map(Number);
       weekdayCounts[new Date(y, m - 1, d).getDay()]++;
     });
-    const topWeekday = WEEKDAY_ORDER.reduce((best, k) => (weekdayCounts[k] > (weekdayCounts[best] || 0) ? k : best), WEEKDAY_ORDER[0]);
+    const topWeekday = dated.length ? WEEKDAY_ORDER.reduce((best, k) => (weekdayCounts[k] > (weekdayCounts[best] || 0) ? k : best), WEEKDAY_ORDER[0]) : null;
 
     const leadBuckets = { week: 0, month: 0, quarter: 0, half: 0, far: 0 };
     upcoming.forEach(g => {
@@ -4337,7 +4337,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
         <div class="an-insights">
           <div class="an-insight"><div class="num">${avgLead != null ? avgLead : '—'}</div><div class="lbl">Avg. days until release</div></div>
           <div class="an-insight"><div class="num">${busiest ? shortMonthLabel(busiest + '-01') : '—'}</div><div class="lbl">Busiest month${busiest ? ` (${monthCounts[busiest]})` : ''}</div></div>
-          <div class="an-insight"><div class="num">${esc(WEEKDAY_LABEL[topWeekday])}</div><div class="lbl">Most common release day</div></div>
+          <div class="an-insight"><div class="num">${topWeekday != null ? esc(WEEKDAY_LABEL[topWeekday]) : '—'}</div><div class="lbl">Most common release day</div></div>
           <div class="an-insight"><div class="num">${longestGap ? longestGap.days + 'd' : '—'}</div><div class="lbl">Longest gap ahead${longestGap ? ` (${fmtSlash(longestGap.from)} – ${fmtSlash(longestGap.to)})` : ''}</div></div>
         </div>
       </div>
