@@ -2297,7 +2297,7 @@
 <script>
   const STORE_KEY = 'nexgame.games.v1';
   const ARCHIVED_KEY = 'nexgame.archived.v1';
-  let archived = (() => { try { return JSON.parse(localStorage.getItem(ARCHIVED_KEY)) || []; } catch { return []; } })();
+  let archived = (() => { try { const p = JSON.parse(localStorage.getItem(ARCHIVED_KEY) || '[]'); return Array.isArray(p) ? p : []; } catch { return []; } })();
   const list = document.getElementById('list');
   const viewToggle = document.getElementById('viewToggle');
   const filterToggle = document.getElementById('filterToggle');
