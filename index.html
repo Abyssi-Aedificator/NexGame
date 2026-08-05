@@ -4649,8 +4649,9 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
       const apply = () => {
         dbx.lastSync = new Date().toLocaleString(); dbx.lastSyncAt = Date.now(); dbxSave(); updateDropboxUI();
         toast('Synced from Dropbox (mock)');
+        return true;
       };
-      if (skipConfirm) { apply(); return; }
+      if (skipConfirm) { return apply(); }
       openConfirmAction({
         title: 'Download from Dropbox?',
         message: 'It will replace all games currently on this device.',
@@ -4676,9 +4677,10 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
           dbxApplyBackupText(text);
           dbx.lastSync = new Date().toLocaleString(); dbx.lastSyncAt = Date.now(); dbxSave(); updateDropboxUI();
           toast('Synced from Dropbox');
-        } catch { toast('⚠ Dropbox file isn\'t a NexGame backup'); }
+          return true;
+        } catch { toast('⚠ Dropbox file isn\'t a NexGame backup'); return false; }
       };
-      if (skipConfirm) { apply(); return; }
+      if (skipConfirm) { return apply(); }
       openConfirmAction({
         title: 'Download from Dropbox?',
         message: 'It will replace all games currently on this device.',
@@ -4732,7 +4734,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
     dbxSyncOverlay.classList.remove('show');
   }
   document.getElementById('dbxSyncLater').addEventListener('click', closeDbxSyncPrompt);
-  document.getElementById('dbxSyncNow').addEventListener('click', () => { dropboxDownload(true); closeDbxSyncPrompt(); });
+  document.getElementById('dbxSyncNow').addEventListener('click', async () => { if (await dropboxDownload(true)) closeDbxSyncPrompt(); });
   dbxSyncOverlay.addEventListener('click', e => { if (e.target === dbxSyncOverlay) closeDbxSyncPrompt(); });
 
   function updateDropboxUI() {
