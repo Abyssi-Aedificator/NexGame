@@ -1,5 +1,14 @@
 1.6.2
 - Search bar now matches game notes as well as game names.
+- Fixed Enter key in the add/edit modal accidentally saving and closing mid-typing.
+- Fixed the calendar "today" highlight and analytics current month/quarter using the wrong timezone.
+- Fixed analytics claiming "Monday" is the most common release day when no games have dates.
+- Archived list is now guarded against corrupt local storage.
+- Backup restore now validates dates and no longer silently strips dates or drops games.
+- Lookup results are no longer applied from stale, out-of-order requests.
+- Release reminders now fire only once per game instead of daily.
+- Dropbox "Sync now" keeps the update prompt if the download fails.
+- Reminder bell no longer looks clickable.
 
 1.6.1
 - Version badge now visible next to the app title in the header.
