@@ -3352,6 +3352,7 @@
   }
 
   async function lookup() {
+    if (lookupBtn.classList.contains('busy')) return;
     const q = gName.value.trim();
     if (!q) { gName.focus(); return; }
     setBusy(true);
