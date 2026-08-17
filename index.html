@@ -1666,6 +1666,10 @@
   @media (min-width: 1340px) {
     .stats-panel { display: flex; }
   }
+  @media (min-width: 1040px) and (max-width: 1339px) {
+    .wrap, .wrap.wide { max-width: 740px; }
+    .stats-panel { display: flex; }
+  }
   .stats-panel.stats-cramped, .stats-panel.stats-empty { display: none; }
   .stats-panel .stat-hero {
     display: flex;
@@ -2887,7 +2891,7 @@
     const panelWidth = panel.offsetWidth || 220;
     const space = document.documentElement.clientWidth - wrapRect.right;
     if (space < panelWidth + 34) {
-      panel.classList.add('stats-cramped');
+      panel.style.right = '18px';
       return;
     }
     panel.classList.remove('stats-cramped');
