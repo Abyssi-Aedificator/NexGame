@@ -1,3 +1,9 @@
+1.6.4
+- Added "Game" type option.
+- Fixed Game type not appearing in the type filter dropdown.
+- Fixed Game type badge color.
+- Game is now the first type option in the add/edit modal.
+
 1.6.3
 - Stats panel now visible on horizontal tablet screens.
 

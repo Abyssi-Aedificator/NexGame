@@ -17,7 +17,7 @@ Single-file PWA. Everything lives in `index.html` (~5280 lines of embedded HTML,
 - `main` — production / stable
 - `dev` — active development (current default)
 
-Commits are short imperative descriptions (never include version numbers). Each bug fix or feature change should be committed individually (one commit per fix). Never push to origin unless explicitly asked to.
+Commits are short imperative descriptions (never include version numbers). Each bug fix or feature change should be committed individually (one commit per fix). Version bumps and changelog updates should be included in the same commit as the feature or fix, not committed separately. Never push to origin unless explicitly asked to.
 
 ## Key conventions inside `index.html`
 
