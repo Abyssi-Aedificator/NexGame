@@ -1,3 +1,6 @@
+1.6.4
+- Added "Game" type option.
+
 1.6.3
 - Stats panel now visible on horizontal tablet screens.
 
