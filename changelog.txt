@@ -1,3 +1,6 @@
+1.6.3
+- Stats panel now visible on horizontal tablet screens.
+
 1.6.2
 - Search bar now matches game notes as well as game names.
 - Fixed Enter key in the add/edit modal accidentally saving and closing mid-typing.
