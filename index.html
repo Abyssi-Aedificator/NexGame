@@ -723,6 +723,7 @@
   .tag-type.tag-dlc { border-color: #4cc9f0; color: #4cc9f0; }
   .tag-type.tag-patch { border-color: #ffb703; color: #ffb703; }
   .tag-type.tag-ear { border-color: #06d6a0; color: #06d6a0; }
+  .tag-type.tag-game { border-color: #ff6b6b; color: #ff6b6b; }
 
   .tag-hype-under { border-color: #8d99ae; color: #8d99ae; }
   .tag-hype-high { border-color: #06d6a0; color: #06d6a0; }
@@ -1796,7 +1797,7 @@
       <details class="filter-picker" id="typeFilter">
         <summary title="Choose type categories to display">
           <span class="filter-summary-text" id="typeFilterSummary">All Types</span>
-          <span class="filter-count" id="typeFilterCount">4</span>
+          <span class="filter-count" id="typeFilterCount">5</span>
           <svg class="filter-caret" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
         </summary>
         <div class="filter-menu" role="group" aria-label="Choose type categories to display">
@@ -1804,6 +1805,11 @@
             <input type="checkbox" value="none">
             <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
             <span>No Type</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" value="game">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Game</span>
           </label>
           <label class="filter-option">
             <input type="checkbox" value="dlc">
@@ -1961,6 +1967,11 @@
         <label>Type</label>
         <div class="chk-row">
           <label class="chk">
+            <input type="radio" name="gType" id="gTypeGame" value="game">
+            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Game</span>
+          </label>
+          <label class="chk">
             <input type="radio" name="gType" id="gTypeDlc" value="dlc">
             <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
             <span>DLC</span>
@@ -1974,11 +1985,6 @@
             <input type="radio" name="gType" id="gTypeEar" value="ear">
             <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
             <span>EAR</span>
-          </label>
-          <label class="chk">
-            <input type="radio" name="gType" id="gTypeGame" value="game">
-            <span class="box"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
-            <span>Game</span>
           </label>
         </div>
       </div>
@@ -2454,7 +2460,8 @@
     none: 'No Type',
     dlc: 'DLC',
     patch: 'Patch',
-    ear: 'EAR'
+    ear: 'EAR',
+    game: 'Game'
   };
   const HYPE_FILTER_KEY = 'nexgame.hypeFilter';
   const HYPE_FILTERS = ['none', 'under', 'high', 'terminal'];
