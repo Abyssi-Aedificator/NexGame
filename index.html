@@ -169,6 +169,7 @@
   .vt-btn svg { width: 18px; height: 18px; }
   .vt-btn:hover { color: var(--text); }
   .vt-btn.active { color: var(--on-accent); background: var(--accent); }
+  .sort-btn.active { color: var(--on-accent); background: var(--accent); }
 
   .more-menu { position: relative; }
   .more-btn {
@@ -1753,6 +1754,9 @@
         </div>
       </div>
       <div class="header-controls">
+        <button class="icon-btn sort-btn" id="sortToggle" title="Sort: Release date">
+          <svg viewBox="0 0 24 24"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"/></svg>
+        </button>
         <div class="view-toggle" id="viewToggle">
           <button data-view="list" class="vt-btn" title="List view">
             <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
@@ -2446,6 +2450,8 @@
 
   const VIEW_KEY = 'nexgame.view';
   let viewMode = ['grid','list','calendar'].includes(localStorage.getItem(VIEW_KEY)) ? localStorage.getItem(VIEW_KEY) : 'list';
+  const SORT_KEY = 'nexgame.sort';
+  let sortMode = ['date','alpha'].includes(localStorage.getItem(SORT_KEY)) ? localStorage.getItem(SORT_KEY) : 'date';
   const FILTER_KEY = 'nexgame.filter';
   const STATUS_FILTERS = ['none', 'queued', 'prequel', 'ready'];
   const STATUS_FILTER_SUMMARY = {
@@ -2573,6 +2579,7 @@
       list.className = viewMode === 'grid' ? 'grid' : viewMode === 'calendar' ? 'list cal-view' : 'list';
       [...viewToggle.children].forEach(b =>
         b.classList.toggle('active', b.dataset.view === viewMode));
+      updateSortButton();
       renderFilterPicker('typeFilter', typeFilterModes, TYPE_FILTERS, 'All Types', TYPE_FILTER_SUMMARY);
       renderFilterPicker('statusFilter', statusFilterModes, STATUS_FILTERS, 'All Status', STATUS_FILTER_SUMMARY);
       renderFilterPicker('hypeFilter', hypeFilterModes, HYPE_FILTERS, 'All Hype', HYPE_FILTER_SUMMARY);
@@ -2609,6 +2616,13 @@
       }
 
       const byName = (a, b) => a.name.localeCompare(b.name);
+    const itemFn = viewMode === 'grid' ? tileHTML : cardHTML;
+
+      if (sortMode === 'alpha') {
+        const sorted = [...visible].sort(byName);
+        list.innerHTML = sorted.map(itemFn).join('');
+        renderSideNav([]);
+      } else {
       const dated = visible.filter(g => !g.tba && typeof g.date === 'string' && g.date.length === 10);
       const upcoming = dated.filter(g => daysUntil(g.date) >= 0);
       const byReleaseDateDesc = (a, b) => daysUntil(b.date) - daysUntil(a.date);
@@ -2617,7 +2631,6 @@
       const byDate = (a, b) => daysUntil(a.date) - daysUntil(b.date);
       const chronological = upcoming.sort(byDate);
 
-    const itemFn = viewMode === 'grid' ? tileHTML : cardHTML;
       const navSections = [];
       let secId = 0;
       function sepHTML(label, navLabel, kind, count, sum) {
@@ -2674,6 +2687,7 @@
       list.innerHTML = html;
       if (navSections.length) navSections.unshift({ id: 'top', label: 'Top', kind: 'top' });
       renderSideNav(navSections);
+      }
     } catch (err) {
       console.warn('Render error:', err);
       // fallback: show a safe error message
@@ -3615,6 +3629,18 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
     render();
   });
 
+  function updateSortButton() {
+    const btn = document.getElementById('sortToggle');
+    btn.classList.toggle('active', sortMode === 'alpha');
+    btn.title = sortMode === 'alpha' ? 'Sort: Alphabetical' : 'Sort: Release date';
+  }
+  document.getElementById('sortToggle').addEventListener('click', () => {
+    sortMode = sortMode === 'date' ? 'alpha' : 'date';
+    localStorage.setItem(SORT_KEY, sortMode);
+    updateSortButton();
+    render();
+  });
+
   searchInput.addEventListener('input', () => {
     searchQuery = searchInput.value.trim().toLowerCase();
     searchClear.hidden = !searchQuery;
@@ -3731,7 +3757,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
   });
 
   // --- Settings ---
-  const APP_VERSION = '1.6.4';
+  const APP_VERSION = '1.6.5';
   const verBadge = document.getElementById('verBadge');
   if (verBadge) verBadge.textContent = APP_VERSION;
   const DEV_BUILD = false;
