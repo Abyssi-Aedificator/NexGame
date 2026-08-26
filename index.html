@@ -2125,6 +2125,14 @@
         </div>
 
         <div class="set-section">
+          <div class="set-label">Export upcoming</div>
+          <p class="set-desc">Download a list of game names that are still to come.</p>
+          <div class="set-row">
+            <button class="btn-cancel" id="exportUpcomingBtn">Export upcoming names</button>
+          </div>
+        </div>
+
+        <div class="set-section">
           <div class="set-label">Data tools</div>
           <p class="set-desc">Bulk-clear a field across every tracked game.</p>
           <div class="set-row">
@@ -3757,7 +3765,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
   });
 
   // --- Settings ---
-  const APP_VERSION = '1.6.5';
+  const APP_VERSION = '1.6.6';
   const verBadge = document.getElementById('verBadge');
   if (verBadge) verBadge.textContent = APP_VERSION;
   const DEV_BUILD = false;
@@ -4467,6 +4475,20 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
     const total = games.length + archived.length;
     restoreNote.textContent = `Backed up ${games.length} active and ${archived.length} archived game${total === 1 ? '' : 's'}.`;
     restoreNote.className = 'set-note ok';
+  });
+
+  document.getElementById('exportUpcomingBtn').addEventListener('click', () => {
+    const upcoming = games.filter(g => g.tba === true || (!g.tba && typeof g.date === 'string' && g.date.length === 10 && daysUntil(g.date) >= 0));
+    if (!upcoming.length) { toast('No upcoming games to export.'); return; }
+    const names = upcoming.sort((a, b) => a.name.localeCompare(b.name)).map(g => g.name).join('\n');
+    const blob = new Blob([names], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nexgame-upcoming-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast(`Exported ${upcoming.length} upcoming game name${upcoming.length === 1 ? '' : 's'}.`);
   });
 
   function applyBackupData(data) {

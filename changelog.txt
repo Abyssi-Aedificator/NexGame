@@ -1,13 +1,16 @@
+Version 1.6.6
+- Added export for upcoming game names in Settings.
+
 1.6.5
 - Added alphabetical sort toggle on the main screen.
 
-1.6.4
+Version  1.6.4
 - Added "Game" type option.
 
-1.6.3
+Version  1.6.3
 - Stats panel now visible on horizontal tablet screens.
 
-1.6.2
+Version  1.6.2
 - Search bar now matches game notes as well as game names.
 - Fixed Enter key in the add/edit modal accidentally saving and closing mid-typing.
 - Fixed the calendar "today" highlight and analytics current month/quarter using the wrong timezone.
@@ -19,10 +22,10 @@
 - Dropbox "Sync now" keeps the update prompt if the download fails.
 - Reminder bell no longer looks clickable.
 
-1.6.1
+Version  1.6.1
 - Version badge now visible next to the app title in the header.
 
-1.6.0
+Version  1.6.0
 - Changelog moved to changelog.txt — the Settings > About tab has been removed.
 - Simplified version update notification — no longer links to changelog.
 - Fixed data loss when localStorage is full — save() and saveArchived() now silently fail instead of crashing.
@@ -32,18 +35,18 @@
 - Escape key now closes the Steam Bulk overlay.
 - Import Wishlist now creates games with all fields initialised, matching the data model.
 
-1.5.0
+Version  1.5.0
 - Bulk field editor — select multiple games and set their Type, Status, or Hype in one action from Settings.
 - Release reminders — set a bell on any game to get a browser notification 1 day, 3 days, or 1 week before release.
 
-1.4.3
+Version  1.4.3
 - Changelog corrected — 1.4.1 entry removed feature claims for functionality that had not been shipped.
 - Dropbox JSON.parse wrapped in try/catch to prevent a hard crash on corrupt local storage.
 - Calendar "Today" button now uses the current date at click time instead of a stale snapshot.
 - Import overlay lookups are now cancelled when the overlay is closed, avoiding stale mutations after dismiss.
 - Added CSS fallbacks for color-mix() to improve compatibility with older browsers.
 
-1.4.2
+Version  1.4.2
 - Fixed calendar month reset — January (month 0) was treated as falsy, causing the calendar to snap back to the current month on every render.
 - Fixed calendar view persistence — switching to calendar view was lost on page reload because the view-mode restore only checked for 'grid' or 'list'.
 - Added missing -webkit-backdrop-filter vendor prefix on four elements (price badge, modal, side nav, stats panel) for Safari compatibility.
@@ -52,19 +55,19 @@
 - Added null guard to positionSideNav and positionStatsPanel to prevent crash if #wrap is absent.
 - Eliminated redundant double render() call at startup — chip colour initialisation no longer triggers a separate full re-render.
 
-1.4.1
+Version  1.4.1
 - Animated background — gradient blobs now drift and morph for a living backdrop.
 - Staggered entry animations — cards fade and slide up as you scroll, with a cascading delay.
 - Adaptive cover accents — card borders and countdown glows pick up the dominant colour from each game's cover art.
 - Micro-interactions — press-scale feedback on cards and buttons, ripple effect on click, and shimmer loading state on Steam lookups.
 
-1.4.0
+Version  1.4.0
 - Bulk Steam ID update — Settings page now has a "Bulk update Steam IDs" button that searches Steam for all games missing an App ID. Review matches, skip games, and save in one go.
 - Steam Price Lookup — click the clock icon next to the Price field to search for your game on Steam. Your game gets linked to its Steam App ID so you can refresh the price anytime, or tap the ID to open the store page. Remove the link with the X button.
 - Consolidated header — secondary actions (Analytics, Archived, Settings) are now grouped under a ... menu so the toolbar stays clean as more features get added.
 - Fixed version notification not appearing — app version constant now matches the changelog.
 
-1.3.0
+Version  1.3.0
 - Calendar view — browse releases on a month grid with prev/next navigation.
 - Game notes — add private notes to any game; expand to read on cards.
 - Auto-switch mode — "System" option follows your OS light/dark preference.
@@ -74,18 +77,18 @@
 - Status colour on left, hype colour on right — both visible at the same time.
 - Unique default chip colours — each status and hype level has a distinct colour.
 
-1.2.1
+Version  1.2.1
 - Removed the "Link" status option.
 
-1.2.0
+Version  1.2.0
 - Released games now show a "Mark as owned" action instead of "Archive" — one click moves them straight to the archived section.
 - Upcoming games releasing this week or next now show in their own "This Week" / "Next Week" groups at the top of the list.
 
-1.1.1
+Version  1.1.1
 - Added a Dropbox sync button next to Archived that spins while a sync is in progress.
 - Reworked the update system — a "What's new" prompt now appears after an update instead of the old top banner.
 
-1.1.0
+Version  1.1.0
 - New light mode with 10 accent colour themes — switch anytime in Settings.
 - Action buttons now appear on hover for a cleaner look.
 - Better text contrast in light mode across cards, buttons, and inputs.
@@ -95,5 +98,5 @@
 - The stats panel now reflects the active filters and search instead of always showing all tracked games.
 - Added 5 new accent colour themes to both dark mode (Ember, Amber, Eclipse, Onyx, Aurora) and light mode (Poppy, Honey, Lavender, Mist, Citrus).
 
-1.0.0
+Version  1.0.0
 - Full release — stable, polished, and ready for everyday use.
