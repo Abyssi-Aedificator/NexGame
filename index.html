@@ -170,6 +170,7 @@
   .vt-btn:hover { color: var(--text); }
   .vt-btn.active { color: var(--on-accent); background: var(--accent); }
   .sort-btn.active { color: var(--on-accent); background: var(--accent); }
+  .sort-btn[hidden] { display: none !important; }
 
   .more-menu { position: relative; }
   .more-btn {
@@ -191,11 +192,13 @@
     top: calc(100% + 6px);
     right: 0;
     min-width: 180px;
-    background: var(--surface);
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 6px;
     box-shadow: 0 6px 24px rgba(0,0,0,.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     z-index: 100;
   }
   .more-dropdown.open { display: block; }
@@ -961,10 +964,11 @@
     display: flex;
     flex-direction: column;
   }
-  .set-panels::-webkit-scrollbar { width: 6px; }
-  .set-panels::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .set-panel.active::-webkit-scrollbar { width: 6px; }
+  .set-panel.active::-webkit-scrollbar-track { background: transparent; }
+  .set-panel.active::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   .set-panel { display: none; }
-  .set-panel.active { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; padding-right: 4px; }
+  .set-panel.active { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; padding-right: 4px; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
   .set-panel .set-section:last-child { margin-bottom: 0; }
   .set-version {
     font-size: 0.8rem;
@@ -2125,6 +2129,14 @@
         </div>
 
         <div class="set-section">
+          <div class="set-label">Export upcoming</div>
+          <p class="set-desc">Download a list of game names that are still to come.</p>
+          <div class="set-row">
+            <button class="btn-cancel" id="exportUpcomingBtn">Export upcoming names</button>
+          </div>
+        </div>
+
+        <div class="set-section">
           <div class="set-label">Data tools</div>
           <p class="set-desc">Bulk-clear a field across every tracked game.</p>
           <div class="set-row">
@@ -2576,6 +2588,7 @@
       if (!Array.isArray(games)) games = [];
       const wrap = document.getElementById('wrap');
       if (wrap) wrap.classList.toggle('wide', viewMode === 'grid' || viewMode === 'calendar');
+      document.getElementById('sortToggle').hidden = viewMode !== 'list';
       list.className = viewMode === 'grid' ? 'grid' : viewMode === 'calendar' ? 'list cal-view' : 'list';
       [...viewToggle.children].forEach(b =>
         b.classList.toggle('active', b.dataset.view === viewMode));
@@ -3757,7 +3770,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
   });
 
   // --- Settings ---
-  const APP_VERSION = '1.6.5';
+  const APP_VERSION = '1.6.6';
   const verBadge = document.getElementById('verBadge');
   if (verBadge) verBadge.textContent = APP_VERSION;
   const DEV_BUILD = false;
@@ -4467,6 +4480,20 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
     const total = games.length + archived.length;
     restoreNote.textContent = `Backed up ${games.length} active and ${archived.length} archived game${total === 1 ? '' : 's'}.`;
     restoreNote.className = 'set-note ok';
+  });
+
+  document.getElementById('exportUpcomingBtn').addEventListener('click', () => {
+    const upcoming = games.filter(g => g.tba === true || (!g.tba && typeof g.date === 'string' && g.date.length === 10 && daysUntil(g.date) >= 0));
+    if (!upcoming.length) { toast('No upcoming games to export.'); return; }
+    const names = upcoming.sort((a, b) => a.name.localeCompare(b.name)).map(g => g.name).join('\n');
+    const blob = new Blob([names], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nexgame-upcoming-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast(`Exported ${upcoming.length} upcoming game name${upcoming.length === 1 ? '' : 's'}.`);
   });
 
   function applyBackupData(data) {
