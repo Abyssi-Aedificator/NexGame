@@ -191,11 +191,13 @@
     top: calc(100% + 6px);
     right: 0;
     min-width: 180px;
-    background: var(--surface);
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 6px;
     box-shadow: 0 6px 24px rgba(0,0,0,.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     z-index: 100;
   }
   .more-dropdown.open { display: block; }
@@ -3766,7 +3768,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
   });
 
   // --- Settings ---
-  const APP_VERSION = '1.6.8';
+  const APP_VERSION = '1.6.9';
   const verBadge = document.getElementById('verBadge');
   if (verBadge) verBadge.textContent = APP_VERSION;
   const DEV_BUILD = false;

@@ -1,4 +1,7 @@
-Version 1.6.8
+Version 1.6.9
+- Added blur to the more menu dropdown background.
+
+1.6.8
 - Fixed settings panel scrollbar track theming.
 
 1.6.7
