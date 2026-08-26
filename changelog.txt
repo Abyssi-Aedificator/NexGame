@@ -1,17 +1,8 @@
-Version 1.6.10
-- Sort button now hidden in grid and calendar views.
-
-1.6.9
-- Added blur to the more menu dropdown background.
-
-Version 1.6.8
-- Fixed settings panel scrollbar track theming.
-
-Version 1.6.7
-- Fixed settings panel scrollbar theming.
-
 Version 1.6.6
 - Added export for upcoming game names in Settings.
+- Sort button now hidden in grid and calendar views.
+- Added blur to the more menu dropdown background.
+- Fixed settings panel scrollbar track theming.
 
 Version 1.6.5
 - Added alphabetical sort toggle on the main screen.
