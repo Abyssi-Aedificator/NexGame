@@ -170,6 +170,7 @@
   .vt-btn:hover { color: var(--text); }
   .vt-btn.active { color: var(--on-accent); background: var(--accent); }
   .sort-btn.active { color: var(--on-accent); background: var(--accent); }
+  .sort-btn[hidden] { display: none !important; }
 
   .more-menu { position: relative; }
   .more-btn {
@@ -2587,6 +2588,7 @@
       if (!Array.isArray(games)) games = [];
       const wrap = document.getElementById('wrap');
       if (wrap) wrap.classList.toggle('wide', viewMode === 'grid' || viewMode === 'calendar');
+      document.getElementById('sortToggle').hidden = viewMode !== 'list';
       list.className = viewMode === 'grid' ? 'grid' : viewMode === 'calendar' ? 'list cal-view' : 'list';
       [...viewToggle.children].forEach(b =>
         b.classList.toggle('active', b.dataset.view === viewMode));
@@ -3768,7 +3770,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
   });
 
   // --- Settings ---
-  const APP_VERSION = '1.6.9';
+  const APP_VERSION = '1.6.10';
   const verBadge = document.getElementById('verBadge');
   if (verBadge) verBadge.textContent = APP_VERSION;
   const DEV_BUILD = false;
