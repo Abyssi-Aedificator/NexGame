@@ -962,9 +962,10 @@
     flex-direction: column;
   }
   .set-panel.active::-webkit-scrollbar { width: 6px; }
+  .set-panel.active::-webkit-scrollbar-track { background: transparent; }
   .set-panel.active::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   .set-panel { display: none; }
-  .set-panel.active { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; padding-right: 4px; scrollbar-width: thin; }
+  .set-panel.active { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; padding-right: 4px; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
   .set-panel .set-section:last-child { margin-bottom: 0; }
   .set-version {
     font-size: 0.8rem;
@@ -3765,7 +3766,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
   });
 
   // --- Settings ---
-  const APP_VERSION = '1.6.7';
+  const APP_VERSION = '1.6.8';
   const verBadge = document.getElementById('verBadge');
   if (verBadge) verBadge.textContent = APP_VERSION;
   const DEV_BUILD = false;

@@ -1,4 +1,7 @@
-Version 1.6.7
+Version 1.6.8
+- Fixed settings panel scrollbar track theming.
+
+1.6.7
 - Fixed settings panel scrollbar theming.
 
 1.6.6
