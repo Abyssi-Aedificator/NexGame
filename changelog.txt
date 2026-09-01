@@ -1,3 +1,6 @@
+Version 1.6.7
+- Added "Reset all Notes" and "Reset all Reminders" data tools in Settings.
+
 Version 1.6.6
 - Added export for upcoming game names in Settings.
 - Sort button now hidden in grid and calendar views.

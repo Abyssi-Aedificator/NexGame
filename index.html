@@ -906,6 +906,7 @@
   }
   .chip-colour-row .cc-reset:hover { background: var(--border); color: var(--text); transform: rotate(-30deg); }
   .set-row { display: flex; gap: 10px; }
+  .set-row + .set-row { margin-top: 8px; }
   .set-row button {
     flex: 1; padding: 12px 14px; border-radius: 100px; font-size: 0.88rem;
     font-weight: 600; cursor: pointer; border: none; transition: transform .15s, box-shadow .15s;
@@ -2142,10 +2143,16 @@
           <div class="set-row">
             <button class="btn-cancel" id="resetHypeBtn">Reset all Hype</button>
             <button class="btn-cancel" id="resetStatusBtn">Reset all Status</button>
+            <button class="btn-cancel" id="resetNotesBtn">Reset all Notes</button>
+          </div>
+          <div class="set-row">
+            <button class="btn-cancel" id="resetReminderBtn">Reset all Reminders</button>
             <button class="btn-save" id="bulkEditBtn">Bulk edit fields</button>
           </div>
           <div class="set-note" id="resetHypeNote"></div>
           <div class="set-note" id="resetStatusNote"></div>
+          <div class="set-note" id="resetNotesNote"></div>
+          <div class="set-note" id="resetReminderNote"></div>
         </div>
 
         <div class="set-section">
@@ -3633,6 +3640,52 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
     });
   });
 
+  document.getElementById('resetNotesBtn').addEventListener('click', () => {
+    const resetNotesNote = document.getElementById('resetNotesNote');
+    const count = games.filter(g => g.notes).length;
+    if (!count) {
+      resetNotesNote.textContent = 'No games have Notes set.';
+      resetNotesNote.className = 'set-note';
+      return;
+    }
+    openConfirmAction({
+      title: 'Reset all Notes?',
+      message: `Clear Notes from ${count} game${count === 1 ? '' : 's'}? This can't be undone.`,
+      actionLabel: 'Reset Notes',
+      danger: true,
+      onConfirm: () => {
+        games.forEach(g => { g.notes = null; });
+        save();
+        render();
+        resetNotesNote.textContent = `Notes cleared on ${count} game${count === 1 ? '' : 's'}.`;
+        resetNotesNote.className = 'set-note ok';
+      }
+    });
+  });
+
+  document.getElementById('resetReminderBtn').addEventListener('click', () => {
+    const resetReminderNote = document.getElementById('resetReminderNote');
+    const count = games.filter(g => g.reminder).length;
+    if (!count) {
+      resetReminderNote.textContent = 'No games have a Reminder set.';
+      resetReminderNote.className = 'set-note';
+      return;
+    }
+    openConfirmAction({
+      title: 'Reset all Reminders?',
+      message: `Clear Reminders from ${count} game${count === 1 ? '' : 's'}? This can't be undone.`,
+      actionLabel: 'Reset Reminders',
+      danger: true,
+      onConfirm: () => {
+        games.forEach(g => { g.reminder = null; });
+        save();
+        render();
+        resetReminderNote.textContent = `Reminders cleared on ${count} game${count === 1 ? '' : 's'}.`;
+        resetReminderNote.className = 'set-note ok';
+      }
+    });
+  });
+
   viewToggle.addEventListener('click', e => {
     const btn = e.target.closest('.vt-btn');
     if (!btn || btn.dataset.view === viewMode) return;
@@ -3770,7 +3823,7 @@ closeArchivedPage(); closeImport(); closeDbxSyncPrompt(); closeBulkEdit(); close
   });
 
   // --- Settings ---
-  const APP_VERSION = '1.6.6';
+  const APP_VERSION = '1.6.7';
   const verBadge = document.getElementById('verBadge');
   if (verBadge) verBadge.textContent = APP_VERSION;
   const DEV_BUILD = false;
